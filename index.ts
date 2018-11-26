@@ -1,4 +1,6 @@
 import * as once from "once"
+import * as deepFreeze from "deepfreeze"
+import produce, {Draft} from "immer"
 
 export const $Merri = Symbol.for("$Merri")
 
@@ -33,6 +35,7 @@ export function val<T>(initial: T): Val<T> {
                 case 1:
                     if (!isUpdating) throw new Error("val can only be updated within an 'update' context")
                     if (newValue !== state) { // TODO: add comparison options
+                        deepFreeze(newValue)
                         state = newValue
                         subscriptions.forEach(s => s.schedule())
                     }
@@ -67,7 +70,7 @@ class Subscriber {
     }
 }
 
-function sub<T>(src: Subscribeable<T>, listener: Listener<T>, options?: SubscribeOptions): Disposer {
+export function sub<T>(src: Subscribeable<T>, listener: Listener<T>, options?: SubscribeOptions): Disposer {
     // TODO: support options
     const subscriber = new Subscriber(src, listener)
     src[$Merri].push(subscriber)
@@ -77,7 +80,8 @@ function sub<T>(src: Subscribeable<T>, listener: Listener<T>, options?: Subscrib
     })
 }
 
-function update<R>(updater: () => R) {
+// TODO: autowrap with update and warn?
+export function update<R>(updater: () => R) {
     let prevUpdating = isUpdating
     isUpdating = true
     try {
@@ -90,7 +94,22 @@ function update<R>(updater: () => R) {
     }
 }
 
-function updater<T extends Function>(fn: T): T {
+export function modify<T>(updater: (draft: Draft<T>) => T | undefined): (val: Val<T>) => void
+export function modify<T>(val: Val<T>, updater: (draft: Draft<T>) => T | undefined)
+export function modify(arg1, arg2?) {
+    switch (arguments.length) {
+        case 1:
+            const p = produce(arg1)
+            return void (val => p(val())) // TODO: introduce utilitiz (call(val) and up(val, value) to do type checking and avoid not a function errors!)
+        case 2:
+            return void arg1(produce(arg1(), updater))
+        default:
+            throw new Error("modify expects 1 or 2 arguments")
+    }
+}
+
+
+export function updater<T extends Function>(fn: T): T {
     return function updater() {
         const self = this
         update(() => fn.apply(self, arguments))
