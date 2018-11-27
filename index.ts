@@ -2,6 +2,12 @@ import * as once from "once";
 import * as deepFreeze from "deepfreeze";
 import produce, { Draft } from "immer";
 
+export type Listener<T = any> = (value: T) => void;
+
+export type Thunk = () => void;
+
+export type Disposer = Thunk;
+
 export const $Merri = Symbol.for("$Merri");
 
 export interface Observable<T = unknown> {
@@ -15,73 +21,55 @@ export interface Val<T> extends Observable<T> {
   (newValue: T): void;
 }
 
+interface Observer {
+    markDirty();
+    markReady(changed: boolean);
+}
+
 export interface ObservableAdministration {
   addObserver(observer: Observer);
   removeObserver(observer: Observer);
 }
 
-export type Listener<T = any> = (value: T) => void;
-
-export type Thunk = () => void;
-
-export type Disposer = Thunk;
-
 let isUpdating = false;
 const pending: Reaction[] = [];
 let currentlyComputing: Computed | undefined = undefined;
 
-export function val<T>(initial: T): Val<T> {
-  const observers: Observer[] = [];
-  const adm = {
-    addObserver(observer) {
-      // TODO: use class
-      observers.push(observer);
-    },
-    removeObserver(observer) {
-      observers.splice(observers.indexOf(observer), 1);
+class ObservableValue<T> implements ObservableAdministration {
+  observers: Observer[] = [];
+  constructor(public state: T) {
+    this.get[$Merri] = this;
+  }
+  addObserver(observer) {
+    // TODO: use class
+    this.observers.push(observer);
+  }
+  removeObserver(observer) {
+    this.observers.splice(this.observers.indexOf(observer), 1);
+  }
+  get = (newValue?: T) => {
+    switch (arguments.length) {
+      case 0:
+        if (currentlyComputing)
+          // optimize: same last touched by optimization as MobX
+          currentlyComputing.registerDependency(this);
+        return this.state;
+      case 1:
+        if (!isUpdating)
+          throw new Error("val can only be updated within an 'update' context"); // TODO: make ok, but optionally support / enforce batching
+        if (newValue !== this.state) {
+          // TODO: run preprocessor(newValue, oldValue) here, and use it for comparison, or model instantiation!
+          deepFreeze(newValue);
+          this.state = newValue;
+          const observers = this.observers.slice();
+          observers.forEach(s => s.markDirty());
+          observers.forEach(s => s.markReady(true));
+        }
+        break;
+      default:
+        throw new Error("val expects 0 or 1 arguments");
     }
   };
-  let state = initial;
-  const res = Object.assign(
-    function val(newValue?: T) {
-      switch (arguments.length) {
-        case 0:
-          if (currentlyComputing)
-            // optimize: same last touched by optimization as MobX
-            currentlyComputing.addDependency(adm);
-          return state;
-        case 1:
-          if (!isUpdating)
-            throw new Error(
-              "val can only be updated within an 'update' context"
-            ); // TODO: make ok, but optionally support / enforce batching
-          if (newValue !== state) {
-            // TODO: run preprocessor(newValue, oldValue) here, and use it for comparison, or model instantiation!
-            deepFreeze(newValue);
-            state = newValue;
-            observers.forEach(s => s.markDirty());
-            observers.forEach(s => s.markReady(true));
-          }
-          break;
-        default:
-          throw new Error("val expects 0 or 1 arguments");
-      }
-    },
-    {
-      [$Merri]: adm
-    }
-  );
-  return res;
-}
-
-export interface SubscribeOptions {
-  fireImmediately?: boolean;
-  scheduler?: (run: Thunk) => void;
-}
-
-interface Observer {
-  markDirty();
-  markReady(changed: boolean);
 }
 
 class Reaction implements Observer {
@@ -109,18 +97,6 @@ class Reaction implements Observer {
   }
 }
 
-export function sub<T>(
-  src: Observable<T>,
-  listener: Listener<T>,
-  options?: SubscribeOptions
-): Disposer {
-  // TODO: support options
-  const observer = new Reaction(src, listener);
-  src[$Merri].addObserver(observer);
-  return once(() => {
-    src[$Merri].removeObserver(observer);
-  });
-}
 class Computed<T = any> implements ObservableAdministration, Observer {
   observers: Observer[] = [];
   observing: Set<ObservableAdministration> = new Set();
@@ -135,6 +111,7 @@ class Computed<T = any> implements ObservableAdministration, Observer {
     if (changed) this.changedCount++;
     if (--this.dirtyCount === 0) {
       const prevValue = this.state;
+      // todo: do tracking and the rest in scheduler
       this.track();
       const changed = this.state !== prevValue;
       this.observers.forEach(o => o.markReady(changed));
@@ -148,8 +125,11 @@ class Computed<T = any> implements ObservableAdministration, Observer {
   }
   removeObserver(observer) {
     this.observers.splice(this.observers.indexOf(observer), 1);
+    if (!this.observers.length) {
+      this.observing.forEach(o => o.removeObserver(this));
+    }
   }
-  addDependency(sub: ObservableAdministration) {
+  registerDependency(sub: ObservableAdministration) {
     this.observing.add(sub);
   }
   get hot() {
@@ -174,6 +154,28 @@ class Computed<T = any> implements ObservableAdministration, Observer {
     if (!this.hot) throw new Error("No observers!"); // or warn and return
     return this.state;
   };
+}
+
+export function val<T>(initial: T): Val<T> {
+  return new ObservableValue(initial).get as any;
+}
+
+export interface SubscribeOptions {
+  fireImmediately?: boolean;
+  scheduler?: (run: Thunk) => void;
+}
+
+export function sub<T>(
+  src: Observable<T>,
+  listener: Listener<T>,
+  options?: SubscribeOptions
+): Disposer {
+  // TODO: support options
+  const observer = new Reaction(src, listener);
+  src[$Merri].addObserver(observer);
+  return once(() => {
+    src[$Merri].removeObserver(observer);
+  });
 }
 
 export function drv<T>(derivation: () => T): Drv<T> {
