@@ -37,7 +37,8 @@ export function val<T>(initial: T): Val<T> {
                     if (newValue !== state) { // TODO: add comparison options
                         deepFreeze(newValue)
                         state = newValue
-                        subscriptions.forEach(s => s.schedule())
+                        subscriptions.forEach(s => s.markDirty())
+                        subscriptions.forEach(s => s.markReady())
                     }
                     break;
                 default:
@@ -57,10 +58,19 @@ export interface SubscribeOptions {
 
 class Subscriber {
     scheduled = false
+    dirtyCount = 0
     constructor(public src: Subscribeable, public listener: Listener) {}
-    schedule() {
+    markDirty() {
+        this.dirtyCount++
+    }
+    markReady() {
+        if (--this.dirtyCount === 0)
+            this.schedule()
+    }
+    private schedule() {
         if (!this.scheduled) {
             this.scheduled = true
+            // TODO: run scheduler here!
             pending.push(this)
         }
     }
@@ -108,6 +118,9 @@ export function modify(arg1, arg2?) {
     }
 }
 
+export function drv<T>(derivation: () => T): Drv<T> {
+    // TODO: support options comparison, scheduler? noEager? keepAlive?
+}
 
 export function updater<T extends Function>(fn: T): T {
     return function updater() {
@@ -118,6 +131,8 @@ export function updater<T extends Function>(fn: T): T {
 
 function runPendingSubscriptions() {
     while(pending.length) {
+        // N.B. errors here cause other pending subscriptions to be aborted!
+        // TODO: cancel that subscription instead and continue (try catch in run())
         pending.splice(0).forEach(s => s.run())
     }
 }
