@@ -5,7 +5,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "watch": "jest --watch",
+    "test": "jest"
   },
   "author": "Michel Weststrate",
   "license": "MIT",
@@ -15,7 +16,33 @@
     "once": "^1.4.0"
   },
   "devDependencies": {
+    "@types/jest": "^23.3.9",
+    "@types/node": "^10.12.10",
     "jest": "^23.6.0",
-    "ts-jest": "^23.10.5"
+    "prettier": "^1.15.2",
+    "ts-jest": "^23.10.5",
+    "typescript": "^3.1.6"
+  },
+  "jest": {
+    "testURL": "http://localhost",
+    "transform": {
+      "^.+\\.jsx?$": "babel-jest",
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "testRegex": "/tests/[^/]*.spec.[jt]sx?$",
+    "globals": {
+      "ts-jest": {
+        "enableTsDiagnostics": true,
+        "tsConfigFile": "tsconfig.json"
+      }
+    },
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ]
   }
 }
