@@ -32,8 +32,8 @@
     "testRegex": "/tests/[^/]*.spec.[jt]sx?$",
     "globals": {
       "ts-jest": {
-        "enableTsDiagnostics": true,
-        "tsConfigFile": "tsconfig.json"
+        "diagnostics": false,
+        "tsConfig": "tsconfig.json"
       }
     },
     "moduleFileExtensions": [

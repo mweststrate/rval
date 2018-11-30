@@ -17,7 +17,6 @@ Patterns
 
 Todo:
 
-* [ ] isolate scope
 * [ ] custom schedulers
 * [ ] custom preprocessors
 * [ ] config: warn on unbatched writes

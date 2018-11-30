@@ -1,7 +1,6 @@
 import once from 'once'
 const deepFreeze = require('deepfreeze')
 import * as deepFreeze from 'deepfreeze'
-import produce, { Draft } from 'immer'
 
 export type Listener<T = any> = (value: T) => void
 
@@ -25,6 +24,7 @@ export interface Val<T> extends Observable<T> {
 interface Observer {
   markDirty()
   markReady(changed: boolean)
+  run()
 }
 
 export interface ObservableAdministration {
@@ -33,7 +33,7 @@ export interface ObservableAdministration {
 }
 
 let isUpdating = false
-const pending: ObserverBase[] = []
+const pending: Observer[] = []
 let currentlyComputing: Computed | undefined = undefined
 
 // TODO: eliminate classes for better minification
@@ -42,7 +42,9 @@ let currentlyComputing: Computed | undefined = undefined
 
 class ObservableValue<T> implements ObservableAdministration {
   observers: Observer[] = []
-  constructor(public state: T) {
+  state: T
+  constructor(state: T) {
+    this.state = deepFreeze(state)
     this.get = this.get.bind(this)
     this.get[$Merri] = this
   }
@@ -118,14 +120,9 @@ class Computed<T = any> implements ObservableAdministration, Observer {
   dirtyCount = 0
   changedCount = 0
   value: T = undefined!
-  get: () => T
-  context: any
   constructor(public derivation: () => T) {
     const self = this
-    this.get = function get() {
-      if (!self.context && this) self.context = this // grab context during first evaluation
-      return self.getImpl()
-    }
+    this.get = this.get.bind(this)
     this.get[$Merri] = this
   }
   markDirty() {
@@ -188,7 +185,7 @@ class Computed<T = any> implements ObservableAdministration, Observer {
     this.observing = new Set()
     const prevComputing = currentlyComputing
     currentlyComputing = this
-    this.value = this.derivation.call(this.context)! // TODO error handling.
+    this.value = this.derivation() // TODO error handling.
     this.state = DerivationState.UP_TO_DATE
     // TODO: optimize
     this.observing.forEach(o => {
@@ -199,13 +196,13 @@ class Computed<T = any> implements ObservableAdministration, Observer {
     })
     currentlyComputing = prevComputing
   }
-  getImpl() {
+  get() {
     // something being computed? setup tracking
     if (currentlyComputing) currentlyComputing.registerDependency(this)
     // yay, we are up to date!
     if (this.state === DerivationState.UP_TO_DATE) return this.value
     // nope, we are not, and no one is observing either
-    if (!currentlyComputing && !this.observers.length) return this.derivation.call(this.context)
+    if (!currentlyComputing && !this.observers.length) return this.derivation()
     // maybe scheduled, definitely tracking, value is needed, track now!
     this.run()
     return this.value
