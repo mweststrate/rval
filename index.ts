@@ -80,10 +80,11 @@ class ObservableValue<T> implements ObservableAdministration {
   }
 }
 
-abstract class ObserverBase {
+class Reaction implements Observer {
   scheduled = false
   dirtyCount = 0
   changedCount = 0
+  constructor(public src: Observable, public listener: Listener) {  }
   markDirty() {
     if (this.scheduled) return
     this.dirtyCount++
@@ -93,7 +94,7 @@ abstract class ObserverBase {
     if (changed) this.changedCount++
     if (--this.dirtyCount === 0) if (this.changedCount) this.schedule()
   }
-  private schedule() {
+  schedule() {
     if (!this.scheduled) {
       this.scheduled = true
       // TODO: run scheduler here!
@@ -101,28 +102,25 @@ abstract class ObserverBase {
       runPendingObservers()
     }
   }
-  abstract run()
-}
-
-class Reaction extends ObserverBase implements Observer {
-  constructor(public src: Observable, public listener: Listener) {
-    super()
-  }
   run() {
     this.scheduled = false
     this.listener(this.src())
   }
 }
 
-class Computed<T = any> extends ObserverBase
-  implements ObservableAdministration, Observer {
+enum DerivationState { NOT_TRACKING, STALE, UP_TO_DATE }
+
+class Computed<T = any> implements ObservableAdministration, Observer {
   observers: Observer[] = []
   observing: Set<ObservableAdministration> = new Set()
-  state: T = undefined!
+  state: DerivationState = DerivationState.NOT_TRACKING
+  scheduled = false
+  dirtyCount = 0
+  changedCount = 0
+  value: T = undefined!
   get: () => T
   context: any
   constructor(public derivation: () => T) {
-    super()
     const self = this
     this.get = function get() {
       if (!self.context && this) self.context = this // grab context during first evaluation
@@ -132,21 +130,22 @@ class Computed<T = any> extends ObserverBase
   }
   markDirty() {
     if (this.scheduled) return
-    if (++this.dirtyCount === 1) this.observers.forEach(o => o.markDirty())
+    if (++this.dirtyCount === 1) {
+      this.state = DerivationState.STALE
+      this.observers.forEach(o => o.markDirty())
+    }
   }
-  run() {
-    if (!this.scheduled) return // already eagerly evaluated!
-    this.scheduled = false
-    this.changedCount = 0
-    if (!this.observers.length) return
-    const prevValue = this.state
-    this.track()
-    const changed = this.state !== prevValue
-    this.observers.forEach(o => o.markReady(changed)) // TODO fix: set of observers might have changed in mean time
+  markReady(changed) {
+    if (this.scheduled) return
+    if (changed) this.changedCount++
+    if (--this.dirtyCount === 0) {
+      if (this.changedCount) this.schedule()
+      else this.state = DerivationState.UP_TO_DATE
+    }
   }
   addObserver(observer) {
     this.observers.push(observer)
-    if (this.observers.length === 1) {
+    if (this.observers.length === 1 && this.state !== DerivationState.UP_TO_DATE) {
       this.track()
     }
   }
@@ -154,18 +153,43 @@ class Computed<T = any> extends ObserverBase
     this.observers.splice(this.observers.indexOf(observer), 1)
     if (!this.observers.length) {
       this.observing.forEach(o => o.removeObserver(this))
-      this.state = undefined!
+      this.value = undefined!
+      this.state = DerivationState.NOT_TRACKING
     }
   }
   registerDependency(sub: ObservableAdministration) {
     this.observing.add(sub)
   }
+  schedule() {
+    if (!this.scheduled) {
+      this.scheduled = true
+      // // TODO: run scheduler here!
+      pending.push(this)
+      runPendingObservers()
+    }
+  }
+  run() {
+    if (!currentlyComputing) {
+      // already eagerly evaluated, before scheduler got to run this derivation
+      if (!this.scheduled ) return
+      // all observers have gone in the mean time...
+      if (!this.observers.length) return
+    }
+    const prevValue = this.value
+    this.track()
+    const changed = this.value !== prevValue
+    // propagate the change
+    this.observers.forEach(o => o.markReady(changed)) // TODO fix: set of observers might have changed in mean time
+  }
   track() {
-    const prevComputing = currentlyComputing
-    currentlyComputing = this
+    this.changedCount = 0
+    this.scheduled = false
     const oldObserving = this.observing
     this.observing = new Set()
-    this.state = this.derivation.call(this.context)! // TODO error handling.
+    const prevComputing = currentlyComputing
+    currentlyComputing = this
+    this.value = this.derivation.call(this.context)! // TODO error handling.
+    this.state = DerivationState.UP_TO_DATE
     // TODO: optimize
     this.observing.forEach(o => {
       if (!oldObserving.has(o)) o.addObserver(this)
@@ -176,21 +200,15 @@ class Computed<T = any> extends ObserverBase
     currentlyComputing = prevComputing
   }
   getImpl() {
-    if (!this.observers.length) {
-      if (currentlyComputing) {
-        // becoming a dependency...
-        currentlyComputing.registerDependency(this)
-        this.track()
-        return this.state
-      } else {
-        // no observers, but value is requested, derive eagerly
-        return this.derivation.call(this.context)
-      }
-    }
-    // force evaluation NOW, as computation is already scheduled, but, value is eagerly needed now
-    if (this.scheduled) this.run()
-    // TODO: flag enforcing this: if (!this.observers.length) throw new Error('No observers!') // or warn and return
-    return this.state
+    // something being computed? setup tracking
+    if (currentlyComputing) currentlyComputing.registerDependency(this)
+    // yay, we are up to date!
+    if (this.state === DerivationState.UP_TO_DATE) return this.value
+    // nope, we are not, and no one is observing either
+    if (!currentlyComputing && !this.observers.length) return this.derivation.call(this.context)
+    // maybe scheduled, definitely tracking, value is needed, track now!
+    this.run()
+    return this.value
   }
 }
 
@@ -209,10 +227,18 @@ export function sub<T>(
   options?: SubscribeOptions
 ): Disposer {
   // TODO: support options
-  const observer = new Reaction(src, listener)
-  src[$Merri].addObserver(observer)
+  const noopObserver = {
+    markDirty() {},
+    markReady(changed) {
+      // assumption, markReady is always triggered exactly once, as it is subscribing to only one
+      if (changed) listener(computed.get())
+    }
+  }
+  const computed = new Computed(src)
+  // const observer = new Reaction(src, listener)
+  computed.addObserver(noopObserver)
   return once(() => {
-    src[$Merri].removeObserver(observer)
+    computed.removeObserver(noopObserver)
   })
 }
 
@@ -234,25 +260,6 @@ export function batch<R>(updater: () => R) {
   }
 }
 
-export function modify<T>(
-  updater: (draft: Draft<T>) => T | undefined
-): (val: Val<T>) => void
-export function modify<T>(
-  val: Val<T>,
-  updater: (draft: Draft<T>) => T | undefined
-): void
-export function modify(arg1, arg2?): any {
-  switch (arguments.length) {
-    case 1:
-      const p = produce(arg1)
-      return void (val => p(val())) // TODO: introduce utilitiz (call(val) and up(val, value) to do type checking and avoid not a function errors!)
-    case 2:
-      return void arg1(produce(arg1(), arg2))
-    default:
-      throw new Error('modify expects 1 or 2 arguments')
-  }
-}
-
 export function batched<T extends Function>(fn: T): T {
   return (function updater(this: any) {
     const self = this
@@ -260,11 +267,15 @@ export function batched<T extends Function>(fn: T): T {
   } as any) as T
 }
 
+let isRunningreactions = false
 function runPendingObservers() {
-  if (!isUpdating)
+  if (!isUpdating && !isRunningreactions) {
+    isRunningreactions = true
     while (pending.length) {
       // N.B. errors here cause other pending subscriptions to be aborted!
       // TODO: cancel that subscription instead and continue (try catch in run())
       pending.splice(0).forEach(s => s.run())
     }
+    isRunningreactions = false
+  }
 }

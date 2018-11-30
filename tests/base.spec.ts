@@ -135,41 +135,55 @@ test('evaluate on demand', () => {
   expect(computed).toBe(3)
 })
 
-test.only('nested propagation', () => {
+test('nested propagation', () => {
   const a = val(2)
   const b = val(3)
-  const doubleA = drv(() => (events.push('a*a'), a() * a()))
+  const doubleA = drv(() => {
+    events.push('a*a')
+    return a() * a()
+  })
   const events: any[] = []
   const doubleB = drv(() => (events.push('b*b'), b() * b()))
   const combined = drv(() => {
-    events.push('combined');
+    events.push('combined')
     return doubleA() + doubleB() + doubleA()
   })
-  debugger
+
   const d = sub(combined, val => events.push(val))
 
   events.push('setup')
   batch(() => {
     a(4)
   })
-  // events.push('b1')
-  // batch(() => {
-  //   a(7)
-  //   b(2)
-  // })
-  // events.push('b4')
-  // d()
-  // events.push('b6')
-  // a(6)
+  events.push('b1')
+  batch(() => {
+    a(7)
+    b(2)
+  })
+  events.push('b4')
+  d()
+  events.push('b6')
+  a(6)
 
-  expect(events).toEqual(
-    ["combined", "a*a", "b*b", "setup", "a*a", "combined", 25
-    //, "b1", "b4", "b6"
-  ]
-  )
+  expect(events).toEqual([
+    'combined',
+    'a*a',
+    'b*b',
+    'setup',
+    'a*a',
+    'combined',
+    41,
+    'b1',
+    'a*a',
+    'b*b',
+    'combined',
+    102,
+    'b4',
+    'b6',
+  ])
 })
 
-test.skip('conditonal logic', () => {
+test('conditonal logic', () => {
   const a = val(2)
   const b = val(3)
   const aMulB = drv(() => (events.push('a*b'), a() * b()))
@@ -186,7 +200,6 @@ test.skip('conditonal logic', () => {
     b(6)
   })
   events.push('b1')
-  debugger
   a(6)
   events.push('b2')
   batch(() => {
@@ -205,24 +218,39 @@ test.skip('conditonal logic', () => {
     'a*b',
     'a-b',
     'setup',
-    'combined',
     'a*b',
     'a-b',
+    'combined',
     22,
     'b1',
-    'combined',
     'a*b',
+    'a-b',
+    'combined',
     36,
     'b2',
-    'combined',
     'a*b',
+    'combined',
     14,
     'b3',
-    'combined',
     'a*b',
+    'combined',
     'a-b',
     10,
     'b4',
     'b6',
   ])
+})
+
+test("no unchanged value propagation", () => {
+  const a = val(3)
+  const b = drv(() => a() - a()) // always 0
+  let called = 0
+  const d = sub(b, () => {
+    called++
+  })
+  a(4)
+  a(5)
+  expect(called).toBe(0)
+  d()
+  a(6)
 })
