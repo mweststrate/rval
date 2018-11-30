@@ -37,6 +37,8 @@ const pending: ObserverBase[] = []
 let currentlyComputing: Computed | undefined = undefined
 
 // TODO: eliminate classes for better minification
+// TODO: make it possible to create a reativity context, for libs and such,
+// and provide a default context as well
 
 class ObservableValue<T> implements ObservableAdministration {
   observers: Observer[] = []
@@ -59,8 +61,10 @@ class ObservableValue<T> implements ObservableAdministration {
           currentlyComputing.registerDependency(this)
         return this.state
       case 1:
-        if (!isUpdating)
-          throw new Error("val can only be updated within an 'update' context") // TODO: make ok, but optionally support / enforce batching
+        if (currentlyComputing)
+          throw new Error("derivations cannot have side effects and update values")
+        // if (!isUpdating)
+        //   throw new Error("val can only be updated within an 'update' context") // TODO: make ok, but optionally support / enforce batching
         if (newValue !== this.state) {
           // TODO: run preprocessor(newValue, oldValue) here, and use it for comparison, or model instantiation!
           deepFreeze(newValue)
@@ -115,9 +119,15 @@ class Computed<T = any> extends ObserverBase
   observers: Observer[] = []
   observing: Set<ObservableAdministration> = new Set()
   state: T = undefined!
+  get: () => T
+  context: any
   constructor(public derivation: () => T) {
     super()
-    this.get = this.get.bind(this)
+    const self = this
+    this.get = function get() {
+      if (!self.context && this) self.context = this // grab context during first evaluation
+      return self.getImpl()
+    }
     this.get[$Merri] = this
   }
   markDirty() {
@@ -125,7 +135,9 @@ class Computed<T = any> extends ObserverBase
     if (++this.dirtyCount === 1) this.observers.forEach(o => o.markDirty())
   }
   run() {
+    if (!this.scheduled) return // already eagerly evaluated!
     this.scheduled = false
+    this.changedCount = 0
     if (!this.observers.length) return
     const prevValue = this.state
     this.track()
@@ -133,15 +145,16 @@ class Computed<T = any> extends ObserverBase
     this.observers.forEach(o => o.markReady(changed)) // TODO fix: set of observers might have changed in mean time
   }
   addObserver(observer) {
-    if (!this.observers.length) {
+    this.observers.push(observer)
+    if (this.observers.length === 1) {
       this.track()
     }
-    this.observers.push(observer)
   }
   removeObserver(observer) {
     this.observers.splice(this.observers.indexOf(observer), 1)
     if (!this.observers.length) {
       this.observing.forEach(o => o.removeObserver(this))
+      this.state = undefined!
     }
   }
   registerDependency(sub: ObservableAdministration) {
@@ -152,7 +165,7 @@ class Computed<T = any> extends ObserverBase
     currentlyComputing = this
     const oldObserving = this.observing
     this.observing = new Set()
-    this.state = this.derivation()! // TODO error handling.
+    this.state = this.derivation.call(this.context)! // TODO error handling.
     // TODO: optimize
     this.observing.forEach(o => {
       if (!oldObserving.has(o)) o.addObserver(this)
@@ -162,8 +175,21 @@ class Computed<T = any> extends ObserverBase
     })
     currentlyComputing = prevComputing
   }
-  get() {
-    if (!this.observers.length) throw new Error('No observers!') // or warn and return
+  getImpl() {
+    if (!this.observers.length) {
+      if (currentlyComputing) {
+        // becoming a dependency...
+        currentlyComputing.registerDependency(this)
+        this.track()
+        return this.state
+      } else {
+        // no observers, but value is requested, derive eagerly
+        return this.derivation.call(this.context)
+      }
+    }
+    // force evaluation NOW, as computation is already scheduled, but, value is eagerly needed now
+    if (this.scheduled) this.run()
+    // TODO: flag enforcing this: if (!this.observers.length) throw new Error('No observers!') // or warn and return
     return this.state
   }
 }
@@ -195,7 +221,7 @@ export function drv<T>(derivation: () => T): Drv<T> {
 }
 
 // TODO: autowrap with update and warn?
-export function update<R>(updater: () => R) {
+export function batch<R>(updater: () => R) {
   let prevUpdating = isUpdating
   isUpdating = true
   try {
@@ -227,10 +253,10 @@ export function modify(arg1, arg2?): any {
   }
 }
 
-export function updater<T extends Function>(fn: T): T {
+export function batched<T extends Function>(fn: T): T {
   return (function updater(this: any) {
     const self = this
-    update(() => fn.apply(self, arguments))
+    batch(() => fn.apply(self, arguments))
   } as any) as T
 }
 
