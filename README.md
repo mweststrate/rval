@@ -78,5 +78,7 @@ Todo:
 * [ ] shape preprocessor
 * [ ] with immer
 * [ ] with react
-* [ ] eliminate Reaction class?
+* [x] eliminate Reaction class
+* [ ] setup minification with minified class members
+
 

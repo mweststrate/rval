@@ -1,6 +1,5 @@
 import once from 'once'
-const deepFreeze = require('deepfreeze')
-import * as deepFreeze from 'deepfreeze'
+import deepFreeze from 'deepfreeze'
 
 export type Listener<T = any> = (value: T) => void
 
@@ -8,11 +7,10 @@ export type Thunk = () => void
 
 export type Disposer = Thunk
 
-export const $Merri = Symbol.for('$Merri')
+export const $Merri = Symbol.for('$Merri') // TODO: rename
 
 export interface Observable<T = unknown> {
   (): T
-  [$Merri]: ObservableAdministration
 }
 
 export interface Drv<T> extends Observable<T> {}
@@ -27,7 +25,7 @@ interface Observer {
   run()
 }
 
-export interface ObservableAdministration {
+interface ObservableAdministration {
   addObserver(observer: Observer)
   removeObserver(observer: Observer)
 }
@@ -88,34 +86,6 @@ function rval() {
         default:
           throw new Error('val expects 0 or 1 arguments')
       }
-    }
-  }
-
-  class Reaction implements Observer {
-    scheduled = false
-    dirtyCount = 0
-    changedCount = 0
-    constructor(public src: Observable, public listener: Listener) {  }
-    markDirty() {
-      if (this.scheduled) return
-      this.dirtyCount++
-    }
-    markReady(changed) {
-      if (this.scheduled) return
-      if (changed) this.changedCount++
-      if (--this.dirtyCount === 0) if (this.changedCount) this.schedule()
-    }
-    schedule() {
-      if (!this.scheduled) {
-        this.scheduled = true
-        // TODO: run scheduler here!
-        pending.push(this)
-        runPendingObservers()
-      }
-    }
-    run() {
-      this.scheduled = false
-      this.listener(this.src())
     }
   }
 
@@ -239,7 +209,6 @@ function rval() {
       }
     }
     const computed = new Computed(src)
-    // const observer = new Reaction(src, listener)
     computed.addObserver(noopObserver)
     return once(() => {
       computed.removeObserver(noopObserver)
