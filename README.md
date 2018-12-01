@@ -1,4 +1,58 @@
 
+REALI
+REActive LIbrary
+
+Names
+
+rval
+depsies
+rvals (reactive values)
+lrl (lightweight reactive library)
+trecker
+reali
+realy
+realli
+laiter
+mobz
+litey
+litez
+litex
+deriver
+derivr
+stiek
+
+# Concepts
+
+## `val`
+
+## `sub`
+
+## `drv`
+
+## `batch`
+
+- batched:
+
+## Immutability and freezing
+
+## Working with objects
+
+## Working with arrays
+
+## Object models
+
+## Scheduling details
+
+## Private context
+
+## Strictness options
+
+# API
+
+
+Tips:
+- subscribe before read, or use `fireImmediately`
+
 Differences with MobX:
 
 - No 2 phase tracking, slower, but enables custom scheduling of computations

@@ -161,6 +161,9 @@ class Computed<T = any> implements ObservableAdministration, Observer {
     if (!this.scheduled) {
       this.scheduled = true
       // // TODO: run scheduler here!
+      // options:
+      // - custom scheduler
+      // - lazy (propagate 'changed') on dirty for mobx like semantics
       pending.push(this)
       runPendingObservers()
     }
@@ -174,7 +177,7 @@ class Computed<T = any> implements ObservableAdministration, Observer {
     }
     const prevValue = this.value
     this.track()
-    const changed = this.value !== prevValue
+    const changed = this.value !== prevValue // TODO: support custom - compare
     // propagate the change
     this.observers.forEach(o => o.markReady(changed)) // TODO fix: set of observers might have changed in mean time
   }
@@ -224,6 +227,8 @@ export function sub<T>(
   options?: SubscribeOptions
 ): Disposer {
   // TODO: support options
+  // - scheduler
+  // - fire immediately
   const noopObserver = {
     markDirty() {},
     markReady(changed) {
@@ -262,6 +267,10 @@ export function batched<T extends Function>(fn: T): T {
     const self = this
     batch(() => fn.apply(self, arguments))
   } as any) as T
+}
+
+function toJS(value) {
+  // convert, recursively, all own enumerable, primitive + vals values
 }
 
 let isRunningreactions = false
