@@ -3,24 +3,38 @@
   "private": false,
   "version": "0.0.1",
   "description": "",
-  "main": "index.js",
+  "main": "dist/rval.js",
+  "umd:main": "dist/rval.umd.js",
+  "module": "dist/rval.module.js",
+  "jsnext:main": "dist/rval.module.js",
+  "react-native": "dist/rval.module.js",
+  "types": "./dist/rval.d.ts",
   "scripts": {
+    "build": "rm -rf dist/ && yarn tsc index.ts -t es2015 -d --outDir dist && mv dist/index.d.ts dist/rval.d.ts && rm dist/index.js && cross-env NODE_ENV=production rollup -c rollup.config.js",
     "watch": "jest --watch",
     "test": "jest"
   },
   "author": "Michel Weststrate",
   "license": "MIT",
   "dependencies": {
-    "deepfreeze": "^2.0.0",
-    "immer": "^1.8.0"
+    "deepfreeze": "^2.0.0"
   },
   "devDependencies": {
     "@types/jest": "^23.3.9",
     "@types/node": "^10.12.10",
+    "cross-env": "^5.2.0",
+    "immer": "^1.8.0",
     "jest": "^23.6.0",
     "prettier": "^1.15.2",
+    "rimraf": "^2.6.2",
+    "rollup": "^0.54.0",
+    "rollup-plugin-filesize": "^1.5.0",
+    "rollup-plugin-typescript": "^1.0.0",
+    "rollup-plugin-uglify": "^2.0.1",
     "ts-jest": "^23.10.5",
-    "typescript": "^3.1.6"
+    "tslib": "^1.9.3",
+    "typescript": "^3.1.6",
+    "uglify-es": "^3.3.9"
   },
   "jest": {
     "testURL": "http://localhost",
