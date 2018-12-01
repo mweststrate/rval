@@ -269,3 +269,13 @@ export const batched = defaultContextMembers.batched;
 export function toJS(value) {
   // convert, recursively, all own enumerable, primitive + vals values
 }
+
+function once<T extends Function>(fn: T): T {
+  var f: any = function (this: any) {
+    if (f.called) return f.value
+    f.called = true
+    return f.value = fn.apply(this, arguments)
+  }
+  f.called = false
+  return f
+}

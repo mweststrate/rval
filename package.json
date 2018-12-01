@@ -12,8 +12,7 @@
   "license": "MIT",
   "dependencies": {
     "deepfreeze": "^2.0.0",
-    "immer": "^1.8.0",
-    "once": "^1.4.0"
+    "immer": "^1.8.0"
   },
   "devDependencies": {
     "@types/jest": "^23.3.9",
