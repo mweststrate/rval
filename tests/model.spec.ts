@@ -4,17 +4,15 @@ const $factory = Symbol("$factory")
 
 function model(factory, key?) {
     return function preProcessor(newValue, currentValue?) {
-        const newValIsObject = newValue && typeof newValue === "object"
-        if (!newValIsObject) return newValue
+        if (newValue == null) return newValue
+        if (typeof newValue !== "object") throw new Error("Model expects null, undefined or an object")
         if (newValue[$factory]) {
             if (newValue[$factory] !== factory) throw new Error(`Factory mismatch`)
             return newValue
         }
         if (key && newValue[key] === undefined) throw new Error(`Attribute '${key}' is required`)
-        const reconcilable =
-            currentValue && typeof currentValue === "object" && currentValue[$factory] === factory
-        const keyMatch = reconcilable && (!key || newValue[key] === currentValue[key])
-        const base = (reconcilable && keyMatch) ? currentValue : Object.assign(factory(), { [$factory]: factory })
+        const reconcilable = currentValue && (!key || newValue[key] === currentValue[key])
+        const base = reconcilable ? currentValue : Object.assign(factory(), { [$factory]: factory })
         // update props
         for(let prop in newValue) {
             if (prop === key) continue
@@ -31,14 +29,18 @@ test("simple model", () => {
         title: val('test')
     }))
 
-    expect(Todo(3,2)).toBe(3)
+    expect(() => {
+        Todo(3)
+    }).toThrow("Model expects null, undefined or an object")
+    expect(Todo(null)).toBe(null)
+    expect(Todo(undefined)).toBe(undefined)
     expect(Todo({}).title()).toBe("test")
     expect(Todo({ title: "hello" }).title()).toBe("hello")
     expect(() => {
         Todo({ title: "test", bla: 3})
     }).toThrow("bla")
-    expect(Todo(2, {})).toBe(2)
-    expect(Todo({title: "xx"}, 2).title()).toEqual("xx")
+    expect(Todo(null, {})).toBe(null)
+    expect(Todo({title: "xx"}, undefined).title()).toEqual("xx")
 
     const t1 = Todo({ title: "hello" })
     const t2 = Todo({ title: "world"}, t1)

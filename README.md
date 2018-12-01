@@ -52,6 +52,7 @@ stiek
 
 Tips:
 - subscribe before read, or use `fireImmediately`
+- typing self-object referring derivations
 
 Differences with MobX:
 
