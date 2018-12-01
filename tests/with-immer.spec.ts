@@ -1,4 +1,4 @@
-import { val, sub, drv, batch, batched, Val } from '..'
+import { val, sub, drv, batch, batched, Val } from './rval'
 import produce, { Draft } from "immer"
 
 function updater<T, U extends any[], R>(val: Val<T>,  updater: (draft: Draft<T>, ...args: U) => R): (...args: U) => R {

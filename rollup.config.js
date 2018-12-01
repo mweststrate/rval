@@ -23,16 +23,15 @@ function getConfig(dest, format, ugly) {
                         toplevel: true,
                         sourceMap: true,
                         mangle: {
-                            properties: true /* {
+                            properties:  {
                                     reserved: [
-                                        "module",
-                                        "exports",
-                                        "default",
-                                        "value", // for the esModule = true defintion
-                                        "setUseProxies",
-                                        "setAutoFreeze"
+                                        "val",
+                                        "drv",
+                                        "sub",
+                                        "batch",
+                                        "batched"
                                     ]
-                                } */
+                                }
                         }
                     },
                     minify

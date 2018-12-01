@@ -5,8 +5,8 @@ REActive LIbrary
 Names
 
 rval
-depsies
 rvals (reactive values)
+depsies
 lrl (lightweight reactive library)
 trecker
 reali
@@ -80,5 +80,5 @@ Todo:
 * [ ] with react
 * [x] eliminate Reaction class
 * [ ] setup minification with minified class members
-
+* [ ] swap export statement in `tests/rval.ts` in CI to test minified build
 

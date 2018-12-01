@@ -1,5 +1,5 @@
 {
-  "name": "merri",
+  "name": "rval",
   "private": false,
   "version": "0.0.1",
   "description": "",
@@ -19,6 +19,9 @@
   "dependencies": {
     "deepfreeze": "^2.0.0"
   },
+  "files": [
+    "dist"
+  ],
   "devDependencies": {
     "@types/jest": "^23.3.9",
     "@types/node": "^10.12.10",

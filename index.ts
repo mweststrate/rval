@@ -52,7 +52,7 @@ function rval() {
     constructor(state: T) {
       this.state = deepfreeze(state) // TODO: make freeze an option
       this.get = this.get.bind(this)
-      this.get[$RVal] = this
+      hiddenProp(this.get, $RVal, this)
     }
     addObserver(observer) {
       // TODO: use class
@@ -97,9 +97,8 @@ function rval() {
     changedCount = 0
     value: T = undefined!
     constructor(public derivation: () => T) {
-      const self = this
       this.get = this.get.bind(this)
-      this.get[$RVal] = this
+      hiddenProp(this.get, $RVal, this)
     }
     markDirty() {
       if (this.scheduled) return
@@ -289,4 +288,13 @@ function deepfreeze(o) {
     })
   }
   return o
+}
+
+function hiddenProp(target, key, value) {
+  Object.defineProperty(target, key, {
+    configurable: true,
+    enumerable: false,
+    writable: false,
+    value
+  })
 }
