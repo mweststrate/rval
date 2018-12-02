@@ -49,7 +49,7 @@ function rval() {
   class ObservableValue<T> implements ObservableAdministration {
     observers: Observer[] = []
     state: T
-    constructor(state: T) {
+    constructor(state: T, private preProcessor) {
       this.state = deepfreeze(state) // TODO: make freeze an option
       this.get = this.get.bind(this)
       hiddenProp(this.get, $RVal, this)
@@ -73,6 +73,7 @@ function rval() {
           if (currentlyComputing) throw new Error('derivations cannot have side effects and update values')
           // if (!isUpdating)
           //   throw new Error("val can only be updated within an 'update' context") // TODO: make ok, but optionally support / enforce batching
+          newValue = this.preProcessor(newValue, this.state)
           if (newValue !== this.state) {
             // TODO: run preprocessor(newValue, oldValue) here, and use it for comparison, or model instantiation!
             deepfreeze(newValue) // TODO: make freeze an option
@@ -188,8 +189,10 @@ function rval() {
     }
   }
 
-  function val<T>(initial: T): Val<T> {
-    return new ObservableValue(initial).get as any
+  function val<S, T>(initial: S, preProcessor: (newValue: S, baseValue?: T) => T): Val<T>
+  function val<T>(initial: T): Val<T>
+  function val<T>(initial: T, preProcessor = defaultPreProcessor): Val<T> {
+    return new ObservableValue(initial, preProcessor).get as any
   }
 
   function sub<T>(
@@ -256,6 +259,7 @@ function rval() {
   }
 }
 
+const defaultPreProcessor = v => v
 const defaultContextMembers = rval()
 
 export const val = defaultContextMembers.val
