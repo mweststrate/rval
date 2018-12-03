@@ -34,6 +34,7 @@ Tips:
 - typing self-object referring derivations
 - share methouds by pulling out / `this` / prototype or Object.create (add tests!)
 - dependency injection through type generation in closure
+- maps versus array entries
 
 Differences with MobX:
 
@@ -54,20 +55,21 @@ Patterns
 
 Todo:
 
+* [ ] docs
 * [ ] coverage
 * [ ] rval-models
 * [ ] rval-react
 * [ ] rval-immer
 * [ ] custom schedulers
-* [ ] custom preprocessors
+* [x] custom preprocessors
 * [ ] toJS
 * [ ] config: warn on unbatched writes
 * [ ] config: warn on untracked, stale reads
-* [ ] shape preprocessor
-* [ ] with immer
-* [ ] with react
 * [x] eliminate Reaction class
-* [ ] setup minification with minified class members
+* [x] setup minification with minified class members
 * [ ] swap export statement in `tests/rval.ts` in CI to test minified build
+
+Latter
 * [ ] setter for `drv`?
 * [ ] MobX global state compatibility?
+* [ ] Docs with docusaurus?

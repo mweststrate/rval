@@ -130,9 +130,9 @@ class ObservableValue<T> implements ObservableAdministration {
   observers: Observer[] = []
   state: T
   constructor(private context: RValContext, state: T, private preProcessor) {
-    this.state = deepfreeze(state) // TODO: make freeze an option
     this.get = this.get.bind(this)
     hiddenProp(this.get, $RVal, this)
+    this.state = deepfreeze(preProcessor(state, undefined)) // TODO: make freeze an option
   }
   addObserver(observer) {
     // TODO: use class
@@ -155,9 +155,7 @@ class ObservableValue<T> implements ObservableAdministration {
         //   throw new Error("val can only be updated within an 'update' context") // TODO: make ok, but optionally support / enforce batching
         newValue = this.preProcessor(newValue, this.state)
         if (newValue !== this.state) {
-          // TODO: run preprocessor(newValue, oldValue) here, and use it for comparison, or model instantiation!
-          deepfreeze(newValue) // TODO: make freeze an option
-          this.state = newValue!
+          this.state = deepfreeze(newValue) // TODO: make freeze an option
           const observers = this.observers.slice()
           observers.forEach(s => s.markDirty())
           observers.forEach(s => s.markReady(true))

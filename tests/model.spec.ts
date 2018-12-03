@@ -127,6 +127,16 @@ test('simple model - with key', () => {
   }
 })
 
+test('invariant', () => {
+    const Bool = invariant(x => typeof x === "boolean")
+    const bool = val(false, Bool)
+    bool(true)
+    expect(bool()).toBe(true)
+    expect(() => bool(0)).toThrow("Invariant failed")
+    expect(bool()).toBe(true)
+    expect(() => val(3, Bool)).toThrow("Invariant failed ")
+})
+
 describe('todostore', () => {
   function toggle(this: any) {
     this.done(!this.done())
@@ -202,3 +212,85 @@ describe('todostore', () => {
     expect(u3).not.toBe(t1)
   })
 })
+
+
+describe('todostore - with map', () => {
+    function toggle(this: any) {
+      this.done(!this.done())
+    }
+    const Todo = model(
+      () => ({
+        id: 0,
+        title: val('test'),
+        done: val(false),
+        toggle,
+      }),
+      'id'
+    )
+
+    const Store = model(() => {
+      const todos = val({}, mapOf(Todo))
+      return {
+        todos,
+      }
+    })
+
+    it('basics', () => {
+      const s = Store({
+        todos: {
+          "a": {
+            id: "a",
+            title: 'hello',
+            done: true,
+          },
+        },
+      })
+      const t1 = s.todos().a
+      expect(t1.title()).toBe('hello')
+      expect(t1.done()).toBe(true)
+      expect(t1.id).toBe("a")
+      t1.toggle()
+      expect(t1.done()).toBe(false)
+    })
+
+    it('reconciliation', () => {
+      const s = Store({
+        todos: {
+          a: {
+            id: "a",
+            title: 'hello',
+            done: true,
+          },
+        },
+      })
+      const x = s.todos().a
+      s.todos({
+        "b": {
+          id: "b",
+          title: 'boe',
+        },
+        ...s.todos(),
+      })
+      {
+        const {a, b} = s.todos()
+        expect(a.title()).toBe('hello')
+        expect(b.title()).toBe('boe')
+        expect(x).toBe(a)
+      }
+      {
+        const oldA = s.todos().a
+        const oldB = s.todos().b
+        s.todos({
+          c: { id: 'c', title: 'hey' },
+          a: { id: "a", done: true }, b: Todo({ id: "b", done: true })})
+        const {a,b,c} = s.todos()
+        expect(c.title()).toBe('hey')
+        expect(a.title()).toBe('hello')
+        expect(a.done()).toBe(true)
+        expect(a).toBe(oldA)
+        expect(b.title()).toBe('test')
+        expect(b.done()).toBe(true)
+        expect(b).not.toBe(oldB)
+      }
+    })
+  })
