@@ -53,7 +53,7 @@ function rval() {
     runPendingObservers
   }
 
-  function val<S, T>(initial: S, preProcessor: (newValue: S, baseValue?: T) => T): Val<T>
+  function val<S, T>(initial: S, preProcessor: (newValue: S | T, baseValue?: T) => T): Val<T>
   function val<T>(initial: T): Val<T>
   function val<T>(initial: T, preProcessor = defaultPreProcessor): Val<T> {
     return new ObservableValue(context, initial, preProcessor).get as any
