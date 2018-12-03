@@ -5,7 +5,7 @@ import typescript from 'rollup-plugin-typescript';
 
 function getConfig(dest, format, ugly) {
     const conf = {
-        input: "index.ts",
+        input: "src/rval-core.ts",
         output: {
             exports: "named",
             file: dest,

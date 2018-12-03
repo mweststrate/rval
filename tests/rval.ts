@@ -1,2 +1,2 @@
 // export * from "../dist/rval"
-export * from "../index"
+export * from "../src/rval-core"

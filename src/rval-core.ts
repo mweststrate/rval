@@ -35,10 +35,10 @@ interface ObservableAdministration {
   removeObserver(observer: Observer)
 }
 
-export type PreProcessor<S, T> = (newValue: S | T, baseValue?: T) => T
+export type PreProcessor<S, T> = (newValue: S | T, baseValue?: T, api?: RValFactories) => T
 
 export interface RValFactories {
-  val<S, T>(initial: S, preProcessor: PreProcessor<S,T>, api: RValFactories): Val<T>
+  val<S, T>(initial: S, preProcessor: PreProcessor<S,T>): Val<T>
   val<T>(initial: T): Val<T>
   drv<T>(derivation: () => T): Drv<T>
   sub<T>(
@@ -285,6 +285,14 @@ export function toJS(value) {
   // convert, recursively, all own enumerable, primitive + vals values
 }
 
+export function isVal<T>(value: any): value is Val<T> {
+  return value instanceof ObservableValue
+}
+
+export function isDrv<T>(value: any): value is Drv<T> {
+  return value instanceof Computed
+}
+
 function once<T extends Function>(fn: T): T {
   // based on 'once' package, but made smaller
   var f: any = function(this: any) {
@@ -296,7 +304,7 @@ function once<T extends Function>(fn: T): T {
   return f
 }
 
-function deepfreeze(o) {
+export function deepfreeze(o) {
   // based on 'deepfreeze' package, but copied here to simplify build setup :-/
   if (o === Object(o)) {
     Object.isFrozen(o) || Object.freeze(o)
