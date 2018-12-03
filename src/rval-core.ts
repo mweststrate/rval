@@ -123,7 +123,7 @@ function rval(): RValFactories {
   function runPendingObservers() {
     if (!context.isUpdating && !context.isRunningReactions) {
       context.isRunningReactions = true
-      while (pending.length) {
+      while (context.pending.length) {
         // N.B. errors here cause other pending subscriptions to be aborted!
         // TODO: cancel that subscription instead and continue (try catch in run())
         context.pending.splice(0).forEach(s => s.run())
