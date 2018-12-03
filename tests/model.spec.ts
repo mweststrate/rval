@@ -7,16 +7,17 @@ test('simple model', () => {
   }))
 
   expect(() => {
-    Todo(3)
+    Todo(3 as any)
   }).toThrow('Model expects null, undefined or an object')
-  expect(Todo(null)).toBe(null)
-  expect(Todo(undefined)).toBe(undefined)
+  expect(Todo(null as any)).toBe(null)
+  expect(Todo(undefined as any)).toBe(undefined)
   expect(Todo({}).title()).toBe('test')
+  debugger
   expect(Todo({ title: 'hello' }).title()).toBe('hello')
   expect(() => {
-    Todo({ title: 'test', bla: 3 })
+    Todo({ title: 'test', bla: 3 }  as any)
   }).toThrow('bla')
-  expect(Todo(null, {})).toBe(null)
+  expect(Todo(null  as any, {}  as any)).toBe(null)
   expect(Todo({ title: 'xx' }, undefined).title()).toEqual('xx')
 
   const t1 = Todo({ title: 'hello' })
@@ -159,7 +160,7 @@ describe('todostore - with map', () => {
     }
     const Todo = model(
       () => ({
-        id: 0,
+        id: "",
         title: val('test'),
         done: val(false),
         toggle,

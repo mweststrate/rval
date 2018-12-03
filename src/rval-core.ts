@@ -12,8 +12,8 @@ export interface Observable<T = unknown> {
 
 export interface Drv<T> extends Observable<T> {}
 
-export interface Val<T> extends Observable<T> {
-  (newValue: T): void
+export interface Val<S, T> extends Observable<T> {
+  (newValue: S | T): void
 }
 
 interface Observer {
@@ -38,8 +38,8 @@ interface ObservableAdministration {
 export type PreProcessor<S, T> = (newValue: S | T, baseValue?: T, api?: RValFactories) => T
 
 export interface RValFactories {
-  val<S, T>(initial: S, preProcessor: PreProcessor<S,T>): Val<T>
-  val<T>(initial: T): Val<T>
+  val<S, T>(initial: S, preProcessor: PreProcessor<S,T>): Val<S, T>
+  val<T>(initial: T): Val<T, T>
   drv<T>(derivation: () => T): Drv<T>
   sub<T>(
     src: Observable<T>,
@@ -68,7 +68,7 @@ function rval(): RValFactories {
     runPendingObservers
   }
 
-  function val<T>(initial: T, preProcessor = defaultPreProcessor): Val<T> {
+  function val<S, T>(initial: T, preProcessor = defaultPreProcessor): Val<S, T> {
     return new ObservableValue(context, api, initial, preProcessor).get as any
   }
 
@@ -285,12 +285,12 @@ export function toJS(value) {
   // convert, recursively, all own enumerable, primitive + vals values
 }
 
-export function isVal<T>(value: any): value is Val<T> {
-  return value instanceof ObservableValue
+export function isVal<S, T>(value: any): value is Val<S, T> {
+  return typeof value === "function" && value[$RVal] instanceof ObservableValue
 }
 
 export function isDrv<T>(value: any): value is Drv<T> {
-  return value instanceof Computed
+  return typeof value === "function" && value[$RVal] instanceof Computed
 }
 
 function once<T extends Function>(fn: T): T {

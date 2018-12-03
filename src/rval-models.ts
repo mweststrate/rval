@@ -1,9 +1,15 @@
-import { isVal, deepfreeze, PreProcessor, Val, Drv } from "./rval-core";
+import { isVal, deepfreeze, PreProcessor, Val, Drv } from './rval-core'
 
 const $factory = Symbol('$factory')
 
 type SnapshotType<T> = {
-    [K in keyof T]?: T[K] extends Val<infer X> ? X | SnapshotType<X> : T[K] extends Drv<any> ? never: T[K]
+  [K in keyof T]?: T[K] extends Val<infer S, infer X>
+    ? S | X
+    : T[K] extends Drv<any>
+    ? never
+    : T[K] extends Function
+    ? never
+    : T[K]
 }
 
 export function model<T>(factory: () => T, key?: keyof T): PreProcessor<SnapshotType<T>, T>
@@ -21,7 +27,7 @@ export function model(factory, key?) {
       const base = reconcilable ? currentValue : Object.assign(factory(), { [$factory]: factory })
       // update props
       for (let prop in newValue) {
-        if (isVal(base[prop] === 'function')) {
+        if (isVal(base[prop])) {
           base[prop](newValue[prop])
         } else if (!reconcilable) {
           if (prop in base) base[prop] = newValue[prop]
@@ -35,6 +41,7 @@ export function model(factory, key?) {
   )
 }
 
+export function mapOf<S, T>(model: PreProcessor<S, T>): PreProcessor<{ [key: string]: S | T }, { [key: string]: T }>
 export function mapOf(model) {
   return function mapPreProcessor(newValue, currentValue) {
     const res = {}
@@ -46,6 +53,7 @@ export function mapOf(model) {
   }
 }
 
+export function arrayOf<S, T>(model: PreProcessor<S, T>): PreProcessor<(S | T)[], T[]>
 export function arrayOf(model) {
   return function arrayPreProcessor(newValue, currentValue) {
     if (!newValue) return []
@@ -59,9 +67,10 @@ export function arrayOf(model) {
   }
 }
 
+export function invariant<S, T>(predicate: (v: T) => boolean): PreProcessor<S, T>
 export function invariant(predicate: (v) => boolean) {
-    return function predicatePreProcessor(newValue) {
-      if (!predicate(newValue)) throw new Error(`Invariant failed for value '${newValue}'`)
-      return newValue
-    }
+  return function predicatePreProcessor(newValue) {
+    if (!predicate(newValue)) throw new Error(`Invariant failed for value '${newValue}'`)
+    return newValue
   }
+}
