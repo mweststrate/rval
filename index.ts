@@ -35,6 +35,21 @@ interface ObservableAdministration {
   removeObserver(observer: Observer)
 }
 
+export type PreProcessor<S, T> = (newValue: S | T, baseValue?: T) => T
+
+export interface RValFactories {
+  val<S, T>(initial: S, preProcessor: PreProcessor<S,T>, api: RValFactories): Val<T>
+  val<T>(initial: T): Val<T>
+  drv<T>(derivation: () => T): Drv<T>
+  sub<T>(
+    src: Observable<T>,
+    listener: Listener<T>,
+    options?: SubscribeOptions
+  ): Disposer
+  batch<R>(updater: () => R): R
+  batched<T extends Function>(fn: T): T
+}
+
 export interface SubscribeOptions {
   fireImmediately?: boolean
   scheduler?: (run: Thunk) => void
@@ -44,7 +59,7 @@ const NOT_TRACKING = 0
 const STALE = 1
 const UP_TO_DATE = 2
 
-function rval() {
+function rval(): RValFactories {
   const context: RValContext = {
     isUpdating : false,
     pending: [],
@@ -53,10 +68,12 @@ function rval() {
     runPendingObservers
   }
 
-  function val<S, T>(initial: S, preProcessor: (newValue: S | T, baseValue?: T) => T): Val<T>
-  function val<T>(initial: T): Val<T>
   function val<T>(initial: T, preProcessor = defaultPreProcessor): Val<T> {
-    return new ObservableValue(context, initial, preProcessor).get as any
+    return new ObservableValue(context, api, initial, preProcessor).get as any
+  }
+
+  function drv<T>(derivation: () => T): Drv<T> {
+    return new Computed<T>(context, derivation).get as any
   }
 
   function sub<T>(
@@ -81,12 +98,9 @@ function rval() {
     })
   }
 
-  function drv<T>(derivation: () => T): Drv<T> {
-    return new Computed<T>(context, derivation).get as any
-  }
 
   // TODO: autowrap with update and warn?
-  function batch<R>(updater: () => R) {
+  function batch<R>(updater: () => R): R {
     let prevUpdating = context.isUpdating
     context.isUpdating = true
     try {
@@ -119,8 +133,8 @@ function rval() {
   }
 
   // prettier-ignore
-  return { val, drv, sub, batch, batched,
-  }
+  const api = { val, drv, sub, batch, batched }
+  return api
 }
 
 const defaultPreProcessor = v => v
@@ -129,10 +143,10 @@ const defaultContextMembers = rval()
 class ObservableValue<T> implements ObservableAdministration {
   observers: Observer[] = []
   state: T
-  constructor(private context: RValContext, state: T, private preProcessor) {
+  constructor(private context: RValContext, private api: RValFactories, state: T, private preProcessor) {
     this.get = this.get.bind(this)
     hiddenProp(this.get, $RVal, this)
-    this.state = deepfreeze(preProcessor(state, undefined)) // TODO: make freeze an option
+    this.state = deepfreeze(preProcessor(state, undefined, this.api)) // TODO: make freeze an option
   }
   addObserver(observer) {
     // TODO: use class
@@ -153,7 +167,7 @@ class ObservableValue<T> implements ObservableAdministration {
         if (this.context.currentlyComputing) throw new Error('derivations cannot have side effects and update values')
         // if (!isUpdating)
         //   throw new Error("val can only be updated within an 'update' context") // TODO: make ok, but optionally support / enforce batching
-        newValue = this.preProcessor(newValue, this.state)
+        newValue = this.preProcessor(newValue, this.state, this.api)
         if (newValue !== this.state) {
           this.state = deepfreeze(newValue) // TODO: make freeze an option
           const observers = this.observers.slice()
