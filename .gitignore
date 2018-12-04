@@ -1,3 +1,8 @@
 node_modules
 yarn-error.log
-dist
+/core
+/immer
+/models
+/react
+/dist
+.rpt2_cache

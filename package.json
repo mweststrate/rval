@@ -3,14 +3,14 @@
   "private": false,
   "version": "0.0.1",
   "description": "",
-  "main": "dist/rval.js",
-  "umd:main": "dist/rval.umd.js",
-  "module": "dist/rval.module.js",
-  "jsnext:main": "dist/rval.module.js",
-  "react-native": "dist/rval.module.js",
-  "types": "./dist/rval.d.ts",
+  "main": "core/index.js",
+  "umd:main": "core/index.umd.js",
+  "module": "core/index.module.js",
+  "jsnext:main": "core/index.module.js",
+  "react-native": "core/index.module.js",
+  "types": "./core/index.d.ts",
   "scripts": {
-    "build": "rm -rf dist/ && yarn tsc index.ts -t es2015 -d --outDir dist && mv dist/index.d.ts dist/rval.d.ts && rm dist/index.js && cross-env NODE_ENV=production rollup -c rollup.config.js",
+    "build": "cross-env NODE_ENV=production rollup -c rollup.config.js",
     "watch": "jest --watch",
     "test": "jest"
   },
@@ -20,7 +20,10 @@
     "deepfreeze": "^2.0.0"
   },
   "files": [
-    "dist"
+    "core",
+    "immer",
+    "models",
+    "react"
   ],
   "devDependencies": {
     "@types/jest": "^23.3.9",
@@ -32,11 +35,11 @@
     "rimraf": "^2.6.2",
     "rollup": "^0.54.0",
     "rollup-plugin-filesize": "^1.5.0",
-    "rollup-plugin-typescript": "^1.0.0",
+    "rollup-plugin-typescript2": "^0.18.0",
     "rollup-plugin-uglify": "^2.0.1",
     "ts-jest": "^23.10.5",
     "tslib": "^1.9.3",
-    "typescript": "^3.1.6",
+    "typescript": "^3.2.1",
     "uglify-es": "^3.3.9"
   },
   "jest": {

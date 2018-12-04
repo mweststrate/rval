@@ -1,21 +1,21 @@
 import {minify} from "uglify-es"
 import filesize from "rollup-plugin-filesize"
 import uglify from "rollup-plugin-uglify"
-import typescript from 'rollup-plugin-typescript';
+import typescript from 'rollup-plugin-typescript2';
 
-function getConfig(dest, format, ugly) {
+function getConfig(mod, dest, format, ugly, reserved = [], umdName) {
     const conf = {
-        input: "src/rval-core.ts",
+        input: "src/rval-" + mod + ".ts",
         output: {
             exports: "named",
             file: dest,
             format,
-            name: "rval",
+            name: umdName,
             sourcemap: true
         },
+        external: ["rval", "immer"],
         plugins: [
-            typescript({
-            }),
+            typescript(),
             ugly &&
                 uglify(
                     {
@@ -24,13 +24,7 @@ function getConfig(dest, format, ugly) {
                         sourceMap: true,
                         mangle: {
                             properties:  {
-                                    reserved: [
-                                        "val",
-                                        "drv",
-                                        "sub",
-                                        "batch",
-                                        "batched"
-                                    ]
+                                    reserved: reserved
                                 }
                         }
                     },
@@ -43,10 +37,26 @@ function getConfig(dest, format, ugly) {
     return conf
 }
 
+function generateConfigs(mod, reserved, umdName) {
+    return [
+        // TODO: re-enable minify
+        getConfig(mod, mod + "/index.js", "cjs", false, reserved),
+        umdName && getConfig(mod, mod + "/index.umd.js", "umd", false, reserved, umdName),
+        getConfig(mod, mod + "/index.module.js", "es", false, reserved)
+    ]
+}
+
 const config = [
-    getConfig("dist/rval.js", "cjs", true),
-    getConfig("dist/rval.umd.js", "umd", true),
-    getConfig("dist/rval.module.js", "es", true)
-]
+    ...generateConfigs("core", [
+        "val",
+        "drv",
+        "sub",
+        "batch",
+        "batched"
+    ], "rval"),
+    ...generateConfigs("immer"),
+    ...generateConfigs("models"),
+    ...generateConfigs("react")
+].filter(Boolean)
 
 export default config
