@@ -254,3 +254,26 @@ test("no unchanged value propagation", () => {
   d()
   a(6)
 })
+
+
+test("no unchanged value propagation - 2", () => {
+  let bCalled = 0
+  let cCalled = 0
+  let subCalled = 0
+  const a = val(3)
+  const b = drv(() => (bCalled++, a() * 2))
+  const c = drv(() => (cCalled++, b() * 2))
+  const d = sub(c, () => {
+    subCalled++
+  })
+  expect([bCalled, cCalled, subCalled]).toEqual([1, 1, 0]) // during initialization
+  batch(() => {
+    a(4)
+    expect([bCalled, cCalled, subCalled]).toEqual([1, 1, 0])
+    expect(b()).toBe(8)
+    expect([bCalled, cCalled, subCalled]).toEqual([2, 1, 0])
+  })
+  expect([bCalled, cCalled, subCalled]).toEqual([2, 2, 1])
+  expect(c()).toBe(16)
+  expect([bCalled, cCalled, subCalled]).toEqual([2, 2, 1])
+})

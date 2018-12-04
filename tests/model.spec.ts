@@ -12,7 +12,6 @@ test('simple model', () => {
   expect(Todo(null as any)).toBe(null)
   expect(Todo(undefined as any)).toBe(undefined)
   expect(Todo({}).title()).toBe('test')
-  debugger
   expect(Todo({ title: 'hello' }).title()).toBe('hello')
   expect(() => {
     Todo({ title: 'test', bla: 3 }  as any)
@@ -234,3 +233,54 @@ describe('todostore - with map', () => {
       }
     })
   })
+
+
+
+describe('todostore - with parent', () => {
+  function toggle(this: any) {
+    this.done(!this.done())
+  }
+  const Todo = parent => model(
+    () => ({
+      id: 0,
+      title: val('test'),
+      done: val(false),
+      toggle,
+      remove() {
+        parent.todos(parent.todos().filter(t => t !== this))
+      }
+    }),
+    'id'
+  )
+
+  const Store = model(() => {
+    const self = {}
+    const todos = val([], arrayOf(Todo(self)))
+    return Object.assign(self, {
+      todos,
+    })
+  })
+
+  it('basics', () => {
+    const s = val({
+      todos: [
+        {
+          id: 1,
+          title: 'hello',
+          done: true,
+        },
+      ],
+    }, Store)
+    const t1 = s().todos()[0]
+    s({todos: [{
+      id: 1, title: "world"
+    }]})
+
+    expect(t1.title()).toBe('world')
+    expect(t1.done()).toBe(true)
+    expect(t1).toBe(s().todos()[0])
+
+    t1.remove()
+    expect(s().todos().length).toBe(0)
+  })
+})

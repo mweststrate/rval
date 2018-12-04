@@ -4,16 +4,16 @@ export type Thunk = () => void
 
 export type Disposer = Thunk
 
-export const $RVal = typeof Symbol === "undefined" ? "$RVal" : Symbol.for('$RVal') // TODO: rename
+export const $RVal = typeof Symbol === "undefined" ? "$RVal" : Symbol.for('$RVal')
 
 export interface Observable<T = unknown> {
   (): T
 }
 
-export interface Drv<T> extends Observable<T> {}
+export interface Drv<T = unknown> extends Observable<T> {}
 
-export interface Val<S, T> extends Observable<T> {
-  (newValue: S | T): void
+export interface Val<T = unknown, S = T> extends Observable<T> {
+  (newValue: T | S): void
 }
 
 interface Observer {
@@ -35,10 +35,12 @@ interface ObservableAdministration {
   removeObserver(observer: Observer)
 }
 
-export type PreProcessor<S, T> = (newValue: S | T, baseValue?: T, api?: RValFactories) => T
+// TODO: swap types of S, T, infer
+// also for Val
+export type PreProcessor<T = unknown, S = T> = (newValue: T | S, baseValue?: T, api?: RValFactories) => T
 
 export interface RValFactories {
-  val<S, T>(initial: S, preProcessor: PreProcessor<S,T>): Val<S, T>
+  val<T, S>(initial: S, preProcessor: PreProcessor<T, S>): Val<T, S>
   val<T>(initial: T): Val<T, T>
   drv<T>(derivation: () => T): Drv<T>
   sub<T>(
@@ -59,7 +61,12 @@ const NOT_TRACKING = 0
 const STALE = 1
 const UP_TO_DATE = 2
 
-function rval(): RValFactories {
+export function rval(base?: Val<any, any>): RValFactories {
+  if (arguments.length) {
+    if (!isVal(base))
+      throw new Error("Expected val as first argument to rval")
+    return (base[$RVal] as ObservableValue<any>).api
+  }
   const context: RValContext = {
     isUpdating : false,
     pending: [],
@@ -68,7 +75,7 @@ function rval(): RValFactories {
     runPendingObservers
   }
 
-  function val<S, T>(initial: T, preProcessor = defaultPreProcessor): Val<S, T> {
+  function val<T, S>(initial: S, preProcessor = defaultPreProcessor): Val<T, S> {
     return new ObservableValue(context, api, initial, preProcessor).get as any
   }
 
@@ -143,7 +150,7 @@ const defaultContextMembers = rval()
 class ObservableValue<T> implements ObservableAdministration {
   observers: Observer[] = []
   state: T
-  constructor(private context: RValContext, private api: RValFactories, state: T, private preProcessor) {
+  constructor(private context: RValContext, public api: RValFactories, state: T, private preProcessor) {
     this.get = this.get.bind(this)
     hiddenProp(this.get, $RVal, this)
     this.state = deepfreeze(preProcessor(state, undefined, this.api)) // TODO: make freeze an option
@@ -285,11 +292,11 @@ export function toJS(value) {
   // convert, recursively, all own enumerable, primitive + vals values
 }
 
-export function isVal<S, T>(value: any): value is Val<S, T> {
+export function isVal(value: any): value is Val {
   return typeof value === "function" && value[$RVal] instanceof ObservableValue
 }
 
-export function isDrv<T>(value: any): value is Drv<T> {
+export function isDrv(value: any): value is Drv {
   return typeof value === "function" && value[$RVal] instanceof Computed
 }
 

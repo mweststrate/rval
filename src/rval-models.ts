@@ -3,16 +3,20 @@ import { isVal, deepfreeze, PreProcessor, Val, Drv } from './rval-core'
 const $factory = Symbol('$factory')
 
 type SnapshotType<T> = {
-  [K in keyof T]?: T[K] extends Val<infer S, infer X>
-    ? S | X
+  [K in keyof T]?: T[K] extends Val<infer X, infer S>
+    ? X | S
     : T[K] extends Drv<any>
     ? never
     : T[K] extends Function
     ? never
-    : T[K]
+    : T[K] extends (string | number | boolean)
+    ? T[K]
+    : SnapshotType<T[K]>
 }
 
-export function model<T>(factory: () => T, key?: keyof T): PreProcessor<SnapshotType<T>, T>
+// TODO: pass bae value as first arg to factory? or call res.afterCreate() ? and what about other hooks? parents?
+// TODO: pass RvalFactories in as second arg to factory?
+export function model<T>(factory: () => T, key?: keyof T): PreProcessor<T, SnapshotType<T>>
 export function model(factory, key?) {
   return Object.assign(
     function modelPreProcessor(newValue, currentValue?) {
@@ -41,7 +45,7 @@ export function model(factory, key?) {
   )
 }
 
-export function mapOf<S, T>(model: PreProcessor<S, T>): PreProcessor<{ [key: string]: S | T }, { [key: string]: T }>
+export function mapOf<T, S>(model: PreProcessor<T, S>): PreProcessor<{ [key: string]: T }, { [key: string]: T | S }>
 export function mapOf(model) {
   return function mapPreProcessor(newValue, currentValue) {
     const res = {}
@@ -53,7 +57,7 @@ export function mapOf(model) {
   }
 }
 
-export function arrayOf<S, T>(model: PreProcessor<S, T>): PreProcessor<(S | T)[], T[]>
+export function arrayOf<T, S>(model: PreProcessor<T, S>): PreProcessor<T[], (S | T)[]>
 export function arrayOf(model) {
   return function arrayPreProcessor(newValue, currentValue) {
     if (!newValue) return []

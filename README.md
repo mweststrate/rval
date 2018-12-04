@@ -49,17 +49,20 @@ Patterns
 - objects with models
 - arrays
 - maps
+- serialization, deserialization
+- capturing parent ref (see test "todostore - with parent")
 - with react
 - with immer (`v(p(v(), draft => { })))`)
 - working with references
 
 Todo:
 
+* [ ] build all the packages
 * [ ] docs
 * [ ] coverage
-* [ ] rval-models
+* [x] rval-models
 * [ ] rval-react
-* [ ] rval-immer
+* [x] rval-immer
 * [ ] custom schedulers
 * [x] custom preprocessors
 * [ ] toJS

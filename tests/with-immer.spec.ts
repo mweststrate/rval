@@ -1,17 +1,5 @@
-import { val, sub, drv, batch, batched, Val } from './rval'
-import produce, { Draft } from "immer"
-
-function updater<T, U extends any[], R>(val: Val<T>,  updater: (draft: Draft<T>, ...args: U) => R): (...args: U) => R {
-  return function(...args: U) {
-    return batch(() => {
-      let res
-      val(produce(val(), draft => {
-        res = updater(draft, ...args)
-      }))
-      return res
-    })
-  }
-}
+import { val, drv, sub, batched } from "../src/rval-core"
+import { updater } from "../src/rval-immer"
 
 test('some basic stuff', () => {
   const events: any = []
