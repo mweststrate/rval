@@ -57,8 +57,10 @@ Patterns
 
 Todo:
 
-* [ ] build all the packages
-* [ ] generate types `yarn tsc index.ts -t es2015 -d --outDir dist && mv dist/index.d.ts dist/rval.d.ts && rm dist/index.js &&`
+* [x] build all the packages
+* [x] generate types `yarn tsc index.ts -t es2015 -d --outDir dist && mv dist/index.d.ts dist/rval.d.ts && rm dist/index.js &&`
+* [ ] test against generated packages
+* [ ] setup CI
 * [ ] docs
 * [ ] coverage
 * [x] rval-models

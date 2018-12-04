@@ -15,7 +15,9 @@ function getConfig(mod, dest, format, ugly, reserved = [], umdName) {
         },
         external: ["rval", "immer"],
         plugins: [
-            typescript(),
+            typescript({
+                exclude: ["tests/**/*"]
+            }),
             ugly &&
                 uglify(
                     {
