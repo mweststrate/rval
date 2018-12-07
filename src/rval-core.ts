@@ -324,10 +324,11 @@ export function deepfreeze(o) {
 
 function hiddenProp(target, key, value) {
   Object.defineProperty(target, key, {
-    configurable: true,
-    enumerable: false,
-    writable: false,
-    value
+    // N.B.: quoting is important, to prevent minification issue. See keep_quoted option!
+    "configurable": true,
+    "enumerable": false,
+    "writable": false,
+    "value": value
   })
 }
 

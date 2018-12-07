@@ -1,4 +1,5 @@
-import { val, drv, sub, batched, updater } from "./rval"
+import { val, drv, sub, batched } from "rval"
+import { updater } from "rval/immer"
 
 test('some basic stuff', () => {
   const events: any = []

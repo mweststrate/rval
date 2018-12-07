@@ -11,8 +11,8 @@
   "types": "core/index.d.ts",
   "scripts": {
     "build": "rimraf core immer models react && cross-env NODE_ENV=production rollup -c rollup.config.js && mv core/src/rval-core.d.ts core/index.d.ts && mv immer/src/rval-immer.d.ts immer/index.d.ts && mv models/src/rval-models.d.ts models/index.d.ts && mv react/src/rval-react.d.ts react/index.d.ts && rimraf core/src immer/src models/src react/src",
-    "watch": "jest --watch",
-    "test": "jest"
+    "watch": "jest --config jest.config.json --watch",
+    "test": "jest --config jest.config.test.json"
   },
   "author": "Michel Weststrate",
   "license": "MIT",
@@ -33,38 +33,12 @@
     "jest": "^23.6.0",
     "prettier": "^1.15.2",
     "rimraf": "^2.6.2",
-    "rollup": "^0.54.0",
-    "rollup-plugin-filesize": "^1.5.0",
+    "rollup": "^0.67.4",
+    "rollup-plugin-filesize": "^5.0.1",
+    "rollup-plugin-terser": "^3.0.0",
     "rollup-plugin-typescript2": "^0.18.0",
-    "rollup-plugin-uglify": "^2.0.1",
     "ts-jest": "^23.10.5",
     "tslib": "^1.9.3",
-    "typescript": "^3.2.1",
-    "uglify-es": "^3.3.9"
-  },
-  "jest": {
-    "testURL": "http://localhost",
-    "transform": {
-      "^.+\\.jsx?$": "babel-jest",
-      "^.+\\.tsx?$": "ts-jest"
-    },
-    "testRegex": "/tests/[^/]*.spec.[jt]sx?$",
-    "moduleNameMapper": {
-      "^rval$": "<rootDir>/src/rval-core"
-    },
-    "globals": {
-      "ts-jest": {
-        "diagnostics": false,
-        "tsConfig": "tsconfig.json"
-      }
-    },
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js",
-      "jsx",
-      "json",
-      "node"
-    ]
+    "typescript": "^3.2.1"
   }
 }

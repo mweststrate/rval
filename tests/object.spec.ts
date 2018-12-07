@@ -1,4 +1,4 @@
-import { val, sub, drv, batch, batched } from './rval'
+import { val, sub, drv, batch, batched } from 'rval'
 
 test('some basic stuff', () => {
   const events: any = []

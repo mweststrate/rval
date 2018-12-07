@@ -1,0 +1,18 @@
+{
+  "testURL": "http://localhost",
+  "transform": {
+    "^.+\\.jsx?$": "babel-jest",
+    "^.+\\.tsx?$": "ts-jest"
+  },
+  "testRegex": "/tests/[^/]*.spec.[jt]sx?$",
+  "moduleNameMapper": {
+    "^rval(.*)": "<rootDir>$1"
+  },
+  "globals": {
+    "ts-jest": {
+      "diagnostics": false,
+      "tsConfig": "tsconfig.json"
+    }
+  },
+  "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json", "node"]
+}

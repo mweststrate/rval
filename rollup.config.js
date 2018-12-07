@@ -1,6 +1,5 @@
-import {minify} from "uglify-es"
 import filesize from "rollup-plugin-filesize"
-import uglify from "rollup-plugin-uglify"
+import { terser } from "rollup-plugin-terser"
 import typescript from 'rollup-plugin-typescript2';
 
 function getConfig(mod, dest, format, ugly, reserved = [], umdName) {
@@ -19,18 +18,21 @@ function getConfig(mod, dest, format, ugly, reserved = [], umdName) {
                 exclude: ["tests/**/*"]
             }),
             ugly &&
-                uglify(
+                terser(
                     {
                         warnings: true,
-                        toplevel: true,
-                        sourceMap: true,
+                        compress: true,
                         mangle: {
-                            properties:  {
-                                    reserved: reserved
-                                }
-                        }
-                    },
-                    minify
+                            properties: {
+                                keep_quoted: true,
+                                reserved
+                            },
+                            reserved
+                        },
+                        module: true,
+                        toplevel: true,
+                        sourcemap: true,
+                    }
                 ),
             filesize()
         ].filter(Boolean)
@@ -41,24 +43,29 @@ function getConfig(mod, dest, format, ugly, reserved = [], umdName) {
 
 function generateConfigs(mod, reserved, umdName) {
     return [
-        // TODO: re-enable minify
-        getConfig(mod, mod + "/index.js", "cjs", false, reserved),
-        umdName && getConfig(mod, mod + "/index.umd.js", "umd", false, reserved, umdName),
-        getConfig(mod, mod + "/index.module.js", "es", false, reserved)
+        getConfig(mod, mod + "/index.js", "cjs", true, reserved),
+        umdName && getConfig(mod, mod + "/index.umd.js", "umd", true, reserved, umdName),
+        getConfig(mod, mod + "/index.module.js", "es", true, reserved)
     ]
 }
 
+const rvalApi = [
+    "rval",
+    "val",
+    "drv",
+    "sub",
+    "batch",
+    "batched",
+    "deepfreeze",
+    "isVal",
+    "isDrv"
+]
+
 const config = [
-    ...generateConfigs("core", [
-        "val",
-        "drv",
-        "sub",
-        "batch",
-        "batched"
-    ], "rval"),
-    ...generateConfigs("immer"),
-    ...generateConfigs("models"),
-    ...generateConfigs("react")
+    ...generateConfigs("core", rvalApi, "rval"),
+    ...generateConfigs("immer", [...rvalApi, "updater"]),
+    ...generateConfigs("models", [...rvalApi, "model", "invariant", "mapOf", "arrayOf"]),
+    ...generateConfigs("react", [...rvalApi])
 ].filter(Boolean)
 
 export default config
