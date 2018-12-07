@@ -78,6 +78,7 @@ Todo:
 * [x] setup minification with minified class members
 * [ ] swap export statement in `tests/rval.ts` in CI to test minified build
 * [ ] mobx evaluation order of drv
+* [ ] fix sourcemaps for minified builds
 
 Latter
 * [ ] setter for `drv`?
