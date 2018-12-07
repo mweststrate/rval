@@ -1,5 +1,4 @@
-import { val } from '../src/rval-core'
-import { model, mapOf, arrayOf, invariant } from "../src/rval-models" // TODO: don't import from source!
+import { model, mapOf, arrayOf, invariant, val } from "./rval" // TODO: don't import from source!
 
 test('simple model', () => {
   const Todo = model(() => ({

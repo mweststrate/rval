@@ -1,5 +1,4 @@
-import { val, drv, sub, batched } from "../src/rval-core"
-import { updater } from "../src/rval-immer"
+import { val, drv, sub, batched, updater } from "./rval"
 
 test('some basic stuff', () => {
   const events: any = []
@@ -72,6 +71,7 @@ describe('todos', () => {
     expect(l.completedCount()).toBe(1)
     l.todos()[0].title("No effect")
     l.todos()[1].toggle()
+    debugger
     l.add({ id: "x", title: "test", done: true})
     expect(l.remove("a")).toBe(true)
     l.remove("x")

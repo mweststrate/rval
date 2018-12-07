@@ -49,6 +49,9 @@
       "^.+\\.tsx?$": "ts-jest"
     },
     "testRegex": "/tests/[^/]*.spec.[jt]sx?$",
+    "moduleNameMapper": {
+      "^rval$": "<rootDir>/src/rval-core"
+    },
     "globals": {
       "ts-jest": {
         "diagnostics": false,

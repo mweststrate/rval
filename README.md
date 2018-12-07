@@ -74,6 +74,7 @@ Todo:
 * [x] eliminate Reaction class
 * [x] setup minification with minified class members
 * [ ] swap export statement in `tests/rval.ts` in CI to test minified build
+* [ ] mobx evaluation order of drv
 
 Latter
 * [ ] setter for `drv`?
