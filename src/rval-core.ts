@@ -18,8 +18,6 @@ export interface Val<T = unknown, S = T> extends Observable<T> {
 
 interface Observer {
   markDirty()
-  markReady(changed: boolean)
-  run()
 }
 
 interface RValContext {
@@ -91,15 +89,40 @@ export function rval(base?: Val<any, any>): RValFactories {
     // TODO: support options
     // - scheduler
     // - fire immediately
+    const scheduler = defaultScheduler
+    let lastSeen = undefined
+    let firstRun = true
+    let scheduled = false
     const noopObserver = {
-      markDirty() {},
-      markReady(changed) {
-        // assumption, markReady is always triggered exactly once, as it is subscribing to only one
-        if (changed) listener(computed.get())
+      markDirty() {
+        if (!scheduled) {
+          scheduled = true
+          context.pending.push(this)
+          runPendingObservers();
+        }
       },
+      run() {
+        scheduler(() => {
+          // Not cancelled yet?
+          if (!computed.observers.length) return
+          // TODO: this is a mess, let scheduler should make sure run happen, eventually, not vice versa, so put it in markDirty!
+          scheduled = false
+          computed.track()
+          const p = computed.value
+          if (firstRun) {
+            firstRun = false
+            lastSeen = p
+          }
+          if (p !== lastSeen) {
+            lastSeen = p
+            listener(p)
+          }
+        }
+      }
     }
     const computed = new Computed(context, src)
     computed.addObserver(noopObserver)
+    scheduler(() => noopObserver.run())
     return once(() => {
       computed.removeObserver(noopObserver)
     })
@@ -144,7 +167,8 @@ export function rval(base?: Val<any, any>): RValFactories {
   return api
 }
 
-const defaultPreProcessor = v => v
+const defaultPreProcessor = value => value
+const defaultScheduler = run => run()
 const defaultContextMembers = rval()
 
 class ObservableValue<T> implements ObservableAdministration {
@@ -177,9 +201,8 @@ class ObservableValue<T> implements ObservableAdministration {
         newValue = this.preProcessor(newValue, this.state, this.api)
         if (newValue !== this.state) {
           this.state = deepfreeze(newValue) // TODO: make freeze an option
-          const observers = this.observers.slice()
+          const observers = this.observers.slice() // TODO: optimization: slice don't seem necessary anymore
           observers.forEach(s => s.markDirty())
-          observers.forEach(s => s.markReady(true))
         }
         break
       default:
@@ -192,27 +215,16 @@ class Computed<T = any> implements ObservableAdministration, Observer {
   observers: Observer[] = []
   observing: Set<ObservableAdministration> = new Set()
   state = NOT_TRACKING
-  scheduled = false
   dirtyCount = 0
-  changedCount = 0
   value: T = undefined!
   constructor(private context: RValContext, public derivation: () => T) {
     this.get = this.get.bind(this)
     hiddenProp(this.get, $RVal, this)
   }
   markDirty() {
-    if (this.scheduled) return
     if (++this.dirtyCount === 1) {
       this.state = STALE
       this.observers.forEach(o => o.markDirty())
-    }
-  }
-  markReady(changed) {
-    if (this.scheduled) return
-    if (changed) this.changedCount++
-    if (--this.dirtyCount === 0) {
-      if (this.changedCount) this.schedule()
-      else this.state = UP_TO_DATE
     }
   }
   addObserver(observer) {
@@ -232,34 +244,10 @@ class Computed<T = any> implements ObservableAdministration, Observer {
   registerDependency(sub: ObservableAdministration) {
     this.observing.add(sub)
   }
-  schedule() {
-    if (!this.scheduled) {
-      this.scheduled = true
-      // // TODO: run scheduler here!
-      // options:
-      // - custom scheduler
-      // - lazy (propagate 'changed') on dirty for mobx like semantics
-      this.context.pending.push(this)
-      this.context.runPendingObservers()
-    }
-  }
-  run() {
-    if (!this.context.currentlyComputing) {
-      // already eagerly evaluated, before scheduler got to run this derivation
-      if (!this.scheduled) return
-      // all observers have gone in the mean time...
-      if (!this.observers.length) return
-    }
-    const prevValue = this.value
-    this.track()
-    const changed = this.value !== prevValue // TODO: support custom - compare
-    // propagate the change
-    this.observers.forEach(o => o.markReady(changed)) // TODO fix: set of observers might have changed in mean time
-  }
   track() {
-    this.changedCount = 0
-    this.scheduled = false
+    this.dirtyCount = 0
     const oldObserving = this.observing
+    // TODO: we want to check if there is any oldObserving that actually changed compared to previous, otherwise we can skip evaluation!
     this.observing = new Set()
     const prevComputing = this.context.currentlyComputing
     this.context.currentlyComputing = this
@@ -283,7 +271,7 @@ class Computed<T = any> implements ObservableAdministration, Observer {
     if (!this.context.currentlyComputing && !this.observers.length)
       return this.derivation()
     // maybe scheduled, definitely tracking, value is needed, track now!
-    this.run()
+    this.track()
     return this.value
   }
 }

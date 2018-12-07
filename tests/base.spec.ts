@@ -1,5 +1,43 @@
 import { val, sub, drv, batch } from 'rval'
 
+test('very basic', () => {
+  const x = val(3)
+  let called = 0
+  const events: any = []
+  const s = sub(x, v => {
+    called++
+    events.push(v)
+  })
+  expect(events).toEqual([])
+  expect(called).toBe(0)
+
+  x(4)
+  expect(events).toEqual([4])
+  expect(called).toBe(1)
+})
+
+test("computeds don't re-evaluate if not changed", () => {
+  const x = val(3)
+  const events: any = []
+  const y = drv(() => {
+    events.push("y")
+    x()
+    return 2
+  })
+  const z = drv(() => {
+    events.push("z")
+    y()
+  })
+  const s = sub(z, v => {
+    events.push(v)
+  })
+  events.push("init done")
+  expect(events.splice(0)).toEqual(["z", "y", "init done"])
+
+  x(4)
+  expect(events.splice(0)).toEqual(["y"]) // no "z"; "y" didn't change, so "z" returned cached value
+})
+
 test('some basic stuff', () => {
   const events: any[] = []
   const x = val(3)
