@@ -120,6 +120,7 @@ export function rval(base?: Val<any, any>): RValFactories {
         }
       }
     }
+    // TODO: pretty sure we can make this wrapping Computed obsolete?
     const computed = new Computed(context, src)
     computed.addObserver(noopObserver)
     scheduler(() => noopObserver.run())
@@ -173,11 +174,11 @@ const defaultContextMembers = rval()
 
 class ObservableValue<T> implements ObservableAdministration {
   observers: Observer[] = []
-  state: T
+  value: T
   constructor(private context: RValContext, public api: RValFactories, state: T, private preProcessor) {
     this.get = this.get.bind(this)
     hiddenProp(this.get, $RVal, this)
-    this.state = deepfreeze(preProcessor(state, undefined, this.api)) // TODO: make freeze an option
+    this.value = deepfreeze(preProcessor(state, undefined, this.api)) // TODO: make freeze an option
   }
   addObserver(observer) {
     // TODO: use class
@@ -192,15 +193,15 @@ class ObservableValue<T> implements ObservableAdministration {
         if (this.context.currentlyComputing)
           // optimize: same last touched by optimization as MobX
           this.context.currentlyComputing.registerDependency(this)
-        return this.state
+        return this.value
       case 1:
       // prettier-ignore
         if (this.context.currentlyComputing) throw new Error('derivations cannot have side effects and update values')
         // if (!isUpdating)
         //   throw new Error("val can only be updated within an 'update' context") // TODO: make ok, but optionally support / enforce batching
-        newValue = this.preProcessor(newValue, this.state, this.api)
-        if (newValue !== this.state) {
-          this.state = deepfreeze(newValue) // TODO: make freeze an option
+        newValue = this.preProcessor(newValue, this.value, this.api)
+        if (newValue !== this.value) {
+          this.value = deepfreeze(newValue) // TODO: make freeze an option
           const observers = this.observers.slice() // TODO: optimization: slice don't seem necessary anymore
           observers.forEach(s => s.markDirty())
         }
@@ -213,6 +214,7 @@ class ObservableValue<T> implements ObservableAdministration {
 
 class Computed<T = any> implements ObservableAdministration, Observer {
   observers: Observer[] = []
+  inputValues: any[] = []
   observing: Set<ObservableAdministration> = new Set()
   state = NOT_TRACKING
   dirtyCount = 0
@@ -239,22 +241,35 @@ class Computed<T = any> implements ObservableAdministration, Observer {
       this.observing.forEach(o => o.removeObserver(this))
       this.value = undefined!
       this.state = NOT_TRACKING
+      this.inputValues.splice(0)
     }
   }
   registerDependency(sub: ObservableAdministration) {
     this.observing.add(sub)
   }
   track() {
-    this.dirtyCount = 0
-    const oldObserving = this.observing
+    if (this.state != NOT_TRACKING && Array.from(this.observing.values()).every((o, idx) => o.get() === this.inputValues[idx])) {
+      // none of the inputs actually changed, skip execution
+      // TODO: rewrite, ungly double code
+      this.dirtyCount = 0
+      this.state = UP_TO_DATE
+      return
+    }
     // TODO: we want to check if there is any oldObserving that actually changed compared to previous, otherwise we can skip evaluation!
+    this.dirtyCount = 0
+    this.state = UP_TO_DATE
+    const oldObserving = this.observing
+    // TODO: optimize
+    // TODO: from async callback
     this.observing = new Set()
     const prevComputing = this.context.currentlyComputing
     this.context.currentlyComputing = this
     this.value = this.derivation() // TODO error handling.
-    this.state = UP_TO_DATE
     // TODO: optimize
-    this.observing.forEach(o => {
+    this.inputValues.length = this.observing.size
+    // optimize: write more efficiently
+    Array.from(this.observing).forEach((o, idx) => {
+      this.inputValues[idx] = o.value
       if (!oldObserving.has(o)) o.addObserver(this)
     })
     oldObserving.forEach(o => {

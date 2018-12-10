@@ -29,6 +29,7 @@ export function model(factory, key?) {
       if (key && newValue[key] === undefined) throw new Error(`Attribute '${key}' is required`)
       const reconcilable = currentValue && (!key || newValue[key] === currentValue[key])
       const base = reconcilable ? currentValue : Object.assign(factory(), { [$factory]: factory })
+      // TODO: factory should set debug names
       // update props
       for (let prop in newValue) {
         if (isVal(base[prop])) {
