@@ -11,8 +11,11 @@
       "request": "launch",
       "name": "debug unit test",
       "stopOnEntry": false,
-      "program": "${workspaceRoot}/node_modules/jest-cli/bin/jest.js",
-      "args": ["--verbose", "--config", "jest.config.json", "--testRegex", ".*", "-i", "${file}"],
+      "program": "${workspaceRoot}\\node_modules\\jest-cli\\bin\\jest.js",
+      "args": ["--verbose", "--runInBand", "--config", "jest.config.json",  "-i", "${fileBasename}"],
+      // "windows": {
+      //   "args": ["--verbose", "--runInBand", "--config", "jest.config.json"]
+      // },
       "runtimeArgs": ["--nolazy"]
     },
     {

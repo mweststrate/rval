@@ -1,4 +1,5 @@
 import { val, sub, drv, batch } from 'rval'
+import { debug } from 'util';
 
 test('very basic', () => {
   const x = val(3)
@@ -213,8 +214,8 @@ test('nested propagation', () => {
     41,
     'b1',
     'a*a',
+    'combined', // combined goes before b, as b doesn't need to be checked first, since 'a' already produced a change!
     'b*b',
-    'combined',
     102,
     'b4',
     'b6',
@@ -228,7 +229,10 @@ test('conditonal logic', () => {
   const events: any[] = []
   const aMinB = drv(() => (events.push('a-b'), a() - b()))
   const combined = drv(
-    () => (events.push('combined'), a() > 5 ? aMulB() : aMulB() + aMinB())
+    () => {
+      events.push('combined')
+      return a() > 5 ? aMulB() : aMulB() + aMinB()
+    }
   )
   const d = sub(combined, val => events.push(val))
 
@@ -256,22 +260,21 @@ test('conditonal logic', () => {
     'a*b',
     'a-b',
     'setup',
+    'combined',
     'a*b',
     'a-b',
-    'combined',
     22,
     'b1',
-    'a*b',
-    'a-b',
     'combined',
+    'a*b',
     36,
     'b2',
-    'a*b',
     'combined',
+    'a*b',
     14,
     'b3',
-    'a*b',
     'combined',
+    'a*b',
     'a-b',
     10,
     'b4',

@@ -1,3 +1,5 @@
+import { runInNewContext } from "vm";
+
 export type Listener<T = any> = (value: T) => void
 
 export type Thunk = () => void
@@ -16,21 +18,19 @@ export interface Val<T = unknown, S = T> extends Observable<T> {
   (newValue: T | S): void
 }
 
-interface Observer {
-  markDirty()
-}
-
 interface RValContext {
   isUpdating: boolean
-  pending: Observer[],
-  currentlyComputing: Computed | undefined
+  pending: Thunk[],
+  currentlyComputingStack: Set<ObservableAdministration>[]
+  currentlyComputing: Set<ObservableAdministration>
   isRunningReactions: boolean
   runPendingObservers()
 }
 
 interface ObservableAdministration {
-  addObserver(observer: Observer)
-  removeObserver(observer: Observer)
+  addListener(observer: Thunk)
+  removeListener(observer: Thunk)
+  get(): any
 }
 
 // TODO: swap types of S, T, infer
@@ -68,9 +68,17 @@ export function rval(base?: Val<any, any>): RValFactories {
   const context: RValContext = {
     isUpdating : false,
     pending: [],
-    currentlyComputing: undefined,
+    currentlyComputingStack: [],
+    get currentlyComputing() {
+      return this.currentlyComputingStack[this.currentlyComputingStack.length - 1]
+    },
     isRunningReactions: false,
     runPendingObservers
+  }
+
+  function runAfterBatch(t: Thunk) {
+    context.pending.push(t)
+    runPendingObservers();
   }
 
   function val<T, S>(initial: S, preProcessor = defaultPreProcessor): Val<T, S> {
@@ -89,24 +97,23 @@ export function rval(base?: Val<any, any>): RValFactories {
     // TODO: support options
     // - scheduler
     // - fire immediately
-    const scheduler = defaultScheduler
-    let lastSeen = undefined
+    const scheduler = runAfterBatch
+    let lastSeen: T | undefined = undefined
     let firstRun = true
     let scheduled = false
-    const noopObserver = {
-      markDirty() {
+    const noopObserver = { // TODO: doesn't need to be an object anymore!
+      markDirty: () => {
         if (!scheduled) {
           scheduled = true
-          context.pending.push(this)
-          runPendingObservers();
+          scheduler(() => noopObserver.runIfChanged())
         }
       },
-      run() {
-        scheduler(() => {
+      runIfChanged() {
           // Not cancelled yet?
-          if (!computed.observers.length) return
-          // TODO: this is a mess, let scheduler should make sure run happen, eventually, not vice versa, so put it in markDirty!
+          if (!computed.listeners.length) return // TODO: not nice!
           scheduled = false
+          // if (!firstRun && !computed.detectChangeInDependency())
+          //   return
           computed.track()
           const p = computed.value
           if (firstRun) {
@@ -117,15 +124,14 @@ export function rval(base?: Val<any, any>): RValFactories {
             lastSeen = p
             listener(p)
           }
-        }
       }
     }
     // TODO: pretty sure we can make this wrapping Computed obsolete?
-    const computed = new Computed(context, src)
-    computed.addObserver(noopObserver)
-    scheduler(() => noopObserver.run())
+    const computed = isDrv(src) ? src[$RVal] : new Computed(context, src)
+    computed.addListener(noopObserver.markDirty)
+    scheduler(() => noopObserver.runIfChanged())
     return once(() => {
-      computed.removeObserver(noopObserver)
+      computed.removeListener(noopObserver.markDirty)
     })
   }
 
@@ -157,7 +163,7 @@ export function rval(base?: Val<any, any>): RValFactories {
       while (context.pending.length) {
         // N.B. errors here cause other pending subscriptions to be aborted!
         // TODO: cancel that subscription instead and continue (try catch in run())
-        context.pending.splice(0).forEach(s => s.run())
+        context.pending.splice(0).forEach(s => s()) // TODO: extract run
       }
       context.isRunningReactions = false
     }
@@ -169,30 +175,27 @@ export function rval(base?: Val<any, any>): RValFactories {
 }
 
 const defaultPreProcessor = value => value
-const defaultScheduler = run => run()
 const defaultContextMembers = rval()
 
 class ObservableValue<T> implements ObservableAdministration {
-  observers: Observer[] = []
+  listeners: Thunk[] = []
   value: T
   constructor(private context: RValContext, public api: RValFactories, state: T, private preProcessor) {
     this.get = this.get.bind(this)
     hiddenProp(this.get, $RVal, this)
     this.value = deepfreeze(preProcessor(state, undefined, this.api)) // TODO: make freeze an option
   }
-  addObserver(observer) {
+  addListener(listener) {
     // TODO: use class
-    this.observers.push(observer)
+    this.listeners.push(listener)
   }
-  removeObserver(observer) {
-    this.observers.splice(this.observers.indexOf(observer), 1)
+  removeListener(listener) {  // TODO: rename to listener
+    removeCallback(this.listeners, listener)
   }
   get(newValue?: T) {
     switch (arguments.length) {
       case 0:
-        if (this.context.currentlyComputing)
-          // optimize: same last touched by optimization as MobX
-          this.context.currentlyComputing.registerDependency(this)
+        registerRead(this.context, this)
         return this.value
       case 1:
       // prettier-ignore
@@ -202,8 +205,8 @@ class ObservableValue<T> implements ObservableAdministration {
         newValue = this.preProcessor(newValue, this.value, this.api)
         if (newValue !== this.value) {
           this.value = deepfreeze(newValue) // TODO: make freeze an option
-          const observers = this.observers.slice() // TODO: optimization: slice don't seem necessary anymore
-          observers.forEach(s => s.markDirty())
+          const observers = this.listeners.slice() // TODO: optimization: slice don't seem necessary anymore
+          run(observers)
         }
         break
       default:
@@ -212,10 +215,10 @@ class ObservableValue<T> implements ObservableAdministration {
   }
 }
 
-class Computed<T = any> implements ObservableAdministration, Observer {
-  observers: Observer[] = []
-  inputValues: any[] = []
-  observing: Set<ObservableAdministration> = new Set()
+class Computed<T = any> implements ObservableAdministration {
+  listeners: Thunk[] = []
+  inputValues: any[] | undefined = undefined
+  observing!: Set<ObservableAdministration>
   state = NOT_TRACKING
   dirtyCount = 0
   value: T = undefined!
@@ -223,72 +226,117 @@ class Computed<T = any> implements ObservableAdministration, Observer {
     this.get = this.get.bind(this)
     hiddenProp(this.get, $RVal, this)
   }
-  markDirty() {
+  markDirty = () => {
     if (++this.dirtyCount === 1) {
       this.state = STALE
-      this.observers.forEach(o => o.markDirty())
+      run(this.listeners)
     }
   }
-  addObserver(observer) {
-    this.observers.push(observer)
-    if (this.observers.length === 1 && this.state !== UP_TO_DATE) {
-      this.track()
-    }
+  addListener(observer) {
+    this.listeners.push(observer)
   }
-  removeObserver(observer) {
-    this.observers.splice(this.observers.indexOf(observer), 1)
-    if (!this.observers.length) {
-      this.observing.forEach(o => o.removeObserver(this))
+  removeListener(observer) {
+    removeCallback(this.listeners, observer)
+    if (!this.listeners.length) {
+      this.observing.forEach(o => o.removeListener(this.markDirty))
       this.value = undefined!
       this.state = NOT_TRACKING
-      this.inputValues.splice(0)
+      this.inputValues = undefined
     }
   }
   registerDependency(sub: ObservableAdministration) {
     this.observing.add(sub)
   }
-  track() {
-    if (this.state != NOT_TRACKING && Array.from(this.observing.values()).every((o, idx) => o.get() === this.inputValues[idx])) {
+  detectChangeInDependency() {
+    if (this.state != NOT_TRACKING && 
+      !inputSetHasChanged(this.observing, this.inputValues)) {
       // none of the inputs actually changed, skip execution
       // TODO: rewrite, ungly double code
       this.dirtyCount = 0
       this.state = UP_TO_DATE
-      return
+      return false
     }
+    return true
+  }
+  track() {
+    if (!this.detectChangeInDependency())
+      return
     // TODO: we want to check if there is any oldObserving that actually changed compared to previous, otherwise we can skip evaluation!
     this.dirtyCount = 0
     this.state = UP_TO_DATE
     const oldObserving = this.observing
-    // TODO: optimize
     // TODO: from async callback
-    this.observing = new Set()
-    const prevComputing = this.context.currentlyComputing
-    this.context.currentlyComputing = this
-    this.value = this.derivation() // TODO error handling.
-    // TODO: optimize
-    this.inputValues.length = this.observing.size
-    // optimize: write more efficiently
-    Array.from(this.observing).forEach((o, idx) => {
-      this.inputValues[idx] = o.value
-      if (!oldObserving.has(o)) o.addObserver(this)
-    })
-    oldObserving.forEach(o => {
-      if (!this.observing.has(o)) o.removeObserver(this)
-    })
-    this.context.currentlyComputing = prevComputing
+    const [newValue, newObserving] = track(this.context, this.derivation)
+    this.value = newValue
+    this.observing = newObserving
+    this.inputValues = recordInputSet(newObserving)
+    registerDependencies(this.markDirty, oldObserving, newObserving)
   }
   get() {
+    // console.log("GET - "+ this.derivation.toString())
     // something being computed? setup tracking
-    if (this.context.currentlyComputing) this.context.currentlyComputing.registerDependency(this)
+    registerRead(this.context, this)
     // yay, we are up to date!
     if (this.state === UP_TO_DATE) return this.value
     // nope, we are not, and no one is observing either
-    if (!this.context.currentlyComputing && !this.observers.length)
+    if (!this.context.currentlyComputing && !this.listeners.length)
       return this.derivation()
     // maybe scheduled, definitely tracking, value is needed, track now!
     this.track()
     return this.value
   }
+}
+
+type DependencySet = (ObservableAdministration | any)[]
+
+function track<R>(context: RValContext, fn: () => R): [R, Set<ObservableAdministration>] {
+  const observing = new Set()
+  context.currentlyComputingStack.push(observing)
+  const res = fn()
+  context.currentlyComputingStack.pop()
+  return [res, observing]
+}
+
+function registerDependencies(listener: Thunk, oldDeps: Set<ObservableAdministration>, newDeps: Set<ObservableAdministration>) {
+  // Optimize: 
+  if (!oldDeps) {
+    newDeps.forEach(d => d.addListener(listener))
+  } else {
+    newDeps.forEach(o => {
+      if (!oldDeps.has(o)) o.addListener(listener)
+    })
+    oldDeps.forEach(o => {
+      if (!newDeps.has(o)) o.removeListener(listener)
+    })
+  }
+}
+
+function registerRead(context: RValContext, observable: ObservableAdministration) {
+  // optimize: same last touched by optimization as MobX
+  if (context.currentlyComputing) context.currentlyComputing.add(observable)
+}
+
+function recordInputSet(deps: Set<ObservableAdministration>): any[] {
+  // optimize: write more efficiently
+  return Array.from(deps).map(currentValue)
+}
+
+function inputSetHasChanged(deps: Set<ObservableAdministration>, inputs?: any[]) {
+  return !deps || !inputs || !Array.from(deps.values()).every((o, idx) => o.get() === inputs[idx])
+}
+
+function currentValue(dep: ObservableAdministration): any {
+  // Returns the current, last known (computed) value of a dep
+  // Regardless whether that is stale or not 
+  return (dep as any).value
+}
+
+function run(fns: Thunk[]): void {
+  fns.forEach(f => f()) // optimize
+}
+
+function removeCallback(fns: Thunk[], fn: Thunk) {
+  fns.splice(fns.indexOf(fn), 1) // TODO: defensive index check?
 }
 
 export function toJS(value) {
