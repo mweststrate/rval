@@ -69,6 +69,7 @@ describe('todos', () => {
     expect(l.completedCount()).toBe(1)
     l.todos()[0].title("No effect")
     l.todos()[1].toggle()
+    debugger
     l.add({ id: "x", title: "test", done: true})
     l.remove("a")
     l.remove("x")

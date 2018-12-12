@@ -89,31 +89,40 @@ export function rval(base?: Val<any, any>): RValFactories {
     return new Computed<T>(context, derivation).get as any
   }
 
-
-  function effect<T>(fn: () => T, onInvalidate: (onChanged: Thunk, pull: () => T) => void): Thunk {
+  function effect<T>(fn: () => T, onInvalidate: (onChanged: () => boolean, pull: () => T) => void): Thunk {
     const computed = new Computed(context, fn)
-    let scheduled = false
+    let scheduled = true
+    let disposed = false
     
     function didChange() {
-      return computed.someDependencyHasChanged()
+      if (disposed) return false
+      const changed = computed.someDependencyHasChanged()
+      if (!changed) {
+        // TODO: yikes! this is ugly here
+        computed.dirtyCount = 0
+        computed.state = UP_TO_DATE
+        scheduled = false // no pull is expected
+      }
+      return changed
     }
-
     function pull() {
+      if (disposed) {
+        throw new Error("[rval] pulling from already disposed effect")
+      }
       scheduled = false
       return computed.get()
     }
-
-    const noopObserver = {
-      markDirty: () => {
-        scheduled = true
-        onInvalidate(didChange, pull)
-      }
+    function onDirty () {
+      if (scheduled || disposed) return
+      scheduled = true
+      runAfterBatch(() => onInvalidate(didChange, pull))
     }
     
-    computed.addListener(noopObserver.markDirty)
-    noopObserver.markDirty()
+    computed.addListener(onDirty)
+    onInvalidate(didChange, pull)
     return once(() => {
-      computed.removeListener(noopObserver.markDirty)
+      disposed = true
+      computed.removeListener(onDirty)
     })
   }
 
@@ -122,47 +131,21 @@ export function rval(base?: Val<any, any>): RValFactories {
     listener: Listener<T>,
     options?: SubscribeOptions
   ): Disposer {
-    // TODO: support options
-    // - scheduler
-    // - fire immediately
-    const scheduler = runAfterBatch
     let lastSeen: T | undefined = undefined
-    let firstRun = true
-    let scheduled = false
-    const noopObserver = { // TODO: doesn't need to be an object anymore!
-      markDirty: () => {
-        if (!scheduled) {
-          scheduled = true
-          scheduler(() => noopObserver.runIfChanged())
-        }
-      },
-      runIfChanged() {
-          // Not cancelled yet?
-          if (!computed.listeners.length) return // TODO: not nice!
-          scheduled = false
-          // if (!firstRun && !computed.someDependencyHasChanged())
-          //   return
-          computed.track()
-          const p = computed.value
-          if (firstRun) {
-            firstRun = false
-            lastSeen = p
-          }
-          if (p !== lastSeen) {
-            lastSeen = p
-            listener(p)
-          }
+    let firstRun = true, disposed = false // TODO: remove disposed
+    const effectDisposer = effect(() => src(), (didChange, pull) => {
+      if (!disposed && didChange()) {
+        const v = pull()
+        if (!firstRun && v !== lastSeen) listener(v)
+        lastSeen = v
+        firstRun = false
       }
-    }
-    // TODO: pretty sure we can make this wrapping Computed obsolete?
-    const computed = isDrv(src) ? src[$RVal] : new Computed(context, src)
-    computed.addListener(noopObserver.markDirty)
-    scheduler(() => noopObserver.runIfChanged())
-    return once(() => {
-      computed.removeListener(noopObserver.markDirty)
     })
+    return () => {
+      disposed = true
+      effectDisposer()
+    }
   }
-
 
   // TODO: autowrap with update and warn?
   function batch<R>(updater: () => R): R {
@@ -233,8 +216,10 @@ class ObservableValue<T> implements ObservableAdministration {
         newValue = this.preProcessor(newValue, this.value, this.api)
         if (newValue !== this.value) {
           this.value = deepfreeze(newValue) // TODO: make freeze an option
-          const observers = this.listeners.slice() // TODO: optimization: slice don't seem necessary anymore
-          run(observers)
+          batch(() => { // optimize: no need to wrap if already in transaction
+            const observers = this.listeners.slice() // TODO: optimization: slice don't seem necessary anymore
+            run(observers)
+          })
         }
         break
       default:
@@ -276,13 +261,22 @@ class Computed<T = any> implements ObservableAdministration {
     this.observing.add(sub)
   }
   someDependencyHasChanged() {
-    return this.state === NOT_TRACKING || inputSetHasChanged(this.observing, this.inputValues)
+    if (this.state === NOT_TRACKING)
+      return true
+    if (!inputSetHasChanged(this.observing, this.inputValues)) {
+      return false;
+    }
+    return true;
   }
   track() {
+    if (!this.someDependencyHasChanged()) {
+       // TODO: this is double in many cases!
+       this.dirtyCount = 0
+       this.state = UP_TO_DATE
+       return
+    }
     this.dirtyCount = 0
     this.state = UP_TO_DATE
-    if (!this.someDependencyHasChanged())
-      return
     const oldObserving = this.observing
     const [newValue, newObserving] = track(this.context, this.derivation)
     this.value = newValue

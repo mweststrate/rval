@@ -240,21 +240,7 @@ test('conditonal logic', () => {
     a(4)
     b(6)
   })
-  events.push('b1')
-  a(6)
-  events.push('b2')
-  batch(() => {
-    a(7)
-    b(2)
-  })
-  events.push('b3')
-  a(4)
-  events.push('b4')
-  d()
-  events.push('b6')
-  a(6)
-
-  expect(events).toEqual([
+  expect(events.splice(0)).toEqual([
     'combined',
     'a*b',
     'a-b',
@@ -263,14 +249,37 @@ test('conditonal logic', () => {
     'a*b',
     'a-b',
     22,
+  ])
+
+  events.push('b1')
+  debugger;
+  a(6)
+  expect(events.splice(0)).toEqual([
     'b1',
     'combined',
     'a*b',
     36,
+  ])
+
+  events.push('b2')
+  batch(() => {
+    a(7)
+    b(2)
+  })
+  expect(events.splice(0)).toEqual([
     'b2',
     'combined',
     'a*b',
     14,
+  ])
+
+  events.push('b3')
+  a(4)
+  events.push('b4')
+  d()
+  events.push('b6')
+  a(6)
+  expect(events.splice(0)).toEqual([
     'b3',
     'combined',
     'a*b',

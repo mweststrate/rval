@@ -109,7 +109,7 @@ function updateFirstName(newName) {
 }
 ```
 
-# Concepts
+# Api
 
 ## `val`
 
@@ -119,7 +119,9 @@ function updateFirstName(newName) {
 
 ## `batch`
 
-- batched:
+## batched:
+
+## effect
 
 ## Immutability and freezing
 
@@ -172,7 +174,7 @@ Todo:
 * [x] test against generated packages
 * [x] setup CI
 * [ ] `drv(( tick ) => ())`
-* [ ] `sub({ scheduler, onInvalidate(f (track)))})`
+* [x] ~`sub({ scheduler, onInvalidate(f (track)))})`~ -> `effect`
 * [ ] docs
 * [ ] setup coveralls
 * [x] rval-models
@@ -186,9 +188,10 @@ Todo:
 * [ ] config: warn on untracked, stale reads
 * [x] eliminate Reaction class
 * [x] setup minification with minified class members
-* [ ] swap export statement in `tests/rval.ts` in CI to test minified build
-* [ ] mobx evaluation order of drv
+* [x] swap export statement in `tests/rval.ts` in CI to test minified build
+* [x] mobx like evaluation order of drv
 * [ ] fix sourcemaps for minified builds
+* [ ] support name option
 
 Latter
 * [ ] setter for `drv`?
