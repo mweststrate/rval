@@ -112,7 +112,7 @@ export function rval(base?: Val<any, any>): RValFactories {
           // Not cancelled yet?
           if (!computed.listeners.length) return // TODO: not nice!
           scheduled = false
-          // if (!firstRun && !computed.detectChangeInDependency())
+          // if (!firstRun && !computed.someDependencyHasChanged())
           //   return
           computed.track()
           const p = computed.value
@@ -247,25 +247,15 @@ class Computed<T = any> implements ObservableAdministration {
   registerDependency(sub: ObservableAdministration) {
     this.observing.add(sub)
   }
-  detectChangeInDependency() {
-    if (this.state != NOT_TRACKING && 
-      !inputSetHasChanged(this.observing, this.inputValues)) {
-      // none of the inputs actually changed, skip execution
-      // TODO: rewrite, ungly double code
-      this.dirtyCount = 0
-      this.state = UP_TO_DATE
-      return false
-    }
-    return true
+  someDependencyHasChanged() {
+    return this.state === NOT_TRACKING || inputSetHasChanged(this.observing, this.inputValues)
   }
   track() {
-    if (!this.detectChangeInDependency())
-      return
-    // TODO: we want to check if there is any oldObserving that actually changed compared to previous, otherwise we can skip evaluation!
     this.dirtyCount = 0
     this.state = UP_TO_DATE
+    if (!this.someDependencyHasChanged())
+      return
     const oldObserving = this.observing
-    // TODO: from async callback
     const [newValue, newObserving] = track(this.context, this.derivation)
     this.value = newValue
     this.observing = newObserving
