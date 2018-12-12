@@ -54,6 +54,7 @@ const rvalApi = [
     "val",
     "drv",
     "sub",
+    "effect",
     "batch",
     "batched",
     "deepfreeze",

@@ -46,6 +46,7 @@ export interface RValFactories {
     listener: Listener<T>,
     options?: SubscribeOptions
   ): Disposer
+  effect<T>(fn: () => T, onInvalidate: (onChanged: () => boolean, pull: () => T) => void): Thunk
   batch<R>(updater: () => R): R
   batched<T extends Function>(fn: T): T
 }
@@ -98,9 +99,6 @@ export function rval(base?: Val<any, any>): RValFactories {
       if (disposed) return false
       const changed = computed.someDependencyHasChanged()
       if (!changed) {
-        // TODO: yikes! this is ugly here
-        computed.dirtyCount = 0
-        computed.state = UP_TO_DATE
         scheduled = false // no pull is expected
       }
       return changed
@@ -261,28 +259,30 @@ class Computed<T = any> implements ObservableAdministration {
     this.observing.add(sub)
   }
   someDependencyHasChanged() {
-    if (this.state === NOT_TRACKING)
-      return true
-    if (!inputSetHasChanged(this.observing, this.inputValues)) {
-      return false;
-    }
-    return true;
+    switch(this.state) {
+      case NOT_TRACKING: return true
+      case UP_TO_DATE: return false
+      case STALE: 
+        // TODO: did should be done in tracking context, otherwise
+        // deps are registered double?
+        if (!inputSetHasChanged(this.observing, this.inputValues)) {
+          this.dirtyCount = 0
+          this.state = UP_TO_DATE
+          return false;
+        }
+      }
+      return true;
   }
   track() {
-    if (!this.someDependencyHasChanged()) {
-       // TODO: this is double in many cases!
-       this.dirtyCount = 0
-       this.state = UP_TO_DATE
-       return
-    }
-    this.dirtyCount = 0
-    this.state = UP_TO_DATE
+    if (!this.someDependencyHasChanged()) return
     const oldObserving = this.observing
     const [newValue, newObserving] = track(this.context, this.derivation)
     this.value = newValue
     this.observing = newObserving
-    this.inputValues = recordInputSet(newObserving)
     registerDependencies(this.markDirty, oldObserving, newObserving)
+    this.inputValues = recordInputSet(newObserving)
+    this.dirtyCount = 0
+    this.state = UP_TO_DATE
   }
   get() {
     // console.log("GET - "+ this.derivation.toString())
