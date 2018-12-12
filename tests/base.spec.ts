@@ -1,5 +1,4 @@
 import { val, sub, drv, batch } from 'rval'
-import { debug } from 'util';
 
 test('very basic', () => {
   const x = val(3)

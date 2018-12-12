@@ -89,6 +89,34 @@ export function rval(base?: Val<any, any>): RValFactories {
     return new Computed<T>(context, derivation).get as any
   }
 
+
+  function effect<T>(fn: () => T, onInvalidate: (onChanged: Thunk, pull: () => T) => void): Thunk {
+    const computed = new Computed(context, fn)
+    let scheduled = false
+    
+    function didChange() {
+      return computed.someDependencyHasChanged()
+    }
+
+    function pull() {
+      scheduled = false
+      return computed.get()
+    }
+
+    const noopObserver = {
+      markDirty: () => {
+        scheduled = true
+        onInvalidate(didChange, pull)
+      }
+    }
+    
+    computed.addListener(noopObserver.markDirty)
+    noopObserver.markDirty()
+    return once(() => {
+      computed.removeListener(noopObserver.markDirty)
+    })
+  }
+
   function sub<T>(
     src: Observable<T>,
     listener: Listener<T>,
@@ -170,7 +198,7 @@ export function rval(base?: Val<any, any>): RValFactories {
   }
 
   // prettier-ignore
-  const api = { val, drv, sub, batch, batched }
+  const api = { val, drv, sub, batch, batched, effect }
   return api
 }
 
@@ -378,3 +406,5 @@ export const drv = defaultContextMembers.drv
 export const sub = defaultContextMembers.sub
 export const batch = defaultContextMembers.batch
 export const batched = defaultContextMembers.batched
+export const effect = defaultContextMembers.effect
+
