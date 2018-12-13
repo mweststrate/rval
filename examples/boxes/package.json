@@ -3,16 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "devDependencies": {
-    "react-scripts": "2.0.5"
+    "react-scripts": "2.1.1"
   },
   "dependencies": {
+    "node-uuid": "^1.4.8",
     "react": "^16.7.0-alpha.0",
     "react-dom": "^16.7.0-alpha.0",
-    "react-draggable": "^3.0.5",
-    "remmi": "^0.0.3"
+    "react-draggable": "^3.0.5"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "yarn link rval && react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

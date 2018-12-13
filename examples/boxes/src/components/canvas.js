@@ -1,8 +1,7 @@
 import React, {Component} from "react"
-import {select, renderAll} from "remmi"
-import { useCursor } from "../utils"
+import { RValRender } from "../utils"
+import { batch } from "rval"
 
-import {createArrow,  createBox } from "../stores/domain-state"
 import BoxView from "./box-view"
 import ArrowView from "./arrow-view"
 import Sidebar from './sidebar';
@@ -11,44 +10,34 @@ import FunStuff from './fun-stuff';
 class Canvas extends Component {
     render() {
         const {store} = this.props
-        const boxesCursor = store.select("boxes")
-        const selection = store.select(s => s.boxes[s.selection])
         return (
             <div className="app">
-                <div className="canvas" onClick={this.onCanvasClick}>
-                    <svg>
-                        {store.do(
-                            select("arrows"),
-                            renderAll((arrow, arrowCursor) => (
-                                <ArrowView
-                                    arrowCursor={arrowCursor}
-                                    boxesCursor={boxesCursor}
-                                />
-                            ))
+                <RValRender>{() => 
+                    <div className="canvas" onClick={this.onCanvasClick}>
+                        <svg>
+                            {Object.entries(store.arrows()).map(([id, arrow]) => 
+                                <ArrowView key={id} arrow={arrow} store={store} />
+                            )}
+                        </svg>
+                        {Object.entries(store.boxes()).map(([id, box]) => 
+                            <BoxView key={id} box={box} store={store} />
                         )}
-                    </svg>
-                    {boxesCursor.do(
-                        renderAll((box, boxCursor) => (
-                            <BoxView box={box} boxCursor={boxCursor} store={store} />
-                        ))
-                    )}
-                </div>
-                <Sidebar selection={selection} />
-                <FunStuff store={store} />
+                    </div>
+                }</RValRender>
+                {/* <Sidebar selection={selection} />
+                <FunStuff store={store} /> */}
             </div>
         )
     }
 
     onCanvasClick = e => {
         const {store} = this.props
-        if (e.ctrlKey === true && store.value().selection) {
-            store.update(draft => {
-                const id = createBox(store, "Hi.",  e.clientX - 50,
-                    e.clientY - 20)
-                createArrow(store, store.value().selection, id)
-                draft.selection = id
+        if (e.ctrlKey === true && store.selection()) {
+            batch(() => {
+                const id = store.addBox("Hi.",  e.clientX - 50, e.clientY - 20)
+                store.addArrow(store.selection(), id)
+                store.selection(id)
             })
-
         }
     }
 }

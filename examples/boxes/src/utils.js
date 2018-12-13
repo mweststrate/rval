@@ -1,4 +1,5 @@
 import React from 'react';
+import { effect } from 'rval';
 
 import {v4} from 'node-uuid';
 
@@ -6,12 +7,21 @@ export function randomUuid() {
     return v4();
 }
 
-// TODO: for whathever reason, hooks don't work when exported from the immer package :'(
-// Probably build issue, need to figure out later
-
-export function useCursor(cursor) {
-    function update(v) { setValue(v) }
-    React.useEffect(() => cursor.subscribe(update), [cursor])
-    const [value, setValue] = React.useState(() => cursor.value())
-    return value
+export function RValRender({ children }) {
+    const [tick, setTick] = React.useState(0)
+    const { render, dispose } = React.useMemo(() => {
+        let render
+        const dispose = effect(
+            children,
+            (didChange, pull) => {
+                render = pull
+                if (didChange()) {
+                    setTick(tick + 1)
+                }
+            }
+        )
+        return { render, dispose }
+    }, [])
+    React.useEffect(() => dispose, [])
+    return render()
 }

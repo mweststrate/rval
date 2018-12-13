@@ -1,45 +1,42 @@
-import {merge, render} from "remmi"
-import React, {PureComponent} from "react"
-import {DraggableCore} from "react-draggable"
-
-import {boxWidth} from "../stores/domain-state"
+import React, { PureComponent } from "react"
+import { DraggableCore } from "react-draggable"
+import { batch } from "rval";
+import { RValRender } from "../utils"
 
 class BoxView extends PureComponent {
     render() {
-        const {box, boxCursor, store} = this.props
-        const isSelected = merge(boxCursor, store.select("selection"))
-            .select(([box, selection]) => box.id === selection)
-        console.log("rendering box " + box.id)
-        return isSelected.do(
-            render(isSelected => (
-                <DraggableCore onDrag={this.handleDrag}>
+        const { box, store } = this.props
+        return <RValRender>
+            {() => {
+                const isSelected = store.selection() === box.id
+                console.log("rendering box " + box.id)
+                return <DraggableCore onDrag={this.handleDrag}>
                     <div
                         style={{
-                            width: boxWidth(box),
-                            left: box.x,
-                            top: box.y
+                            width: box.width(),
+                            left: box.x(),
+                            top: box.y()
                         }}
                         onClick={this.handleClick}
                         className={isSelected ? "box box-selected" : "box"}
                     >
-                        {box.name}
+                        {box.name()}
                     </div>
                 </DraggableCore>
-            ))
-        )
+            }}
+        </RValRender>
     }
 
     handleClick = e => {
-        this.props.store.update(d => {
-            d.selection = this.props.box.id
-        })
+        this.props.store.selection(this.props.box.id)
         e.stopPropagation()
     }
 
     handleDrag = (e, dragInfo) => {
-        this.props.boxCursor.update(d => {
-            d.x += dragInfo.deltaX
-            d.y += dragInfo.deltaY
+        const { box } = this.props
+        batch(() => {
+            box.x(box.x() + dragInfo.deltaX)
+            box.y(box.y() + dragInfo.deltaY)
         })
     }
 }
