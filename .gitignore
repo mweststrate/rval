@@ -6,3 +6,4 @@ yarn-error.log
 /react
 /dist
 .rpt2_cache
+/coverage

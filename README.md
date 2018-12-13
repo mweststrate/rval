@@ -191,9 +191,10 @@ Todo:
 * [x] swap export statement in `tests/rval.ts` in CI to test minified build
 * [x] mobx like evaluation order of drv
 * [ ] fix sourcemaps for minified builds
-* [ ] support name option
+* [ ] rval-remote
 
-Latter
+Later
+* [ ] support name option
 * [ ] setter for `drv`?
 * [ ] MobX global state compatibility?
 * [ ] Docs with docusaurus?
