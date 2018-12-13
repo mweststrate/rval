@@ -79,7 +79,7 @@ export function rval(base?: Val<any, any>): RValFactories {
 
   function runAfterBatch(t: Thunk) {
     context.pending.push(t)
-    runPendingObservers();
+    if (!context.isUpdating) runPendingObservers(); // TODO: is this line ever hit?
   }
 
   function val<T, S>(initial: S, preProcessor = defaultPreProcessor): Val<T, S> {
@@ -91,6 +91,7 @@ export function rval(base?: Val<any, any>): RValFactories {
   }
 
   function effect<T>(fn: () => T, onInvalidate: (onChanged: () => boolean, pull: () => T) => void): Thunk {
+    // TODO: avoid double wrapping computeds
     const computed = new Computed(context, fn)
     let scheduled = true
     let disposed = false
@@ -130,9 +131,9 @@ export function rval(base?: Val<any, any>): RValFactories {
     options?: SubscribeOptions
   ): Disposer {
     let lastSeen: T | undefined = undefined
-    let firstRun = true, disposed = false // TODO: remove disposed
-    const effectDisposer = effect(() => src(), (didChange, pull) => {
-      if (!disposed && didChange()) {
+    let firstRun = true
+    const effectDisposer = effect(src, (didChange, pull) => {
+      if (didChange()) {
         const v = pull()
         if (!firstRun && v !== lastSeen) listener(v)
         lastSeen = v
@@ -140,7 +141,6 @@ export function rval(base?: Val<any, any>): RValFactories {
       }
     })
     return () => {
-      disposed = true
       effectDisposer()
     }
   }
@@ -159,10 +159,12 @@ export function rval(base?: Val<any, any>): RValFactories {
     }
   }
 
+  // TODO: rename to act, and kill batch
   function batched<T extends Function>(fn: T): T {
     return (function updater(this: any) {
       const self = this
-      batch(() => fn.apply(self, arguments))
+      // TODO: optimize: short-circuit if already in transaction
+      return batch(() => fn.apply(self, arguments))
     } as any) as T
   }
 
@@ -171,8 +173,7 @@ export function rval(base?: Val<any, any>): RValFactories {
       context.isRunningReactions = true
       while (context.pending.length) {
         // N.B. errors here cause other pending subscriptions to be aborted!
-        // TODO: cancel that subscription instead and continue (try catch in run())
-        context.pending.splice(0).forEach(s => s()) // TODO: extract run
+        context.pending.splice(0).forEach(run)
       }
       context.isRunningReactions = false
     }
@@ -195,10 +196,9 @@ class ObservableValue<T> implements ObservableAdministration {
     this.value = deepfreeze(preProcessor(state, undefined, this.api)) // TODO: make freeze an option
   }
   addListener(listener) {
-    // TODO: use class
     this.listeners.push(listener)
   }
-  removeListener(listener) {  // TODO: rename to listener
+  removeListener(listener) {
     removeCallback(this.listeners, listener)
   }
   get(newValue?: T) {
@@ -215,8 +215,7 @@ class ObservableValue<T> implements ObservableAdministration {
         if (newValue !== this.value) {
           this.value = deepfreeze(newValue) // TODO: make freeze an option
           batch(() => { // optimize: no need to wrap if already in transaction
-            const observers = this.listeners.slice() // TODO: optimization: slice don't seem necessary anymore
-            run(observers)
+            runAll(this.listeners)
           })
         }
         break
@@ -240,7 +239,7 @@ class Computed<T = any> implements ObservableAdministration {
   markDirty = () => {
     if (++this.dirtyCount === 1) {
       this.state = STALE
-      run(this.listeners)
+      runAll(this.listeners)
     }
   }
   addListener(observer) {
@@ -325,6 +324,9 @@ function registerDependencies(listener: Thunk, oldDeps: Set<ObservableAdministra
 
 function registerRead(context: RValContext, observable: ObservableAdministration) {
   // optimize: same last touched by optimization as MobX
+  // Sets are used, and keep insertion order, which is important for optimal performance! 
+  // (to make someDependencyHasChanged cheap and not
+  // re-evaluate deps that might not be needed in the future due some branching logic) 
   if (context.currentlyComputing) context.currentlyComputing.add(observable)
 }
 
@@ -343,8 +345,12 @@ function currentValue(dep: ObservableAdministration): any {
   return (dep as any).value
 }
 
-function run(fns: Thunk[]): void {
-  fns.forEach(f => f()) // optimize
+function runAll(fns: Thunk[]): void {
+  fns.forEach(run)
+}
+
+function run(fn: Thunk): void {
+  fn()
 }
 
 function removeCallback(fns: Thunk[], fn: Thunk) {

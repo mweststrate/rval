@@ -1,5 +1,10 @@
 import { val, sub, drv, batch, effect } from 'rval'
 
+const RVAL = Symbol.for('$RVal')
+function getDeps(thing) {
+    return Array.from(thing[RVAL].listeners)
+}
+
 async function delay(time) {
     return new Promise(r => {
         setTimeout(() => r(), time)
@@ -58,6 +63,11 @@ test("scheduling 1", async () => {
     await delay(50)
     expect(events.splice(0)).toEqual([    ])
 
+    if (y[RVAL].markDirty) {
+        // only check on non-minified build
+        // should be exactly one dependency
+        expect(getDeps(x)).toEqual([y[RVAL].markDirty])
+    }
     x(4)
     expect(events.splice(0)).toEqual([
         "invalidate"

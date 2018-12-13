@@ -1,3 +1,15 @@
 import {  } from "rval"
 
-export const hello = "world";
+// TODO: how to use correct context?
+
+export function useVal() {
+
+}
+
+export function useDrv() {
+
+}
+
+export function render() {
+
+}
