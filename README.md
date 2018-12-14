@@ -109,6 +109,41 @@ function updateFirstName(newName) {
 }
 ```
 
+# concepts
+
+val
+
+drv
+
+sub
+
+objects
+
+factories
+
+structural immutability
+
+mutability granularity
+
+rendering iwth react
+
+STATE DESIGN
+
+refs
+
+preprocessor validation
+
+preprocessor objects
+
+
+models
+
+ADVANCED
+updaes wit immer
+
+drv with setter
+
+
 # Api
 
 ## `val`
@@ -176,14 +211,16 @@ Todo:
 * [ ] `drv(( tick ) => ())`
 * [x] ~`sub({ scheduler, onInvalidate(f (track)))})`~ -> `effect`
 * [ ] docs
-* [ ] setup coveralls
+* [x] setup coveralls
 * [x] rval-models
 * [ ] rval-react
 * [x] rval-immer
-* [ ] custom schedulers
+* [x] custom schedulers
 * [x] custom preprocessors
 * [ ] rename `sub` to `on`?
 * [ ] toJS
+* [ ] `drv` with setter
+* [ ] combine preprocessor array
 * [ ] config: warn on unbatched writes
 * [ ] config: warn on untracked, stale reads
 * [x] eliminate Reaction class
@@ -191,6 +228,7 @@ Todo:
 * [x] swap export statement in `tests/rval.ts` in CI to test minified build
 * [x] mobx like evaluation order of drv
 * [ ] fix sourcemaps for minified builds
+* [ ] rval-validation
 * [ ] rval-remote
 
 Later
