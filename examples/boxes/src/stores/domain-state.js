@@ -2,15 +2,17 @@ import { val, drv, batch } from "rval"
 
 import {randomUuid} from '../utils';
 
-function createBox(id, city, _x, _y) {
+function createBox(id, city, _x, _y, selection) {
     const name = val(city)
     const x = val(_x)
     const y = val(_y)
     const width = drv(() => name().length * 15)
+    const selected = drv(() => selection() === id)
     return {
         id,
         name, x, y,
-        width
+        width,
+        selected
     }
 }
 
@@ -27,7 +29,7 @@ export function createBoxesStore(initialState = {
     function addBox(city, x, y) {
         const id = randomUuid()
         boxes({ ...boxes(), 
-            [id]: createBox(id, city, x, y)
+            [id]: createBox(id, city, x, y, selection)
         })
         return id
     }

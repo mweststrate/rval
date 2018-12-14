@@ -218,6 +218,7 @@ class ObservableValue<T> implements ObservableAdministration {
             runAll(this.listeners)
           })
         }
+        // TODO: return this.value ?
         break
       default:
         throw new Error('val expects 0 or 1 arguments')

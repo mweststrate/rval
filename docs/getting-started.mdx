@@ -1,0 +1,54 @@
+# Getting started with RVal
+
+The core of `RVal` is four functions which have all a very simple contract: `val`, `drv`, `sub` and `act`. 
+Yes, they all have three-letter names. That's kind of cool I think. Not sure yet why.
+
+## Creating reactive values using `val(initialValue)`
+
+In RVal, the universe revolves around _reactive values_. 
+Creating your first reactive value is easy:
+
+```javascript
+import { val } from "rval";
+
+const myLuckyNumber = val(13)
+```
+
+`val` returns a function that returns any value you've put into it. 
+So `myLuckyNumber` is now a number and we can call it:
+
+```javascript
+console.log(myLuckyNumber())
+// prints: 13
+```
+
+Fancy! But what use is it to create a function that just returns the original value?
+We'll find out in a bit. 
+First, there is another trick the function can do: We can call it with a new lucky number, 
+since the `13` didn't work out after all:
+
+```javascript
+myLuckyNumber(42)
+
+console.log(myLuckyNumber())
+// prints: 42
+``` 
+
+By passing an argument to the function, we can update it's internal state.
+When calling the reactive value function without argumens, it will always return the value we've passed into it the last time.
+
+You can put any value you like into a reactive value. 
+But, for all practical purposes, you've should consider this value to be immutable. 
+This will greatly benefit the understanding of the code base once it grows big enough.
+But, more on that later.
+
+See the [Philosophy](docs-philosophy) for some more background on this idea.
+
+
+Drv / odd numbers
+
+subscribe
+
+act
+
+Forward ref to objects

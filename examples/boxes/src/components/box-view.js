@@ -5,10 +5,9 @@ import { RValRender } from "../utils"
 
 class BoxView extends PureComponent {
     render() {
-        const { box, store } = this.props
+        const { box } = this.props
         return <RValRender>
             {() => {
-                const isSelected = store.selection() === box.id
                 console.log("rendering box " + box.id)
                 return <DraggableCore onDrag={this.handleDrag}>
                     <div
@@ -18,7 +17,7 @@ class BoxView extends PureComponent {
                             top: box.y()
                         }}
                         onClick={this.handleClick}
-                        className={isSelected ? "box box-selected" : "box"}
+                        className={box.selected() ? "box box-selected" : "box"}
                     >
                         {box.name()}
                     </div>
