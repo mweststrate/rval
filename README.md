@@ -34,6 +34,13 @@ preprocessor validation
 
 preprocessor objects
 
+preprocessors
+ - validation
+ - conversion
+ - equality checks
+ - models
+ - combing them
+
 
 models
 
@@ -41,6 +48,9 @@ ADVANCED
 updaes wit immer
 
 drv with setter
+
+
+async
 
 
 # Api
@@ -116,7 +126,7 @@ Todo:
 * [x] rval-immer
 * [x] custom schedulers
 * [x] custom preprocessors
-* [ ] rename `sub` to `on`?
+* [ ] support currying for sub: `sub(listener)(val)`
 * [ ] toJS
 * [ ] `drv` with setter
 * [ ] combine preprocessor array
@@ -129,6 +139,7 @@ Todo:
 * [ ] fix sourcemaps for minified builds
 * [ ] rval-validation
 * [ ] rval-remote
+* [ ]  check https://reactpixi.org/#/stage / https://docs.setprotocol.com/#/#support-and-community- for setup of edit button, menu nesting, hosting
 
 Later
 * [ ] support name option

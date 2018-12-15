@@ -1,6 +1,7 @@
 export default {
     menu: [
         'Getting started',
-        'Philosophy'
+        'Objects and factories',
+        'Philosophy',
     ],
   }

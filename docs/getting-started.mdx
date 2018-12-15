@@ -14,8 +14,8 @@ import { val } from "rval";
 const myLuckyNumber = val(13)
 ```
 
-`val` returns a function that returns any value you've put into it. 
-So `myLuckyNumber` is now a number and we can call it:
+`val` returns a function that returns any **value** you've put into it. 
+So `myLuckyNumber` is now a function, returning the original number, and we can call it:
 
 ```javascript
 console.log(myLuckyNumber())
@@ -25,7 +25,7 @@ console.log(myLuckyNumber())
 Fancy! But what use is it to create a function that just returns the original value?
 We'll find out in a bit. 
 First, there is another trick the function can do: We can call it with a new lucky number, 
-since the `13` didn't work out after all:
+(in case `13` didn't work out after all):
 
 ```javascript
 myLuckyNumber(42)
@@ -44,11 +44,108 @@ But, more on that later.
 
 See the [Philosophy](docs-philosophy) for some more background on this idea.
 
+## Creating derived values with `drv(() => expr)`
 
-Drv / odd numbers
+In my humble opinion, good lucky numbers should at least be odd. So we can quickly run a check for that:
 
-subscribe
+```javascript
+const myLuckyNumber = val(13)
+const isGoodLuckyNumber = myLuckyNumber() % 2 === 1
+```
 
-act
+That works. But is a bit limited, if we update `myLuckyNumber` later on, this change won't be reflected
+in `isGoodLuckyNumber`.
+But, using `drv` we can repeat a similar trick as we did for `val`: 
+Instead of capturing some state, `drv` captures a computation. 
+It returns a function, that, when invoked, runs the computation once.
 
-Forward ref to objects
+```javascript
+const myLuckyNumber = val(13)
+const isGoodLuckyNumber = drv(() => myLuckyNumber() % 2 === 1)
+
+console.log(isGoodLuckyNumber()) // true
+myLuckyNumber(42)
+console.log(isGoodLuckyNumber()) // false
+```
+
+`drv` can be used to **derive** arbitrarly simple or complex values based on other reactive values, created by either `drv` or `val`.
+
+The critical reader might think at this point: &ldquo;That's nice and dandy, but you couldn't we just have used `const isGoodLuckyNumber = () => myLuckyNumber() % 2 === 1`?&rdquo;. 
+And that is true, glad you ask. That would indeed have yielded the same output. 
+But! Using `drv` brings in a few new possiblities:
+
+First, `drv` will memoize[^(usually)] it's results. That is: as long as `myLuckyNumber` doesn't change, invoking `isGoodLuckyNumber()` multiple times won't actually re-evaluate the original expression, but just return a memoized result.
+
+Secondly, and more importantly. So far we having been pulling values through our system by explicitly calling `myLuckyNumber()` or `isGoodLuckyNumber()`.
+But in a reactive system, the control flow is inversed[^(a.k.a. inversion of control)]. 
+To build a reactive system, we have to push our values to consumers and actively _notify_ them.
+
+## Subscribing to changes using `sub(thing, listener)`
+
+And that is where `sub` comes in! 
+With `sub`, one can create a consumer of a reactive value created using `val` or `drv`.
+In other words, it sets up a **subscription**.
+This creates a _we'll call you_ basis of operation:
+
+```javascript
+const myLuckyNumber = val(13)
+const isGoodLuckyNumber = drv(() => myLuckyNumber() % 2 === 1)
+
+const cancelPrint = sub(isGoodLuckyNumber, isGood => {
+    console.log(isGood)
+})
+
+myLuckyNumber(42) // prints: 'false'
+myLuckyNumber(33) // prints: 'true'
+myLuckyNumber(55) // (doesn't print, isGoodLuckyNumber didn't produce a new value)
+myLuckyNumber(2)  // prints: 'false'
+
+cancelPrint() // stop listening to future updates
+```
+
+Finally, we did something that we couldn't have achieved by using just plain functions and omitting `drv` or `val`.
+What `drv` and `val` achieve is that they set up a dependency system, so that when we update state, this state is propagated through the derived values, to the subscriptions. 
+Transparent reactive programming is used to determine the optimal program flow, and based on the [MobX](https://mobx.js.org) package.
+
+Note that we didn't pass `isGoodLuckyNumber()`! We want to subscribe to the function's future output, not to it's current value (`13`). 
+Also note that `sub` returns a function. This function has only one purpose: cancelling future executions of the subscription.
+
+A remarkable property about `sub` is that you don't need them as often as you would initially think.
+They are not needed to propagate values through your system. `drv` can take care of that.
+`sub` is generally only need to achieve side effects; visible output from your system. 
+Such as updating the UI, logging, making network effects etc. 
+
+
+## Combining changes using `act(thunk)`
+
+You might have noticed that in the previous listening or side effects where immediately fired when emitting an update to `myLuckyNumber`. 
+This is just the default behavior and there are several ways to influence it. 
+First of all, we can use techniques like debounce to roun our subscriptions less frequently. 
+But more importantly, we can hold of the reactive system to wait a bit until we've done all our updates,
+so that changes will be broadcased as one atomic update. 
+To express that, there is `act` to group multiple changes into a single **activity**: 
+
+```javascript
+const cancelPrint = sub(isGoodLuckyNumber, isGood => {
+    console.log(isGood)
+})
+
+act(() => {
+    myLuckyNumber(42) 
+    myLuckyNumber(33)
+    myLuckyNumber(55)
+    myLuckyNumber(2) 
+}) // prints only once, at the end of the activity: 'false'
+```
+
+That's all! Note that `act` only batches _synchronosly_ run updates. Passing an `async` function to `act` is in that regard mostly useless.
+
+---
+
+Your system will most probably not be expressible in a single `val`, `drv` and `sub`. 
+But, we've now covered the entire basic mechanism of "rval"!
+In the next sections we will focus on organizing many different values, objects etc. 
+And see how we can hook up the UI.
+
+[^(usually)]: `drv` will by default memoize as long as there is at least one active subscription. Without subscriptions, memoization will be disabled to avoid accidentally leaking memory. The behavior can be overriden by using the `keepAlive` option. (TODO).
+[^(a.k.a. inversion of control)]: Wiki: [Inversion of control](https://en.wikipedia.org/wiki/Inversion_of_control)
