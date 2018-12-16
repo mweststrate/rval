@@ -52,7 +52,7 @@ test('useVal - mimimum computations - 1', async () => {
   expect(called).toBe(3)
 })
 
-test('useVal - mimimum computations - 1', async () => {
+test('useVal - mimimum computations - 2', async () => {
   const counter = val(0)
   let called = 0
   const doubler = drv(() => {
