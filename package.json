@@ -29,6 +29,8 @@
   "devDependencies": {
     "@types/jest": "^23.3.9",
     "@types/node": "^10.12.10",
+    "@types/react": "^16.7.17",
+    "@types/react-dom": "^16.0.11",
     "coveralls": "^3.0.2",
     "cross-env": "^5.2.0",
     "docz": "^0.12.17",
@@ -36,6 +38,9 @@
     "immer": "^1.8.0",
     "jest": "^23.6.0",
     "prettier": "^1.15.2",
+    "react": "^16.7.0-alpha.2",
+    "react-dom": "^16.7.0-alpha.2",
+    "react-testing-library": "^5.4.0",
     "rimraf": "^2.6.2",
     "rollup": "^0.67.4",
     "rollup-plugin-filesize": "^5.0.1",

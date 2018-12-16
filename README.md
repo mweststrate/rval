@@ -1,7 +1,7 @@
 # RVal
 
 
-[![npm](https://img.shields.io/npm/v/rval.svg)](https://www.npmjs.com/package/rval) [![size](http://img.badgesize.io/https://cdn.jsdelivr.net/npm/rval/core/index.module.js?compression=gzip)](http://img.badgesize.io/https://cdn.jsdelivr.net/npm/rval/core/index.module.js) [![install size](https://packagephobia.now.sh/badge?p=rval)](https://packagephobia.now.sh/result?p=rval) [![Build Status](https://travis-ci.org/mweststrate/rval.svg?branch=master)](https://travis-ci.org/mweststrate/rval) [![Coverage Status](https://coveralls.io/repos/github/mweststrate/rval/badge.svg?branch=master)](https://coveralls.io/github/mweststrate/rval?branch=master) [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier) [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/michelweststrate)
+[![npm](https://img.shields.io/npm/v/rval.svg)](https://www.npmjs.com/package/rval) [![size](http://img.badgesize.io/https://unpkg.com/rval/core/index.module.js?compression=gzip)](http://img.badgesize.io/https://unpkg.com/rval/core/index.module.js) [![install size](https://packagephobia.now.sh/badge?p=rval)](https://packagephobia.now.sh/result?p=rval) [![Build Status](https://travis-ci.org/mweststrate/rval.svg?branch=master)](https://travis-ci.org/mweststrate/rval) [![Coverage Status](https://coveralls.io/repos/github/mweststrate/rval/badge.svg?branch=master)](https://coveralls.io/github/mweststrate/rval?branch=master) [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier) [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/michelweststrate)
 
 TODO: publish docz docs somewhere and link
 
@@ -143,6 +143,7 @@ Todo:
 
 Later
 * [ ] support name option
+* [ ] abstraction for creating drv / vals and subscribing in hook based component automatically?
 * [ ] setter for `drv`?
 * [ ] MobX global state compatibility?
 * [ ] Docs with docusaurus?
