@@ -59,7 +59,8 @@ const rvalApi = [
     "batched",
     "deepfreeze",
     "isVal",
-    "isDrv"
+    "isDrv",
+    "defaultContext"
 ]
 
 const config = [

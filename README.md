@@ -111,6 +111,15 @@ Patterns
 - with immer (`v(p(v(), draft => { })))`)
 - working with references
 
+Comparison with mobx
+- factory + getter / setters -> observable. More convenient, but, pit of success
+- sub(drv(x), noop) === autorun(x)
+
+Comparison with Rx
+- focus on values, not events
+- push / pull vs. push
+- transparent tracking
+
 Todo:
 
 * [x] build all the packages
@@ -140,6 +149,9 @@ Todo:
 * [ ] rval-validation
 * [ ] rval-remote
 * [ ]  check https://reactpixi.org/#/stage / https://docs.setprotocol.com/#/#support-and-community- for setup of edit button, menu nesting, hosting
+* [ ] strict mode: only reads from actions or reactions. Only updates from actions. 
+* [ ] verify callign actions in reactions work correctly
+* [ ] rename RvalContext to RvalInstance
 
 Later
 * [ ] support name option

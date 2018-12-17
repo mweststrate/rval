@@ -1,5 +1,6 @@
-import { Observable, sub, isVal, isDrv, effect } from "rval"
-import { useState, useEffect, useMemo } from "react"
+import { Observable, isVal, isDrv, defaultContext, rval, RValFactories } from "rval"
+import { useState, useEffect, useMemo, ReactNode, ReactElement } from "react"
+import * as React from "react"
 
 
 export function useVal<T>(observable: Observable<T>): T {
@@ -10,28 +11,25 @@ export function useVal<T>(observable: Observable<T>): T {
     // The benefit of this setup, is that we set up the subscription first,
     // so that observable is already 'hot' before we read it for the first time
     // See: test "useVal - mimimum computations - 2"
-    const disposer = useMemo(() => sub(observable, x => f(x)), [observable])
+    // Note: `rval(sub)` makes sure we use the context of the observable passed in
+    const disposer = useMemo(() => rval(observable).sub(observable, x => f(x)), [observable])
     const [val, updater] = useState(observable) // short-cut for initializer with fn: actually: () => observable()
     f = updater
     useEffect(() => disposer, [observable])
     return val
 }
 
-export function useDrv() {
-
+export function rview(render: () => ReactNode, rvalContext = defaultContext):  ReactElement<any> | null {
+    return <RView rvalContext={rvalContext}>{render}</RView>
 }
 
-// TODO: how to use correct context?
-export function render() {
-
-}
-
-export function RValRender({ children }) {
+export function RView({ children, rvalContext = defaultContext }: { children?: () => ReactNode, rvalContext?: RValFactories }) :  ReactElement<any> | null {
+    if (typeof children !== "function") throw new Error("RVal expected function as children")
     const [tick, setTick] = useState(0)
     const { render, dispose } = useMemo(() => {
         let render
-        const dispose = effect(
-            children,
+        const dispose = rvalContext.effect(
+            children!,
             (didChange, pull) => {
                 render = pull
                 if (didChange()) {
@@ -40,7 +38,7 @@ export function RValRender({ children }) {
             }
         )
         return { render, dispose }
-    }, [])
-    useEffect(() => dispose, [])
+    }, [children])
+    useEffect(() => dispose, [children])
     return render()
 }

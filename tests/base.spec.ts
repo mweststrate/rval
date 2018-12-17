@@ -252,7 +252,6 @@ test('conditonal logic', () => {
   ])
 
   events.push('b1')
-  debugger;
   a(6)
   expect(events.splice(0)).toEqual([
     'b1',

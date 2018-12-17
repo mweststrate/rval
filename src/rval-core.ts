@@ -62,9 +62,9 @@ const UP_TO_DATE = 2
 
 export function rval(base?: Val<any, any>): RValFactories {
   if (arguments.length) {
-    if (!isVal(base))
+    if (!isVal(base) && !isDrv(base))
       throw new Error("Expected val as first argument to rval")
-    return (base[$RVal] as ObservableValue<any>).api
+    return (base[$RVal] as any).api
   }
   const context: RValContext = {
     isUpdating : false,
@@ -87,12 +87,12 @@ export function rval(base?: Val<any, any>): RValFactories {
   }
 
   function drv<T>(derivation: () => T): Drv<T> {
-    return new Computed<T>(context, derivation).get as any
+    return new Computed<T>(context, api, derivation).get as any
   }
 
   function effect<T>(fn: () => T, onInvalidate: (onChanged: () => boolean, pull: () => T) => void): Thunk {
     // TODO: avoid double wrapping computeds
-    const computed = new Computed(context, fn)
+    const computed = new Computed(context, api, fn)
     let scheduled = true
     let disposed = false
     
@@ -185,7 +185,7 @@ export function rval(base?: Val<any, any>): RValFactories {
 }
 
 const defaultPreProcessor = value => value
-const defaultContextMembers = rval()
+export const defaultContext = rval()
 
 class ObservableValue<T> implements ObservableAdministration {
   listeners: Thunk[] = []
@@ -233,7 +233,7 @@ class Computed<T = any> implements ObservableAdministration {
   state = NOT_TRACKING
   dirtyCount = 0
   value: T = undefined!
-  constructor(private context: RValContext, public derivation: () => T) {
+  constructor(private context: RValContext, public api: RValFactories, public derivation: () => T) {
     this.get = this.get.bind(this)
     hiddenProp(this.get, $RVal, this)
   }
@@ -402,10 +402,10 @@ function hiddenProp(target, key, value) {
   })
 }
 
-export const val = defaultContextMembers.val
-export const drv = defaultContextMembers.drv
-export const sub = defaultContextMembers.sub
-export const batch = defaultContextMembers.batch
-export const batched = defaultContextMembers.batched
-export const effect = defaultContextMembers.effect
+export const val = defaultContext.val
+export const drv = defaultContext.drv
+export const sub = defaultContext.sub
+export const batch = defaultContext.batch
+export const batched = defaultContext.batched
+export const effect = defaultContext.effect
 
