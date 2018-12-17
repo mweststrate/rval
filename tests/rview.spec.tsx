@@ -183,3 +183,51 @@ test('rview - with use state', async () => {
   expect(renderOuter).toBe(2) 
   expect(renderInner).toBe(3) 
 })
+
+test('rview - with use state and inputs', async () => {
+  const counter = val(0)
+  let renderOuter = 0
+  let renderInner = 0
+  let setTick
+  let setTick2
+
+  const Comp = () => {
+    renderOuter++
+    const [tick, setter] = useState(0)
+    const [tick2, setter2] = useState(0)
+    setTick = setter
+    setTick2 = setter2
+    return rview(() => {
+      renderInner++
+      return <h1>{counter()}-{tick}-{tick2}</h1>
+    }, undefined, [tick])
+  }
+
+  const { container } = render(<Comp />)
+  
+  await delay(20)
+  expect(container.innerHTML).toEqual('<h1>0-0-0</h1>')
+  expect(renderOuter).toBe(1) 
+  expect(renderInner).toBe(1) 
+
+  // not parts of inputs, so doesn't cause a render
+  setTick2(2)
+  await delay(20)
+  expect(container.innerHTML).toEqual('<h1>0-0-0</h1>')
+  expect(renderOuter).toBe(2) 
+  expect(renderInner).toBe(1) 
+
+  // parts of inputs, so cause a render, also making tick2 visible
+  setTick(2)
+  await delay(20)
+  expect(container.innerHTML).toEqual('<h1>0-2-2</h1>')
+  expect(renderOuter).toBe(3) 
+  expect(renderInner).toBe(2) 
+
+  // only causes inner to rerender
+  counter(2)
+  await delay(20)
+  expect(container.innerHTML).toEqual('<h1>2-2-2</h1>')
+  expect(renderOuter).toBe(3) 
+  expect(renderInner).toBe(3) 
+})
