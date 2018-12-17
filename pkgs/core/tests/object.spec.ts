@@ -1,5 +1,4 @@
-import { val, drv, sub, batched } from "rval"
-import { updater } from "rval/immer"
+import { val, sub, drv, batch, batched } from '@rval/core'
 
 test('some basic stuff', () => {
   const events: any = []
@@ -40,14 +39,12 @@ describe('todos', () => {
     const completedCount = drv(() => todos().filter(todo => todo.done()).length)
     return {
       todos,
-      add: updater(todos, (draft, todo: ITodo) => {
-        draft.push(Todo(todo))
-      }),
-      remove: updater(todos, (draft, id: string) => {
-        const idx = draft.findIndex(todo => todo.id === id)
-        draft.splice(idx, 1)
-        return true
-      }),
+      add(todo: ITodo) {
+        todos([...todos(), Todo(todo)])
+      },
+      remove(id) {
+        todos(todos().filter(todo => todo.id !== id))
+      },
       completedCount,
     }
   }
@@ -73,12 +70,22 @@ describe('todos', () => {
     l.todos()[0].title("No effect")
     l.todos()[1].toggle()
     l.add({ id: "x", title: "test", done: true})
-    expect(l.remove("a")).toBe(true)
+    l.remove("a")
     l.remove("x")
     expect(events).toEqual([
         0,
         1,
         0
     ])
+  })
+
+  test("direct manipulation should fail", () => {
+    const l = TodoList(initialState)
+    expect(() => {
+        l.todos()[0].done = 3 as any
+    }).toThrow("Cannot assign to read only property 'done'")
+    expect(() => {
+        l.todos().push(Todo({ id: "bla", title: "bla", done: false }))
+    }).toThrow("object is not extensible")
   })
 })

@@ -1,5 +1,3 @@
-import { runInNewContext } from "vm";
-
 export type Listener<T = any> = (value: T) => void
 
 export type Thunk = () => void

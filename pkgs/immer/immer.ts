@@ -1,4 +1,4 @@
-import { rval, Val } from "rval"
+import { rval, Val } from "@rval/core"
 import produce, { Draft } from "immer"
 
 export function updater<T, U extends any[], R>(val: Val<T>,  updater: (draft: Draft<T>, ...args: U) => R): (...args: U) => R {

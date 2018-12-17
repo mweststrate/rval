@@ -1,4 +1,4 @@
-import { isVal, deepfreeze, PreProcessor, Val, Drv } from "rval"
+import { isVal, deepfreeze, PreProcessor, Val, Drv } from "@rval/core"
 
 const $factory = Symbol('$factory')
 

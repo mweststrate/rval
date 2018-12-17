@@ -1,4 +1,4 @@
-import { Observable, isVal, isDrv, defaultContext, rval, RValFactories } from 'rval'
+import { Observable, isVal, isDrv, defaultContext, rval, RValFactories } from '@rval/core'
 import { useState, useEffect, useMemo, ReactNode, ReactElement } from 'react'
 import * as React from 'react'
 
