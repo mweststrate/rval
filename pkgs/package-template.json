@@ -1,0 +1,21 @@
+{
+  "name": "@rval/$pkg",
+  "private": false,
+  "version": "0.0.1",
+  "description": "",
+  "main": "dist/$pkg.js",
+  "umd:main": "dist/$pkg.umd.js",
+  "module": "dist/$pkg.mjs",
+  "source": "$pkg.ts",
+  "scripts": {
+  },
+  "author": "Michel Weststrate",
+  "license": "MIT",
+  "dependencies": {},
+  "files": [
+    "*.ts",
+    "dist"
+  ],
+  "devDependencies": {
+  }
+}

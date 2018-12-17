@@ -1,6 +1,5 @@
 import { Observable, isVal, isDrv, defaultContext, rval, RValFactories } from '@rval/core'
-import { useState, useEffect, useMemo, ReactNode, ReactElement } from 'react'
-import * as React from 'react'
+import { useState, useEffect, useMemo, ReactNode, ReactElement, createElement } from 'react'
 
 export function useVal<T>(observable: Observable<T>): T {
   if (!isVal(observable) && !isDrv(observable)) throw new Error('useval - expected val or drv')
@@ -21,7 +20,9 @@ export function useVal<T>(observable: Observable<T>): T {
 export function rview(render: () => ReactNode, rvalContext = defaultContext, inputs?: any[]): ReactElement<any> | null {
   // TODO: or should rview be a HOC?
   // return props => <RView rvalContext={rvalContext}>{() => render(props)}</RView>
-  return <RView rvalContext={rvalContext} inputs={inputs}>{render}</RView>
+  return createElement(RView, {
+    rvalContext, inputs, children: render
+  })
 }
 
 export function RView({

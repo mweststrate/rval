@@ -1,10 +1,7 @@
 node_modules
 yarn-error.log
-/core
-/immer
-/models
-/react
-/dist
+dist
 .rpt2_cache
+.rts2_cache*
 /coverage
 .docz

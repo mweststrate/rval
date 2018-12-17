@@ -1,0 +1,21 @@
+{
+  "name": "@rval/react",
+  "private": false,
+  "version": "0.0.1",
+  "description": "",
+  "main": "dist/react.js",
+  "umd:main": "dist/react.umd.js",
+  "module": "dist/react.mjs",
+  "source": "react.ts",
+  "scripts": {
+  },
+  "author": "Michel Weststrate",
+  "license": "MIT",
+  "dependencies": {},
+  "files": [
+    "*.ts",
+    "dist"
+  ],
+  "devDependencies": {
+  }
+}

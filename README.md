@@ -158,4 +158,4 @@ Later
 * [ ] abstraction for creating drv / vals and subscribing in hook based component automatically?
 * [ ] setter for `drv`?
 * [ ] MobX global state compatibility?
-* [ ] Docs with docusaurus?
+* [ ] use prop mangling for smaller builds

@@ -1,0 +1,21 @@
+{
+  "name": "@rval/core",
+  "private": false,
+  "version": "0.0.1",
+  "description": "",
+  "main": "dist/core.js",
+  "umd:main": "dist/core.umd.js",
+  "module": "dist/core.mjs",
+  "source": "core.ts",
+  "scripts": {
+  },
+  "author": "Michel Weststrate",
+  "license": "MIT",
+  "dependencies": {},
+  "files": [
+    "*.ts",
+    "dist"
+  ],
+  "devDependencies": {
+  }
+}

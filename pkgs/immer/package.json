@@ -1,0 +1,21 @@
+{
+  "name": "@rval/immer",
+  "private": false,
+  "version": "0.0.1",
+  "description": "",
+  "main": "dist/immer.js",
+  "umd:main": "dist/immer.umd.js",
+  "module": "dist/immer.mjs",
+  "source": "immer.ts",
+  "scripts": {
+  },
+  "author": "Michel Weststrate",
+  "license": "MIT",
+  "dependencies": {},
+  "files": [
+    "*.ts",
+    "dist"
+  ],
+  "devDependencies": {
+  }
+}
