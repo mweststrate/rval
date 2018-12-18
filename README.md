@@ -126,37 +126,40 @@ Todo:
 * [x] generate types `yarn tsc index.ts -t es2015 -d --outDir dist && mv dist/index.d.ts dist/rval.d.ts && rm dist/index.js &&`
 * [x] test against generated packages
 * [x] setup CI
-* [ ] `drv(( tick ) => ())`
 * [x] ~`sub({ scheduler, onInvalidate(f (track)))})`~ -> `effect`
-* [ ] docs
 * [x] setup coveralls
 * [x] rval-models
-* [ ] rval-react
+* [c] rval-react
 * [x] rval-immer
 * [x] custom schedulers
 * [x] custom preprocessors
+* [x] eliminate Reaction class
+* [x] setup minification with minified class members
+* [x] swap export statement in `tests/rval.ts` in CI to test minified build
+* [x] mobx like evaluation order of drv
+* [ ] docs
+* [ ] `drv(( tick ) => ())`
 * [ ] support currying for sub: `sub(listener)(val)`
 * [ ] toJS
 * [ ] `drv` with setter
 * [ ] combine preprocessor array
 * [ ] config: warn on unbatched writes
 * [ ] config: warn on untracked, stale reads
-* [x] eliminate Reaction class
-* [x] setup minification with minified class members
-* [x] swap export statement in `tests/rval.ts` in CI to test minified build
-* [x] mobx like evaluation order of drv
-* [ ] fix sourcemaps for minified builds
 * [ ] rval-validation
 * [ ] rval-remote
-* [ ]  check https://reactpixi.org/#/stage / https://docs.setprotocol.com/#/#support-and-community- for setup of edit button, menu nesting, hosting
+* [ ] check https://reactpixi.org/#/stage / https://docs.setprotocol.com/#/#support-and-community- for setup of edit button, menu nesting, hosting
 * [ ] strict mode: only reads from actions or reactions. Only updates from actions. 
 * [ ] verify callign actions in reactions work correctly
 * [ ] rename RvalContext to RvalInstance
 * [ ] contributing and debugging
 * [ ] support `this.rvalProps(this.rvalProps() + 1)` -> `this.rvalProps(x => x + 1)`?
-* [ ] dynamically switch between hook and non-hook implementations (and explain differences)
+* [ ] updaters `inc`, `push`, `set`, `delete`, `assign`
+
 
 Later
+* [ ] dynamically switch between hook and non-hook implementations (and explain differences)
+* [ ] re-enable minification ootb
+* [ ] fix sourcemaps for minified builds
 * [ ] support name option
 * [ ] abstraction for creating drv / vals and subscribing in hook based component automatically?
 * [ ] setter for `drv`?

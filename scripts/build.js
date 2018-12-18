@@ -9,7 +9,7 @@ const projects = ["core", "react", "immer", "models"]
 const externals = ["immer", "react"]
 const packageJson = fs.readFileSync("pkgs/package-template.json", "utf8")
 
-const buildCommand = microbundle + " --entry $pkg.ts --name rval$pkg --strict --format es,cjs,umd --globals "
+const buildCommand = microbundle + " --no-compress --entry $pkg.ts --name rval$pkg --strict --format es,cjs,umd --globals "
    + [].concat(projects.map(pkg => "@rval/" + pkg + "=rval" + pkg), externals.map(pkg => pkg + "=" + pkg)).join(",") + ",immer=immer,react=react --external "
    + externals.concat(projects.map(pkg => "@rval/" + pkg)).join(",")
    + " && mv dist/$pkg/*.d.ts dist/ && rimraf dist/$pkg .rts2*"
