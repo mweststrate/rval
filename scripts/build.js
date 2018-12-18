@@ -2,8 +2,8 @@ const fs = require("fs")
 const child_process = require("child_process")
 const os = require("os")
 
-const binFolder = child_process.execSync("yarn bin")
-const microbundle = binFolder.replace(/(^\s+)|(\s+$)/g, "") + "/microbundle"
+const binFolder = child_process.execSync("yarn bin").toString().replace(/(\s+$)/g, "")
+const microbundle = binFolder + "/microbundle"
 
 const projects = ["core", "react", "immer", "models"]
 const externals = ["immer", "react"]
