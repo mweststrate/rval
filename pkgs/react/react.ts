@@ -1,5 +1,5 @@
-import { Observable, isVal, isDrv, defaultContext, rval, RValFactories, Val, Drv } from '@rval/core'
-import { useState, useEffect, useMemo, ReactNode, ReactElement, createElement } from 'react'
+import { Observable, isVal, isDrv, defaultContext, rval, RValFactories, Val } from '@rval/core'
+import { useState, useEffect, useMemo, ReactNode, ReactElement, createElement, Component, PureComponent } from 'react'
 
 export function useVal<T>(observable: Observable<T>): T {
   if (!isVal(observable) && !isDrv(observable)) throw new Error('useval - expected val or drv')
@@ -30,7 +30,46 @@ export function rview(render: () => ReactNode, rvalContext = defaultContext, inp
   })
 }
 
-export function RView({
+export class RView extends PureComponent<{
+  children?: () => ReactNode
+  rvalContext?: RValFactories
+  inputs?: any[]
+}, {
+  children: () => ReactNode,
+  inputs: any[]
+}> {
+
+  static defaultProps = {
+    rvalContext: defaultContext
+  }
+
+  disposer?: () => void
+  renderPuller?: () => ReactNode
+  lastChildren?: () => ReactNode
+
+  render() {
+    const { children } = this.props
+    if (!this.disposer || this.props.children !== this.lastChildren) {
+      const oldDisposer = this.disposer
+      // this.disposer = undefined
+      this.disposer = this.props.rvalContext!.effect(children!, (didChange, pull) => {
+        this.renderPuller = pull
+        if (didChange() && this.disposer) { // this.disposer = false? -> first rendering
+          this.forceUpdate()
+        }
+      })
+      this.lastChildren = children
+      oldDisposer && oldDisposer()
+    }
+    return this.renderPuller!()
+  }
+
+  componentWillUnmount() {
+    this.disposer && this.disposer()
+  }
+}
+
+export function _RView({
   children,
   rvalContext = defaultContext,
   inputs = [children],
