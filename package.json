@@ -19,7 +19,8 @@
   },
   "author": "Michel Weststrate",
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+  },
   "files": [
     "core",
     "immer",
