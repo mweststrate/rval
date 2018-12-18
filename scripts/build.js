@@ -3,7 +3,7 @@ const child_process = require("child_process")
 const os = require("os")
 
 const binFolder = child_process.execSync("yarn bin")
-const microbundle = binFolder + "/microbundle"
+const microbundle = binFolder.trim() + "/microbundle"
 
 const projects = ["core", "react", "immer", "models"]
 const externals = ["immer", "react"]
