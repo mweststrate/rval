@@ -1,12 +1,21 @@
+---
+name: Getting started
+order: 1
+menu: Introduction
+route: /introduction/getting-started
+---
+
 # Getting started with RVal
 
 The core of `RVal` is four functions which have all a very simple contract: `val`, `drv`, `sub` and `act`. 
 Yes, they all have three-letter names. That's kind of cool I think. Not sure yet why.
 
-## Creating reactive values using `val(initialValue)`
+## `val`: reactive values
+
+_&ldquo;Sometimes, the elegant implementation is just a function. Not a method. Not a class. Not a framework. Just a function.&rdquo; &mdash; John Carmack_
 
 In RVal, the universe revolves around _reactive values_. 
-Creating your first reactive value is easy:
+Creating your first reactive value is easy by leveraging `val(initialValue)`:
 
 ```javascript
 import { val } from "rval";
@@ -44,7 +53,7 @@ But, more on that later.
 
 See the [Philosophy](docs-philosophy) for some more background on this idea.
 
-## Creating derived values with `drv(() => expr)`
+## `drv`: derived values
 
 In my humble opinion, good lucky numbers should at least be odd. So we can quickly run a check for that:
 
@@ -80,7 +89,7 @@ Secondly, and more importantly. So far we having been pulling values through our
 But in a reactive system, the control flow is inversed[^(a.k.a. inversion of control)]. 
 To build a reactive system, we have to push our values to consumers and actively _notify_ them.
 
-## Subscribing to changes using `sub(thing, listener)`
+## `sub`: listing to changes
 
 And that is where `sub` comes in! 
 With `sub`, one can create a consumer of a reactive value created using `val` or `drv`.
@@ -116,7 +125,7 @@ They are not needed to propagate values through your system. `drv` can take care
 Such as updating the UI, logging, making network effects etc. 
 
 
-## Combining changes using `act(thunk)`
+## `act`: batching updates
 
 You might have noticed that in the previous listening or side effects where immediately fired when emitting an update to `myLuckyNumber`. 
 This is just the default behavior and there are several ways to influence it. 

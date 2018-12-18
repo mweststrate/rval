@@ -1,7 +1,14 @@
 export default {
     menu: [
-        'Getting started',
-        'Objects and factories',
-        'Philosophy',
+        {
+            name: "Introduction"           
+        }, 
+        {
+            name: "Advanced"
+        }, 
+        {
+            name: "API"
+        }
     ],
-  }
+    hashRouter: true
+}

@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.1",
   "description": "",
+  "repository": "git+https://github.com/mweststrate/rval.git",
   "main": "core/index.js",
   "umd:main": "core/index.umd.js",
   "module": "core/index.module.js",
@@ -19,8 +20,7 @@
   },
   "author": "Michel Weststrate",
   "license": "MIT",
-  "dependencies": {
-  },
+  "dependencies": {},
   "files": [
     "core",
     "immer",
