@@ -2,7 +2,8 @@ const fs = require("fs")
 const child_process = require("child_process")
 const os = require("os")
 
-const microbundle = os.platform() === "win32" ? __dirname + "\\..\\node_modules\\.bin\\microbundle.cmd" : __dirname + "/../node_modules/./bin/microbundle"
+const binFolder = child_process.execSync("yarn bin")
+const microbundle = binFolder + "/microbundle"
 
 const projects = ["core", "react", "immer", "models"]
 const externals = ["immer", "react"]
