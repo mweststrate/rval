@@ -4,6 +4,7 @@ export type Thunk = () => void
 
 export type Disposer = Thunk
 
+// Exposed, this might be useful for third part reflection based (dev) tools
 export const $RVal = typeof Symbol === "undefined" ? "$RVal" : Symbol.for('$RVal')
 
 export interface Observable<T = unknown> {

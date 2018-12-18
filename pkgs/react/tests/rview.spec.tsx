@@ -137,6 +137,187 @@ test('rview - mimimum computations - 3', async () => {
   expect(called).toBe(2) // and not 1, as the doubler is not hot anymore after unmount
 })
 
+
+test('rview - with memo - default / false', async () => {
+  const counter = val(0)
+  let renderOuter = 0
+  let renderInner = 0
+  let setTick
+
+  const Comp = () => {
+    renderOuter++
+    const [tick, setter] = useState(0)
+    setTick = setter
+    return rview(() => {
+      renderInner++
+      return <h1>{counter()}-{tick}</h1>
+    })
+  }
+
+  const { container } = render(<Comp />)
+
+  await delay(20)
+  expect(container.innerHTML).toEqual('<h1>0-0</h1>')
+  expect(renderOuter).toBe(1) 
+  expect(renderInner).toBe(1) 
+
+  counter(1)
+  await delay(20)
+  expect(container.innerHTML).toEqual('<h1>1-0</h1>')
+  expect(renderOuter).toBe(1) 
+  expect(renderInner).toBe(2) 
+
+  setTick(1)
+  await delay(20)
+  expect(container.innerHTML).toEqual('<h1>1-1</h1>')
+  expect(renderOuter).toBe(2) 
+  expect(renderInner).toBe(3) 
+
+  counter(2)
+  await delay(20)
+  expect(container.innerHTML).toEqual('<h1>2-1</h1>')
+  expect(renderOuter).toBe(2) 
+  expect(renderInner).toBe(4) 
+
+  setTick(2)
+  await delay(20)
+  expect(container.innerHTML).toEqual('<h1>2-2</h1>')
+  expect(renderOuter).toBe(3) 
+  expect(renderInner).toBe(5) 
+
+  setTick(2)
+  await delay(20)
+  expect(container.innerHTML).toEqual('<h1>2-2</h1>')
+  expect(renderOuter).toBe(4) 
+  expect(renderInner).toBe(6) // produced new closure
+
+  counter(2)
+  await delay(20)
+  expect(container.innerHTML).toEqual('<h1>2-2</h1>')
+  expect(renderOuter).toBe(4) 
+  expect(renderInner).toBe(6) 
+})
+
+test('rview - with memo - true', async () => {
+  const counter = val(0)
+  let renderOuter = 0
+  let renderInner = 0
+  let setTick
+
+  const Comp = () => {
+    renderOuter++
+    const [tick, setter] = useState(0)
+    setTick = setter
+    return rview(() => {
+      renderInner++
+      return <h1>{counter()}-{tick}</h1>
+    }, true)
+  }
+
+  const { container } = render(<Comp />)
+
+  await delay(20)
+  expect(container.innerHTML).toEqual('<h1>0-0</h1>')
+  expect(renderOuter).toBe(1) 
+  expect(renderInner).toBe(1) 
+
+  counter(1)
+  await delay(20)
+  expect(container.innerHTML).toEqual('<h1>1-0</h1>')
+  expect(renderOuter).toBe(1) 
+  expect(renderInner).toBe(2) 
+
+  setTick(1)
+  await delay(20)
+  expect(container.innerHTML).toEqual('<h1>1-0</h1>')
+  expect(renderOuter).toBe(2) 
+  expect(renderInner).toBe(2) 
+
+  counter(2)
+  await delay(20)
+  expect(container.innerHTML).toEqual('<h1>2-1</h1>')
+  expect(renderOuter).toBe(2) 
+  expect(renderInner).toBe(3) 
+
+  setTick(2)
+  await delay(20)
+  expect(container.innerHTML).toEqual('<h1>2-1</h1>')
+  expect(renderOuter).toBe(3) 
+  expect(renderInner).toBe(3) 
+
+  setTick(2)
+  await delay(20)
+  expect(container.innerHTML).toEqual('<h1>2-1</h1>')
+  expect(renderOuter).toBe(4) 
+  expect(renderInner).toBe(3)
+
+  counter(2)
+  await delay(20)
+  expect(container.innerHTML).toEqual('<h1>2-1</h1>') // no new render triggered, so tick stays stale
+  expect(renderOuter).toBe(4) 
+  expect(renderInner).toBe(3) 
+})
+
+test('rview - with memo - explicit [tick]', async () => {
+  const counter = val(0)
+  let renderOuter = 0
+  let renderInner = 0
+  let setTick
+
+  const Comp = () => {
+    renderOuter++
+    const [tick, setter] = useState(0)
+    setTick = setter
+    return rview(() => {
+      renderInner++
+      return <h1>{counter()}-{tick}</h1>
+    }, [tick])
+  }
+
+  const { container } = render(<Comp />)
+
+  await delay(20)
+  expect(container.innerHTML).toEqual('<h1>0-0</h1>')
+  expect(renderOuter).toBe(1) 
+  expect(renderInner).toBe(1) 
+
+  counter(1)
+  await delay(20)
+  expect(container.innerHTML).toEqual('<h1>1-0</h1>')
+  expect(renderOuter).toBe(1) 
+  expect(renderInner).toBe(2) 
+
+  setTick(1)
+  await delay(20)
+  expect(container.innerHTML).toEqual('<h1>1-1</h1>')
+  expect(renderOuter).toBe(2) 
+  expect(renderInner).toBe(3) 
+
+  counter(2)
+  await delay(20)
+  expect(container.innerHTML).toEqual('<h1>2-1</h1>')
+  expect(renderOuter).toBe(2) 
+  expect(renderInner).toBe(4) 
+
+  setTick(2)
+  await delay(20)
+  expect(container.innerHTML).toEqual('<h1>2-2</h1>')
+  expect(renderOuter).toBe(3) 
+  expect(renderInner).toBe(5) 
+
+  setTick(2)
+  await delay(20)
+  expect(container.innerHTML).toEqual('<h1>2-2</h1>')
+  expect(renderOuter).toBe(4) 
+  expect(renderInner).toBe(5) // produced new closure, but that is ignored
+
+  counter(2)
+  await delay(20)
+  expect(container.innerHTML).toEqual('<h1>2-2</h1>')
+  expect(renderOuter).toBe(4) 
+  expect(renderInner).toBe(5) 
+})
+
 test('rview - with use state', async () => {
   const counter = val(0)
   let called = 0
@@ -156,7 +337,7 @@ test('rview - with use state', async () => {
     return rview(() => {
       renderInner++
       return <h1>{doubler()}-{tick}</h1>
-    }, [tick]) // TODO: passig `[tick]` is only needed when using non-hook implementation!
+    })
   }
 
   const { container } = render(<Comp />)
@@ -212,13 +393,12 @@ test('rview - with use state and inputs', async () => {
   expect(renderInner).toBe(1) 
 
   // not parts of inputs, so doesn't cause a render
-  debugger
   setTick2(2)
   await delay(20)
   expect(container.innerHTML).toEqual('<h1>0-0-0</h1>')
   expect(renderOuter).toBe(2) 
   expect(renderInner).toBe(1) 
-  debugger
+
   // parts of inputs, so cause a render, also making tick2 visible
   setTick(2)
   await delay(20)

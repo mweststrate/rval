@@ -22,26 +22,23 @@ export function useLocalDrv<T>(derivation: () => T, inputs: any[] = [], rvalCont
   return useVal(drv)
 }
 
-export function rview(render: () => ReactNode, inputs?: any[], rvalContext?: RValFactories): ReactElement<any> | null {
+export function rview(render: () => ReactNode, memo?: any[] | boolean, rvalContext?: RValFactories): ReactElement<any> | null {
   // TODO: or should rview be a HOC?
   // return props => <RView rvalContext={rvalContext}>{() => render(props)}</RView>
   return createElement(RView, {
-    rvalContext, inputs, children: render
+    rvalContext, memo, children: render
   })
 }
 
 export class RView extends Component<{
   children?: () => ReactNode
-  inputs?: any[],
+  memo?: any[] | boolean,
   rvalContext?: RValFactories
-}, {
-  children: () => ReactNode,
-  inputs: any[]
-}> {
+}, {}> {
 
   static defaultProps = {
     rvalContext: defaultContext,
-    inputs: []
+    memo: false
   }
 
   disposer?: () => void
@@ -53,11 +50,19 @@ export class RView extends Component<{
   }
 
   inputsChanged(nextProps) {
-    const { inputs } = nextProps
-    if (inputs.length !== this.props.inputs!.length)
+    // memo:
+    // - true: always memoize! children only depends on reactive vals, nothing else (equals memo=[])
+    // - falsy: never memoize: if we get a new children func, re-render (equals memo=[children])
+    // - array: re-render if any of the given inputs change 
+    const { memo } = nextProps
+    if (memo === true)
+      return false
+    const newInputs = Array.isArray(memo) ? memo : [nextProps.children]
+    const currentInputs = Array.isArray(this.props.memo) ? this.props.memo : [this.props.children]
+    if (newInputs.length !== currentInputs.length)
       return true
-    for (let i = 0; i < inputs.length; i++)
-      if (this.props.inputs![i] !== inputs[i])
+    for (let i = 0; i < newInputs.length; i++)
+      if (currentInputs![i] !== newInputs[i])
         return true
     return false
   }
