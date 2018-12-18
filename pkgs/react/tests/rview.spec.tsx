@@ -34,7 +34,7 @@ test('rview - custom context ', async () => {
   const Comp = () => {
     return rview(() =>
       <h1>{counter()}</h1>
-    , myRval)
+    , [], myRval)
   }
 
   const re = render(<Comp />)
@@ -156,7 +156,7 @@ test('rview - with use state', async () => {
     return rview(() => {
       renderInner++
       return <h1>{doubler()}-{tick}</h1>
-    })
+    }, [tick]) // TODO: passig `[tick]` is only needed when using non-hook implementation!
   }
 
   const { container } = render(<Comp />)
@@ -200,9 +200,10 @@ test('rview - with use state and inputs', async () => {
     return rview(() => {
       renderInner++
       return <h1>{counter()}-{tick}-{tick2}</h1>
-    }, undefined, [tick])
+    }, [tick])
   }
 
+  
   const { container } = render(<Comp />)
   
   await delay(20)
@@ -211,12 +212,13 @@ test('rview - with use state and inputs', async () => {
   expect(renderInner).toBe(1) 
 
   // not parts of inputs, so doesn't cause a render
+  debugger
   setTick2(2)
   await delay(20)
   expect(container.innerHTML).toEqual('<h1>0-0-0</h1>')
   expect(renderOuter).toBe(2) 
   expect(renderInner).toBe(1) 
-
+  debugger
   // parts of inputs, so cause a render, also making tick2 visible
   setTick(2)
   await delay(20)
@@ -230,4 +232,4 @@ test('rview - with use state and inputs', async () => {
   expect(container.innerHTML).toEqual('<h1>2-2-2</h1>')
   expect(renderOuter).toBe(3) 
   expect(renderInner).toBe(3) 
-})
+}, 60 * 1000 * 1000)

@@ -152,6 +152,9 @@ Todo:
 * [ ] strict mode: only reads from actions or reactions. Only updates from actions. 
 * [ ] verify callign actions in reactions work correctly
 * [ ] rename RvalContext to RvalInstance
+* [ ] contributing and debugging
+* [ ] support `this.rvalProps(this.rvalProps() + 1)` -> `this.rvalProps(x => x + 1)`?
+* [ ] dynamically switch between hook and non-hook implementations (and explain differences)
 
 Later
 * [ ] support name option
