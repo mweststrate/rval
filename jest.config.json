@@ -6,7 +6,7 @@
   },
   "testRegex": "/tests/[^/]*.spec.[jt]sx?$",
   "moduleNameMapper": {
-    "^@rval/(.*)": "<rootDir>/pkgs/$1/$1.ts"
+    "^@r-val/(.*)": "<rootDir>/pkgs/$1/$1.ts"
   },
   "globals": {
     "ts-jest": {

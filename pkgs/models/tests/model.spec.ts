@@ -1,5 +1,5 @@
-import { val } from "@rval/core"
-import { model, mapOf, arrayOf, invariant } from "@rval/models"
+import { val } from "@r-val/core"
+import { model, mapOf, arrayOf, invariant } from "@r-val/models"
 
 test('simple model', () => {
   const Todo = model(() => ({

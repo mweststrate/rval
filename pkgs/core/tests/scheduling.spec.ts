@@ -1,4 +1,4 @@
-import { val, sub, drv, batch, effect } from '@rval/core'
+import { val, sub, drv, batch, effect } from '@r-val/core'
 
 const RVAL = Symbol.for('$RVal')
 function getDeps(thing) {

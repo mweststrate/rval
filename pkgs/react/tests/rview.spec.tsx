@@ -1,5 +1,5 @@
-import { val, drv, rval } from '@rval/core'
-import { rview, RView } from '@rval/react'
+import { val, drv, rval } from '@r-val/core'
+import { rview, RView } from '@r-val/react'
 import * as React from 'react'
 import { render, waitForElement } from 'react-testing-library'
 import { useState } from 'react';

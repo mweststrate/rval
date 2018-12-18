@@ -1,4 +1,4 @@
-import { val, sub, drv, batch } from '@rval/core'
+import { val, sub, drv, batch } from '@r-val/core'
 
 test('very basic', () => {
   const x = val(3)

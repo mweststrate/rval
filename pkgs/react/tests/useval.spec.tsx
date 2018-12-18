@@ -1,5 +1,5 @@
-import { val, drv, rval } from '@rval/core'
-import { useVal, useLocalVal, useLocalDrv } from '@rval/react'
+import { val, drv, rval } from '@r-val/core'
+import { useVal, useLocalVal, useLocalDrv } from '@r-val/react'
 import * as React from 'react'
 import { render, waitForElement } from 'react-testing-library'
 
