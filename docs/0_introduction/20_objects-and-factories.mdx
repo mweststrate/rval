@@ -6,3 +6,75 @@ route: /introduction/factories
 ---
 
 # Objects, factories and the basics of organizing state
+
+So far we only used stand-alone reactive values to capture our state.
+But in real world applications we will need complex objects or state trees.
+But suprisingly, RVal however doesn't offer a primitive to work with objects or array.
+Instead:
+
+_consider every object or array as an immutable collection of reactive values_
+
+By keeping objects and arrays themself immutable, it turns out that the mental model remains much simpler,
+and the API surface that is needed to apply reactivity is much[^1] smaller.
+
+But, that doesn't RVal is awkward of inconvenient when working with objects.
+Instead, it turns out that using objects, which are structurally immutable, but contain stateful reactive values, are presently convenient to work with.
+
+Let's start a bit simple with an object that captures the state of a `Todo` item (with apologies for the uninspired example):
+
+```javascript
+const title = val('Get coffee')
+const done = val(false)
+
+const myFirstTodo = {
+  title,
+  done,
+}
+
+title.done(true)
+console.log(title.done())
+```
+
+Pretty straight forward eh? Note that we used only `const` values, and that `myFirstTodo` itself should be treated as an immutable objects to keep the conceptuel model simple.
+(In fact, it would be recommended to use `Object.freeze(myFirstTodo)`, but it turns out that RVal will take care of that as well in most cases, as we will discover later).
+
+## Factory functions
+
+Probably you don't want to create multiple todo's in your application, intead of one.
+To ease that process we can make a _factory_ funtion:
+
+```javascript
+function createTodo(initialTitle) {
+  const title = val(initialTitle)
+  const done = val(false)
+  return {
+    title,
+    done,
+  }
+}
+```
+
+```javascript
+function createTodo(initialTitle) {
+    const title = val(initialTitle)
+    const done = val(false)
+    const asMarkdown(() => done() ? "~" + title() + "~" : title())
+    const toggle = act(() {
+        done(!done())
+    })
+
+    return {
+        title, done, toggle, asMarkdown
+    }
+}
+```
+
+acts, drs, sub, this
+
+Freezing
+
+[^1]: In MobX, roughly 75% of the code base is dealing with decorators, making plain data structures observable and dealing with the various different ways that people have to work with objects.
+
+```
+
+```
