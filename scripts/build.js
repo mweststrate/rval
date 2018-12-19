@@ -9,10 +9,11 @@ const projects = ["core", "react", "immer", "models"]
 const externals = ["immer", "react"]
 const packageJson = fs.readFileSync("pkgs/package-template.json", "utf8")
 
-const buildCommand = microbundle + " --no-compress --entry $pkg.ts --name rval$pkg --strict --format es,cjs,umd --globals "
+const buildCommand = microbundle + " --compress --source-map --entry $pkg.ts --name rval$pkg --strict --format es,cjs,umd --globals "
    + [].concat(projects.map(pkg => "@r-val/" + pkg + "=rval" + pkg), externals.map(pkg => pkg + "=" + pkg)).join(",") + ",immer=immer,react=react --external "
    + externals.concat(projects.map(pkg => "@r-val/" + pkg)).join(",")
-   + " && mv dist/$pkg/*.d.ts dist/ && rimraf dist/$pkg .rts2*"
+   + " && mv dist/$pkg/*.d.ts dist/ "
+   + " && rimraf dist/$pkg .rts2*"
 
 projects.forEach(pkg => {
     // at some point we might want to disable this for some projects, (and put peer deps in @r-val/immer, @r-val/react etc)

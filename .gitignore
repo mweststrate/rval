@@ -5,3 +5,4 @@ dist
 .rts2_cache*
 /coverage
 .docz
+mangle.json

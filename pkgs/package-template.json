@@ -5,17 +5,41 @@
   "description": "",
   "main": "dist/$pkg.js",
   "umd:main": "dist/$pkg.umd.js",
+  "unpkg": "dist/$pkg.umd.js",
   "module": "dist/$pkg.mjs",
-  "source": "$pkg.ts",
-  "scripts": {
+  "jsnext:main": "dist/$pkg.mjs",
+  "react-native": "dist/$pkg.mjs",
+  "browser": {
+    "./dist/$pkg.js": "./dist/$pkg.js",
+    "./dist/$pkg.mjs": "./dist/$pkg.mjs"
   },
+  "source": "$pkg.ts",
+  "scripts": {},
   "author": "Michel Weststrate",
   "license": "MIT",
   "dependencies": {},
-  "files": [
-    "*.ts",
-    "dist"
-  ],
-  "devDependencies": {
+  "files": ["*.ts", "dist"],
+  "devDependencies": {},
+  "mangle": {
+    "reserved": [
+      "val",
+      "drv",
+      "sub",
+      "batch",
+      "batched",
+      "deepfreeze",
+      "isVal",
+      "isDrv",
+      "defaultContext",
+      "rval",
+      "rview",
+      "useVal",
+      "useLocalVal",
+      "useLocalDrv",
+      "model",
+      "mapOf",
+      "arrayOf",
+      "updater"
+    ]
   }
 }

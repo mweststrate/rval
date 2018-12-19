@@ -5,17 +5,41 @@
   "description": "",
   "main": "dist/models.js",
   "umd:main": "dist/models.umd.js",
+  "unpkg": "dist/models.umd.js",
   "module": "dist/models.mjs",
-  "source": "models.ts",
-  "scripts": {
+  "jsnext:main": "dist/models.mjs",
+  "react-native": "dist/models.mjs",
+  "browser": {
+    "./dist/models.js": "./dist/models.js",
+    "./dist/models.mjs": "./dist/models.mjs"
   },
+  "source": "models.ts",
+  "scripts": {},
   "author": "Michel Weststrate",
   "license": "MIT",
   "dependencies": {},
-  "files": [
-    "*.ts",
-    "dist"
-  ],
-  "devDependencies": {
+  "files": ["*.ts", "dist"],
+  "devDependencies": {},
+  "mangle": {
+    "reserved": [
+      "val",
+      "drv",
+      "sub",
+      "batch",
+      "batched",
+      "deepfreeze",
+      "isVal",
+      "isDrv",
+      "defaultContext",
+      "rval",
+      "rview",
+      "useVal",
+      "useLocalVal",
+      "useLocalDrv",
+      "model",
+      "mapOf",
+      "arrayOf",
+      "updater"
+    ]
   }
 }
