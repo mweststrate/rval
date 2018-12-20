@@ -2,7 +2,7 @@
   "name": "@r-val/$pkg",
   "private": false,
   "version": "0.0.1",
-  "description": "",
+  "description": "minimalistic transparent reactive programming library",
   "main": "dist/$pkg.js",
   "umd:main": "dist/$pkg.umd.js",
   "module": "dist/$pkg.mjs",
