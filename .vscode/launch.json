@@ -23,7 +23,7 @@
     {
       // Note; this config requires node 8.4 or higher
       "type": "node",
-      "protocol": "auto",
+      "protocol": "inspector",
       "request": "launch",
       "name": "debug unit test - minified",
       "stopOnEntry": false,
@@ -31,8 +31,17 @@
       "windows": {
         "program": "${workspaceRoot}\\node_modules\\jest-cli\\bin\\jest.js"
       },
+      "outFiles": ["pkgs/core/"],
       "args": ["--verbose", "--runInBand", "--config", "jest.config.test.json", "-i", "${fileBasename}"],
-      "runtimeArgs": ["--nolazy"]
+      "runtimeArgs": ["--nolazy"],
+      "sourceMaps": true
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch Program",
+      "program": "${file}",
+      "sourceMaps": true
     }
   ]
 }
