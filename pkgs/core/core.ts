@@ -357,10 +357,6 @@ function removeCallback(fns: Thunk[], fn: Thunk) {
   fns.splice(fns.indexOf(fn), 1) // TODO: defensive index check?
 }
 
-export function toJS(value) {
-  // convert, recursively, all own enumerable, primitive + vals values
-}
-
 export function isVal(value: any): value is Val {
   return typeof value === "function" && value[$RVal] instanceof ObservableValue
 }

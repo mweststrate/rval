@@ -1,8 +1,7 @@
-import { val, sub, drv, batch, effect } from '@r-val/core'
+import { val, sub, drv, batch, effect, $RVal } from '@r-val/core'
 
-const RVAL = Symbol.for('$RVal')
 function getDeps(thing) {
-    return Array.from(thing[RVAL].listeners)
+    return Array.from(thing[$RVal].listeners)
 }
 
 async function delay(time) {
@@ -63,10 +62,10 @@ test("scheduling 1", async () => {
     await delay(50)
     expect(events.splice(0)).toEqual([    ])
 
-    if (y[RVAL].markDirty) {
+    if (y[$RVal].markDirty) {
         // only check on non-minified build
         // should be exactly one dependency
-        expect(getDeps(x)).toEqual([y[RVAL].markDirty])
+        expect(getDeps(x)).toEqual([y[$RVal].markDirty])
     }
     x(4)
     expect(events.splice(0)).toEqual([

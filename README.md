@@ -155,6 +155,11 @@ Todo:
 * [ ] support `this.rvalProps(this.rvalProps() + 1)` -> `this.rvalProps(x => x + 1)`?
 * [ ] updaters `inc1`, `inc`, `push`, `set`, `delete`, `assign`, `toggle`
 * [ ] utils `assignVals`, `toJS
+* [ ] move `invariant` to preprocessors?
+* [ ] add `reference` to models?
+* [ ] host docs
+* [ ] contributing guide. `reserved` section in package.json!
+* [ ] add `toJS` on all model types
 
 Later
 * [ ] dynamically switch between hook and non-hook implementations (and explain differences)

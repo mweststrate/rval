@@ -18,28 +18,38 @@
   "author": "Michel Weststrate",
   "license": "MIT",
   "dependencies": {},
-  "files": ["*.ts", "dist"],
+  "files": [
+    "*.ts",
+    "dist"
+  ],
   "devDependencies": {},
+  "peerDependencies": {
+    "immer": "^1.6.0"
+  },
+  "reserved": [
+    "updater",
+    "produce"
+  ],
   "mangle": {
     "reserved": [
+      "configurable",
+      "enumerable",
+      "writable",
+      "value",
+      "$RVal",
+      "rval",
+      "defaultContext",
+      "isVal",
+      "isDrv",
+      "deepfreeze",
       "val",
       "drv",
       "sub",
       "batch",
       "batched",
-      "deepfreeze",
-      "isVal",
-      "isDrv",
-      "defaultContext",
-      "rval",
-      "rview",
-      "useVal",
-      "useLocalVal",
-      "useLocalDrv",
-      "model",
-      "mapOf",
-      "arrayOf",
-      "updater"
+      "effect",
+      "updater",
+      "produce"
     ]
   }
 }
