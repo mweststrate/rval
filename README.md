@@ -153,8 +153,8 @@ Todo:
 * [ ] rename RvalContext to RvalInstance
 * [ ] contributing and debugging
 * [ ] support `this.rvalProps(this.rvalProps() + 1)` -> `this.rvalProps(x => x + 1)`?
-* [ ] updaters `inc`, `push`, `set`, `delete`, `assign`
-
+* [ ] updaters `inc1`, `inc`, `push`, `set`, `delete`, `assign`, `toggle`
+* [ ] utils `assignVals`, `toJS
 
 Later
 * [ ] dynamically switch between hook and non-hook implementations (and explain differences)

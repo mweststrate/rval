@@ -5,7 +5,7 @@ menu: Introduction
 route: /introduction/factories
 ---
 
-# Objects, factories and the basics of organizing state
+# Working with objects and arrays
 
 So far we only used stand-alone reactive values to capture our state.
 But in real world applications we will need complex objects or state trees.
@@ -38,7 +38,7 @@ console.log(title.done())
 Pretty straight forward eh? Note that we used only `const` values, and that `myFirstTodo` itself should be treated as an immutable objects to keep the conceptuel model simple.
 (In fact, it would be recommended to use `Object.freeze(myFirstTodo)`, but it turns out that RVal will take care of that as well in most cases, as we will discover later).
 
-## Factory functions
+## A first object factory
 
 Probably you don't want to create multiple todo's in your application, intead of one.
 To ease that process we can make a _factory_ funtion:
@@ -52,13 +52,19 @@ function createTodo(initialTitle) {
     done,
   }
 }
+
+const myFirstTodo = createTodo("Get coffee")
+myFirstTodo.done(true)
 ```
+
+Ok, that was easy! But our factory function can do more than just instating some reactive values and combining them into an object.
+We can add define derived data using `drv`, and actions using `act`, and make them part of the object as well:
 
 ```javascript
 function createTodo(initialTitle) {
     const title = val(initialTitle)
     const done = val(false)
-    const asMarkdown(() => done() ? "~" + title() + "~" : title())
+    const asMarkdown(() => done() ? " * [x] ~" + title() + "~" : " * [ ] " +title())
     const toggle = act(() {
         done(!done())
     })
@@ -69,12 +75,31 @@ function createTodo(initialTitle) {
 }
 ```
 
-acts, drs, sub, this
+So, we now have a factory that creates an immutable object, containing some reactive values, derivations and actions. 
+Note that we are only creating `const`s in these listing, and we neatly avoided using `this`, which might save some headaches down the road![^2]
+
+Let's put our code to the test and create a `sub` to observe the effects of our state updates:
+
+```javascript
+const myFirstTodo = createTodo("Get coffee")
+sub(myFirstTodo.asMarkdown, md => {
+    console.log(md)
+}
+
+myFirstTodo.title("Get coffee and cookie")
+// Prints: * [ ] Get coffee and cookie
+
+myFirstTodo.toggle()
+// Prints: * [x] ~Get coffee and cookie~
+```
+
+## Combining factories
+
+
+
+## Using classes
 
 Freezing
 
 [^1]: In MobX, roughly 75% of the code base is dealing with decorators, making plain data structures observable and dealing with the various different ways that people have to work with objects.
-
-```
-
-```
+[^2]: For _super_ performance critical applications (measure before optimizing!), one could use `Object.create` and store actions on the `prototype`, leveraging `this` and avoid creating a closure per action per instance.
