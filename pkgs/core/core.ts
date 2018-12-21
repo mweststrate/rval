@@ -11,19 +11,27 @@ export interface Observable<T = unknown> {
   (): T
 }
 
-export interface Drv<T = unknown> extends Observable<T> {}
+export interface Drv<T = unknown, S = T> extends Observable<T> {
+  (newValue: T | S): void
+}
 
 export interface Val<T = unknown, S = T> extends Observable<T> {
+  (updater: (current: T) => T | S): void
   (newValue: T | S): void
 }
 
 interface RValContext {
+  config: RValConfig
   isUpdating: boolean
   pending: Thunk[],
   currentlyComputingStack: Set<ObservableAdministration>[]
   currentlyComputing: Set<ObservableAdministration>
   isRunningReactions: boolean
   runPendingObservers()
+}
+
+export interface RValConfig {
+  autoFreeze: boolean
 }
 
 interface ObservableAdministration {
@@ -37,9 +45,9 @@ interface ObservableAdministration {
 export type PreProcessor<T = unknown, S = T> = (newValue: T | S, baseValue?: T, api?: RValFactories) => T
 
 export interface RValFactories {
-  val<T, S>(initial: S, preProcessor: PreProcessor<T, S>): Val<T, S>
+  val<T, S=T>(initial: S, preProcessor: PreProcessor<T, S>): Val<T, S>
   val<T>(initial: T): Val<T, T>
-  drv<T>(derivation: () => T): Drv<T>
+  drv<T, S=T>(derivation: () => T, setter?: (value: S) => void): Drv<T>
   sub<T>(
     src: Observable<T>,
     listener: Listener<T>,
@@ -48,6 +56,7 @@ export interface RValFactories {
   effect<T>(fn: () => T, onInvalidate: (onChanged: () => boolean, pull: () => T) => void): Thunk
   batch<R>(updater: () => R): R
   batched<T extends Function>(fn: T): T
+  configure(config: Partial<RValConfig>): void
 }
 
 export interface SubscribeOptions {
@@ -65,7 +74,11 @@ export function rval(base?: Val<any, any>): RValFactories {
       throw new Error("Expected val as first argument to rval")
     return (base[$RVal] as any).api
   }
+
   const context: RValContext = {
+    config: {
+      autoFreeze: true // TODO: use node_env
+    },
     isUpdating : false,
     pending: [],
     currentlyComputingStack: [],
@@ -85,8 +98,8 @@ export function rval(base?: Val<any, any>): RValFactories {
     return new ObservableValue(context, api, initial, preProcessor).get as any
   }
 
-  function drv<T>(derivation: () => T): Drv<T> {
-    return new Computed<T>(context, api, derivation).get as any
+  function drv<T>(derivation: () => T, setter: (value) => void): Drv<T> {
+    return new Computed<T>(context, api, derivation, setter).get as any
   }
 
   function effect<T>(fn: () => T, onInvalidate: (onChanged: () => boolean, pull: () => T) => void): Thunk {
@@ -178,8 +191,12 @@ export function rval(base?: Val<any, any>): RValFactories {
     }
   }
 
+  function configure(config: Partial<RValConfig>) {
+    Object.assign(context.config, config)
+  }
+
   // prettier-ignore
-  const api = { val, drv, sub, batch, batched, effect }
+  const api = { val, drv, sub, batch, batched, effect, configure }
   return api
 }
 
@@ -210,9 +227,11 @@ class ObservableValue<T> implements ObservableAdministration {
         if (this.context.currentlyComputing) throw new Error('derivations cannot have side effects and update values')
         // if (!isUpdating)
         //   throw new Error("val can only be updated within an 'update' context") // TODO: make ok, but optionally support / enforce batching
+        if(typeof newValue === "function") newValue = newValue(this.value)
         newValue = this.preProcessor(newValue, this.value, this.api)
         if (newValue !== this.value) {
-          this.value = deepfreeze(newValue) // TODO: make freeze an option
+          this.value = newValue!
+          if (this.context.config.autoFreeze) deepfreeze(this.value)
           batch(() => { // optimize: no need to wrap if already in transaction
             runAll(this.listeners)
           })
@@ -232,8 +251,10 @@ class Computed<T = any> implements ObservableAdministration {
   state = NOT_TRACKING
   dirtyCount = 0
   value: T = undefined!
-  constructor(private context: RValContext, public api: RValFactories, public derivation: () => T) {
-    this.get = this.get.bind(this)
+  setter?: (value) => void
+  constructor(private context: RValContext, public api: RValFactories, public derivation: () => T, setter?: (value) => void) {
+    this.get = this.get.bind(this) as any
+    if (setter) this.setter = batched(setter)
     hiddenProp(this.get, $RVal, this)
   }
   markDirty = () => {
@@ -283,18 +304,26 @@ class Computed<T = any> implements ObservableAdministration {
     this.dirtyCount = 0
     this.state = UP_TO_DATE
   }
-  get() {
-    // console.log("GET - "+ this.derivation.toString())
-    // something being computed? setup tracking
-    registerRead(this.context, this)
-    // yay, we are up to date!
-    if (this.state === UP_TO_DATE) return this.value
-    // nope, we are not, and no one is observing either
-    if (!this.context.currentlyComputing && !this.listeners.length)
-      return this.derivation()
-    // maybe scheduled, definitely tracking, value is needed, track now!
-    this.track()
-    return this.value
+  get():T
+  get(value): void
+  get(value?) {
+    switch (arguments.length) {
+      case 0:
+        // console.log("GET - "+ this.derivation.toString())
+        // something being computed? setup tracking
+        registerRead(this.context, this)
+        // yay, we are up to date!
+        if (this.state === UP_TO_DATE) return this.value
+        // nope, we are not, and no one is observing either
+        if (!this.context.currentlyComputing && !this.listeners.length)
+          return this.derivation()
+        // maybe scheduled, definitely tracking, value is needed, track now!
+        this.track()
+        return this.value
+      case 1:
+        if (this.setter) return void this.setter(value)
+    }
+    throw new Error("[drv] Didn't expect any arguments");
   }
 }
 
@@ -380,6 +409,7 @@ function once<T extends Function>(fn: T): T {
   return f
 }
 
+// TODO: don't export?
 export function deepfreeze(o) {
   // based on 'deepfreeze' package, but copied here to simplify build setup :-/
   if (o === Object(o)) {
@@ -407,4 +437,4 @@ export const sub = defaultContext.sub
 export const batch = defaultContext.batch
 export const batched = defaultContext.batched
 export const effect = defaultContext.effect
-
+export const configure = defaultContext.configure

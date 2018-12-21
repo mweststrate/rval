@@ -31,15 +31,8 @@
       "isVal",
       "isDrv",
       "defaultContext",
-      "rval",
-      "rview",
-      "useVal",
-      "useLocalVal",
-      "useLocalDrv",
-      "model",
-      "mapOf",
-      "arrayOf",
-      "updater"
+      "configure",
+      "autoFreeze"
     ]
   }
 }

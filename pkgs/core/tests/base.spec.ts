@@ -325,3 +325,41 @@ test("no unchanged value propagation - 2", () => {
   expect(c()).toBe(16)
   expect([bCalled, cCalled, subCalled]).toEqual([2, 2, 1])
 })
+
+test("val supports updater function", () => {
+  const inc = i => i + 1
+  const replace = value => () => value
+
+  const a = val(3)
+  a(inc)
+  expect(a()).toBe(4)
+
+  const b = val<() => number>(() => 3)
+  const fn = function anotherFunction() {
+    return 4
+  }
+  b(() => fn)
+  expect(b()).toBe(fn)
+  expect(b()()).toBe(4)
+
+  b(replace(() => 5))
+  expect(b()()).toBe(5)
+})
+
+test("drv supports setter", () => {
+  const a = val(3)
+  const b = drv(
+    () => a() * 4,
+    newValue => {
+      a(newValue / 2)
+      a(a() / 2)
+    }
+  )
+
+  const values: any = []
+  sub(b, v => values.push(v))
+  a(4)
+  b(20)
+  expect(a()).toBe(5)
+  expect(values).toEqual([16, 20]) // triggered only two updates
+})

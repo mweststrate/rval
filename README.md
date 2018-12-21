@@ -137,11 +137,9 @@ Todo:
 * [x] setup minification with minified class members
 * [x] swap export statement in `tests/rval.ts` in CI to test minified build
 * [x] mobx like evaluation order of drv
-* [ ] docs
-* [ ] `drv(( tick ) => ())`
+* [x] `drv` with setter
 * [ ] support currying for sub: `sub(listener)(val)`
 * [ ] toJS
-* [ ] `drv` with setter
 * [ ] combine preprocessor array
 * [ ] config: warn on unbatched writes
 * [ ] config: warn on untracked, stale reads
@@ -155,8 +153,10 @@ Todo:
 * [ ] support `this.rvalProps(this.rvalProps() + 1)` -> `this.rvalProps(x => x + 1)`?
 * [ ] updaters `inc1`, `inc`, `push`, `set`, `delete`, `assign`, `toggle`
 * [ ] utils `assignVals`, `toJS
+* [ ] docs
 
 Later
+* [ ] `drv(( tick ) => ())`
 * [ ] dynamically switch between hook and non-hook implementations (and explain differences)
 * [ ] re-enable minification ootb
 * [ ] fix sourcemaps for minified builds
