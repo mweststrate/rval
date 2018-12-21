@@ -387,3 +387,26 @@ test("multiple preprocesors", () => {
     "base: 4, acc: 10, res: 20"
   ])
 })
+
+test("curried subscription", () => {
+  const events: string[] = []
+  const logger = sub<string|number>(value => events.push("Got: " + value))
+
+  const a = val(1)
+  const b = val("x")
+  const d1 = logger(a);
+  const d2 = logger(b);
+
+  a(2)
+  b("y")
+  d1()
+  a(3)
+  b("z")
+  d2()
+  b("a")
+  expect(events).toEqual([
+    "Got: 2",
+    "Got: y",
+    "Got: z",
+  ])
+})

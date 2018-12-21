@@ -49,6 +49,10 @@ export interface RValFactories {
   val<T>(initial: T): Val<T, T>
   drv<T, S=T>(derivation: () => T, setter?: (value: S) => void): Drv<T>
   sub<T>(
+    listener: Listener<T>,
+    options?: SubscribeOptions
+  ): (src: Observable<T>) => Disposer
+  sub<T>(
     src: Observable<T>,
     listener: Listener<T>,
     options?: SubscribeOptions
@@ -137,12 +141,17 @@ export function rval(base?: Val<any, any>): RValFactories {
     })
   }
 
-  function sub<T>(
-    src: Observable<T>,
-    listener: Listener<T>,
-    options?: SubscribeOptions
-  ): Disposer {
-    let lastSeen: T | undefined = undefined
+  function sub(
+    src,
+    listener?,
+    options?
+  ) {
+    if (arguments.length === 1 || typeof arguments[1] !== "function") {
+      // curried invocation
+      return source => sub(source, src /* the listener actually */, listener /* the options actually */)
+    }
+
+    let lastSeen: any = undefined
     let firstRun = true
     const effectDisposer = effect(src, (didChange, pull) => {
       if (didChange()) {

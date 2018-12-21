@@ -138,9 +138,9 @@ Todo:
 * [x] swap export statement in `tests/rval.ts` in CI to test minified build
 * [x] mobx like evaluation order of drv
 * [x] `drv` with setter
-* [ ] support currying for sub: `sub(listener)(val)`
+* [x] combine preprocessor array
+* [x] support currying for sub: `sub(listener)(val)`
 * [ ] toJS
-* [ ] combine preprocessor array
 * [ ] config: warn on unbatched writes
 * [ ] config: warn on untracked, stale reads
 * [ ] rval-validation
@@ -154,6 +154,7 @@ Todo:
 * [ ] updaters `inc1`, `inc`, `push`, `set`, `delete`, `assign`, `toggle`
 * [ ] utils `assignVals`, `toJS
 * [ ] docs
+* [ ] implement `SubscribeOptions`
 
 Later
 * [ ] `drv(( tick ) => ())`
