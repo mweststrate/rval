@@ -1,4 +1,4 @@
-import { val, sub, drv, batch } from '@r-val/core'
+import { val, sub, drv, batch, defaultContext } from '@r-val/core'
 
 test('very basic', () => {
   const x = val(3)
@@ -362,4 +362,28 @@ test("drv supports setter", () => {
   b(20)
   expect(a()).toBe(5)
   expect(values).toEqual([16, 20]) // triggered only two updates
+})
+
+test("multiple preprocesors", () => {
+  const api = defaultContext
+  const events: any[] = []
+  const p = (newValue, baseValue, context) => {
+    expect(context).toBe(defaultContext)
+    const res = newValue * 2
+    events.push(`base: ${baseValue}, acc: ${newValue}, res: ${res}`)
+    return res
+  }
+  const v = val(1, [p,p])
+  expect(v()).toBe(4)
+  expect(events.splice(0)).toEqual([
+    "base: undefined, acc: 1, res: 2",
+    "base: undefined, acc: 2, res: 4"
+  ])
+
+  v(5)
+  expect(v()).toBe(20)
+  expect(events.splice(0)).toEqual([
+    "base: 4, acc: 5, res: 10",
+    "base: 4, acc: 10, res: 20"
+  ])
 })

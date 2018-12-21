@@ -45,7 +45,7 @@ interface ObservableAdministration {
 export type PreProcessor<T = unknown, S = T> = (newValue: T | S, baseValue?: T, api?: RValFactories) => T
 
 export interface RValFactories {
-  val<T, S=T>(initial: S, preProcessor: PreProcessor<T, S>): Val<T, S>
+  val<T, S=T>(initial: S, preProcessor: PreProcessor<T, S> | PreProcessor<T, any>[]): Val<T, S>
   val<T>(initial: T): Val<T, T>
   drv<T, S=T>(derivation: () => T, setter?: (value: S) => void): Drv<T>
   sub<T>(
@@ -94,7 +94,7 @@ export function rval(base?: Val<any, any>): RValFactories {
     if (!context.isUpdating) runPendingObservers(); // TODO: is this line ever hit?
   }
 
-  function val<T, S>(initial: S, preProcessor = defaultPreProcessor): Val<T, S> {
+  function val(initial, preProcessor: any = defaultPreProcessor): Val {
     return new ObservableValue(context, api, initial, preProcessor).get as any
   }
 
@@ -206,10 +206,12 @@ export const defaultContext = rval()
 class ObservableValue<T> implements ObservableAdministration {
   listeners: Thunk[] = []
   value: T
-  constructor(private context: RValContext, public api: RValFactories, state: T, private preProcessor) {
+  preProcessor: PreProcessor
+  constructor(private context: RValContext, public api: RValFactories, state: T, preProcessor) {
     this.get = this.get.bind(this)
+    this.preProcessor = normalizePreProcessor(preProcessor)
     hiddenProp(this.get, $RVal, this)
-    this.value = deepfreeze(preProcessor(state, undefined, this.api)) // TODO: make freeze an option
+    this.value = deepfreeze(this.preProcessor(state, undefined, this.api)) // TODO: make freeze an option
   }
   addListener(listener) {
     this.listeners.push(listener)
@@ -228,7 +230,7 @@ class ObservableValue<T> implements ObservableAdministration {
         // if (!isUpdating)
         //   throw new Error("val can only be updated within an 'update' context") // TODO: make ok, but optionally support / enforce batching
         if(typeof newValue === "function") newValue = newValue(this.value)
-        newValue = this.preProcessor(newValue, this.value, this.api)
+        newValue = this.preProcessor(newValue, this.value, this.api) as T
         if (newValue !== this.value) {
           this.value = newValue!
           if (this.context.config.autoFreeze) deepfreeze(this.value)
@@ -386,8 +388,14 @@ function removeCallback(fns: Thunk[], fn: Thunk) {
   fns.splice(fns.indexOf(fn), 1) // TODO: defensive index check?
 }
 
-export function toJS(value) {
-  // convert, recursively, all own enumerable, primitive + vals values
+function normalizePreProcessor(preProcessor: undefined | PreProcessor | PreProcessor[]): PreProcessor {
+  if (!preProcessor) return defaultPreProcessor
+  if (typeof preProcessor === "function") return preProcessor
+  if (Array.isArray(preProcessor))
+    return function(newValue, currentValue, api) {
+      return preProcessor.reduce((acc, current) => current(acc, currentValue, api), newValue)
+    }
+  throw new Error("No valid preprocessor");
 }
 
 export function isVal(value: any): value is Val {

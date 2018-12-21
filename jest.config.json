@@ -14,5 +14,6 @@
       "tsConfig": "tsconfig.json"
     }
   },
-  "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json", "node"]
+  "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json", "node"],
+  "modulePathIgnorePatterns": ["node_modules", "\\.git"]
 }
