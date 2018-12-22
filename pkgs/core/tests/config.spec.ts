@@ -1,8 +1,8 @@
-import { val, sub, drv, batch, rval } from '@r-val/core'
+import { val, sub, drv, rval } from '@r-val/core'
 
 test('auto freeze', () => {
     {
-        const v = val({ x: 1 })
+        const v = val<any>({ x: 1 })
         expect(() => v().y = 1).toThrow(/object is not extensible/)
 
         v({ x: { y: 1 }})
@@ -10,7 +10,7 @@ test('auto freeze', () => {
     }
     {
         const newContext = rval()
-        const v = newContext.val({ x: 1 })
+        const v = newContext.val<any>({ x: 1 })
         expect(() => v().y = 1).toThrow(/object is not extensible/)
         newContext.configure({
             autoFreeze: false

@@ -1,4 +1,4 @@
-import { val, sub, drv, batch, batched } from '@r-val/core'
+import { val, sub, drv, act } from '@r-val/core'
 
 test('some basic stuff', () => {
   const events: any = []
@@ -25,7 +25,7 @@ describe('todos', () => {
   function Todo(initial: ITodo) {
     const title = val(initial.title)
     const done = val(initial.done)
-    const toggle = batched(() => done(!done()))
+    const toggle = act(() => done(!done()))
     return {
       id: initial.id,
       title,

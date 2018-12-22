@@ -1,4 +1,4 @@
-import { val, sub, drv, batch, defaultContext } from '@r-val/core'
+import { val, sub, drv, run, defaultInstance } from '@r-val/core'
 
 test('very basic', () => {
   const x = val(3)
@@ -53,27 +53,27 @@ test('some basic stuff', () => {
     events.push(x)
   })
 
-  batch(() => {
+  run(() => {
     x(4)
     x(6)
   })
 
   expect(events.splice(0)).toEqual(['computing', 6, 'computing', 12])
 
-  batch(() => {
+  run(() => {
     x(7)
   })
 
   d()
 
-  batch(() => {
+  run(() => {
     x(8)
   })
 
   expect(events.splice(0)).toEqual([7, 'computing', 14, 'computing', 16])
 })
 
-test('drv is readable during batch', () => {
+test('drv is readable during run', () => {
   const events: any[] = []
   const a = val(2)
   const b = drv(() => {
@@ -83,7 +83,7 @@ test('drv is readable during batch', () => {
   const d = sub(b, x => {
     events.push(x)
   })
-  batch(() => {
+  run(() => {
     a(3)
     a(4)
     expect(b()).toEqual(8)
@@ -92,8 +92,8 @@ test('drv is readable during batch', () => {
   })
   expect(events).toEqual([
     'computing', // subscribing
-    'computing', // in batch
-    'computing', // after batch
+    'computing', // in run
+    'computing', // after run
     12,
   ])
 })
@@ -108,14 +108,14 @@ test('drv is not re-evaluating if triggered eagerly', () => {
   const d = sub(b, x => {
     events.push(x)
   })
-  batch(() => {
+  run(() => {
     a(3)
     a(4)
     expect(b()).toEqual(8)
   })
   expect(events).toEqual([
     'computing', // subscribing
-    'computing', // in batch
+    'computing', // in run
     8,
   ])
 })
@@ -130,7 +130,7 @@ test('drv is not reavaluating if unsubscribed early', () => {
   const d = sub(b, x => {
     events.push(x)
   })
-  batch(() => {
+  run(() => {
     a(3)
     d()
     a(4)
@@ -150,7 +150,7 @@ test('drv can evaluate after unsubscribe', () => {
   const d = sub(b, x => {
     events.push(x)
   })
-  batch(() => {
+  run(() => {
     a(3)
     d()
     a(4)
@@ -190,11 +190,11 @@ test('nested propagation', () => {
   const d = sub(combined, val => events.push(val))
 
   events.push('setup')
-  batch(() => {
+  run(() => {
     a(4)
   })
   events.push('b1')
-  batch(() => {
+  run(() => {
     a(7)
     b(2)
   })
@@ -236,7 +236,7 @@ test('conditonal logic', () => {
   const d = sub(combined, val => events.push(val))
 
   events.push('setup')
-  batch(() => {
+  run(() => {
     a(4)
     b(6)
   })
@@ -261,7 +261,7 @@ test('conditonal logic', () => {
   ])
 
   events.push('b2')
-  batch(() => {
+  run(() => {
     a(7)
     b(2)
   })
@@ -315,7 +315,7 @@ test("no unchanged value propagation - 2", () => {
     subCalled++
   })
   expect([bCalled, cCalled, subCalled]).toEqual([1, 1, 0]) // during initialization
-  batch(() => {
+  run(() => {
     a(4)
     expect([bCalled, cCalled, subCalled]).toEqual([1, 1, 0])
     expect(b()).toBe(8)
@@ -365,10 +365,10 @@ test("drv supports setter", () => {
 })
 
 test("multiple preprocesors", () => {
-  const api = defaultContext
+  const api = defaultInstance
   const events: any[] = []
   const p = (newValue, baseValue, context) => {
-    expect(context).toBe(defaultContext)
+    expect(context).toBe(defaultInstance)
     const res = newValue * 2
     events.push(`base: ${baseValue}, acc: ${newValue}, res: ${res}`)
     return res

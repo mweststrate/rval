@@ -1,4 +1,4 @@
-import { val, drv, sub, batched } from "@r-val/core"
+import { val, drv, sub, act } from "@r-val/core"
 import { updater } from "@r-val/immer"
 
 test('some basic stuff', () => {
@@ -26,7 +26,7 @@ describe('todos', () => {
   function Todo(initial: ITodo) {
     const title = val(initial.title)
     const done = val(initial.done)
-    const toggle = batched(() => done(!done()))
+    const toggle = act(() => done(!done()))
     return {
       id: initial.id,
       title,

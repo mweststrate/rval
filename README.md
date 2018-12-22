@@ -140,7 +140,11 @@ Todo:
 * [x] `drv` with setter
 * [x] combine preprocessor array
 * [x] support currying for sub: `sub(listener)(val)`
-* [ ] toJS
+* [x] rename RvalContext to RvalInstance
+* [x] support `this.rvalProps(this.rvalProps() + 1)` -> `this.rvalProps(x => x + 1)`?
+* [x] re-enable minification ootb
+* [x] fix sourcemaps for minified builds
+* [x] use prop mangling for smaller builds
 * [ ] config: warn on unbatched writes
 * [ ] config: warn on untracked, stale reads
 * [ ] rval-validation
@@ -148,21 +152,17 @@ Todo:
 * [ ] check https://reactpixi.org/#/stage / https://docs.setprotocol.com/#/#support-and-community- for setup of edit button, menu nesting, hosting
 * [ ] strict mode: only reads from actions or reactions. Only updates from actions. 
 * [ ] verify callign actions in reactions work correctly
-* [ ] rename RvalContext to RvalInstance
 * [ ] contributing and debugging
-* [ ] support `this.rvalProps(this.rvalProps() + 1)` -> `this.rvalProps(x => x + 1)`?
 * [ ] updaters `inc1`, `inc`, `push`, `set`, `delete`, `assign`, `toggle`
-* [ ] utils `assignVals`, `toJS
+* [ ] utils `assignVals`, `toJS`
 * [ ] docs
 * [ ] implement `SubscribeOptions`
+* [ ] verify debugging with minification
 
 Later
 * [ ] `drv(( tick ) => ())`
 * [ ] dynamically switch between hook and non-hook implementations (and explain differences)
-* [ ] re-enable minification ootb
-* [ ] fix sourcemaps for minified builds
 * [ ] support name option
 * [ ] abstraction for creating drv / vals and subscribing in hook based component automatically?
-* [ ] setter for `drv`?
+* [x] setter for `drv`?
 * [ ] MobX global state compatibility?
-* [ ] use prop mangling for smaller builds

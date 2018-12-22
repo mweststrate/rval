@@ -1,4 +1,4 @@
-import { Observable, isVal, isDrv, defaultContext, rval, RValFactories, Val } from '@r-val/core'
+import { Observable, isVal, isDrv, defaultInstance, rval, RValInstance, Val } from '@r-val/core'
 import { useState, useEffect, useMemo, ReactNode, ReactElement, createElement, Component } from 'react'
 
 export function useVal<T>(observable: Observable<T>): T {
@@ -11,39 +11,39 @@ export function useVal<T>(observable: Observable<T>): T {
   return observable()
 }
 
-export function useLocalVal<T>(initial: T, rvalContext = defaultContext): [T, Val<T>] {
-  const val = useMemo(() => rvalContext.val(initial), [])
+export function useLocalVal<T>(initial: T, rvalInstance = defaultInstance): [T, Val<T>] {
+  const val = useMemo(() => rvalInstance.val(initial), [])
   const current = useVal(val)
   return [current, val]
 }
 
-export function useLocalDrv<T>(derivation: () => T, inputs: any[] = [], rvalContext = defaultContext): T {
-  const drv = useMemo(() => rvalContext.drv(derivation), inputs)
+export function useLocalDrv<T>(derivation: () => T, inputs: any[] = [], rvalInstance = defaultInstance): T {
+  const drv = useMemo(() => rvalInstance.drv(derivation), inputs)
   return useVal(drv)
 }
 
-export function rview(render: () => ReactNode, memo?: any[] | boolean, rvalContext?: RValFactories): ReactElement<any> | null {
+export function rview(render: () => ReactNode, memo?: any[] | boolean, rvalInstance?: RValInstance): ReactElement<any> | null {
   // TODO: or should rview be a HOC?
-  // return props => <RView rvalContext={rvalContext}>{() => render(props)}</RView>
+  // return props => <RView rvalInstance={rvalInstance}>{() => render(props)}</RView>
   return createElement(RView, {
-    rvalContext, memo, children: render
+    rvalInstance, memo, children: render
   })
 }
 
 export class RView extends Component<{
   children?: () => ReactNode
   memo?: any[] | boolean,
-  rvalContext?: RValFactories
+  rvalInstance?: RValInstance
 }, {}> {
 
   static defaultProps = {
-    rvalContext: defaultContext,
+    rvalInstance: defaultInstance,
     memo: false
   }
 
   disposer?: () => void
   renderPuller?: () => ReactNode
-  inputsAtom = this.props.rvalContext!.val(0)
+  inputsAtom = this.props.rvalInstance!.val(0)
 
   shouldComponentUpdate() {
     return false;
@@ -75,7 +75,7 @@ export class RView extends Component<{
 
   render() {
     if (!this.disposer) {
-      this.disposer = this.props.rvalContext!.effect(() => {
+      this.disposer = this.props.rvalInstance!.effect(() => {
         this.inputsAtom();
         return this.props.children!()
       }, (didChange, pull) => {
@@ -95,11 +95,11 @@ export class RView extends Component<{
 
 // export function _RView({
 //   children,
-//   rvalContext = defaultContext,
+//   rvalInstance = defaultContext,
 //   inputs = [children],
 // }: {
 //   children?: () => ReactNode
-//   rvalContext?: RValFactories
+//   rvalInstance?: RValFactories
 //   inputs?: any[]
 // }): ReactElement<any> | null {
 //   if (typeof children !== 'function') throw new Error('RVal expected function as children')
@@ -107,7 +107,7 @@ export class RView extends Component<{
 //   const { render, dispose } = useMemo(
 //     () => {
 //       let render
-//       const dispose = rvalContext.effect(children!, (didChange, pull) => {
+//       const dispose = rvalInstance.effect(children!, (didChange, pull) => {
 //         render = pull
 //         if (didChange()) {
 //           setTick(tick + 1)

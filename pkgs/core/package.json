@@ -30,7 +30,7 @@
       "deepfreeze",
       "isVal",
       "isDrv",
-      "defaultContext",
+      "defaultInstance",
       "configure",
       "autoFreeze"
     ]

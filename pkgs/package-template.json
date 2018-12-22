@@ -19,27 +19,5 @@
   "license": "MIT",
   "dependencies": {},
   "files": ["*.ts", "dist"],
-  "devDependencies": {},
-  "mangle": {
-    "reserved": [
-      "val",
-      "drv",
-      "sub",
-      "batch",
-      "batched",
-      "deepfreeze",
-      "isVal",
-      "isDrv",
-      "defaultContext",
-      "rval",
-      "rview",
-      "useVal",
-      "useLocalVal",
-      "useLocalDrv",
-      "model",
-      "mapOf",
-      "arrayOf",
-      "updater"
-    ]
-  }
+  "devDependencies": {}  
 }

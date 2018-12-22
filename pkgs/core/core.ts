@@ -42,9 +42,9 @@ interface ObservableAdministration {
 
 // TODO: swap types of S, T, infer
 // also for Val
-export type PreProcessor<T = unknown, S = T> = (newValue: T | S, baseValue?: T, api?: RValFactories) => T
+export type PreProcessor<T = unknown, S = T> = (newValue: T | S, baseValue?: T, api?: RValInstance) => T
 
-export interface RValFactories {
+export interface RValInstance {
   val<T, S=T>(initial: S, preProcessor: PreProcessor<T, S> | PreProcessor<T, any>[]): Val<T, S>
   val<T>(initial: T): Val<T, T>
   drv<T, S=T>(derivation: () => T, setter?: (value: S) => void): Drv<T>
@@ -58,8 +58,8 @@ export interface RValFactories {
     options?: SubscribeOptions
   ): Disposer
   effect<T>(fn: () => T, onInvalidate: (onChanged: () => boolean, pull: () => T) => void): Thunk
-  batch<R>(updater: () => R): R
-  batched<T extends Function>(fn: T): T
+  act<T extends Function>(fn: T): T
+  run<R>(fn: () => R): R
   configure(config: Partial<RValConfig>): void
 }
 
@@ -72,7 +72,7 @@ const NOT_TRACKING = 0
 const STALE = 1
 const UP_TO_DATE = 2
 
-export function rval(base?: Val<any, any>): RValFactories {
+export function rval(base?: Val<any, any>): RValInstance {
   if (arguments.length) {
     if (!isVal(base) && !isDrv(base))
       throw new Error("Expected val as first argument to rval")
@@ -166,27 +166,18 @@ export function rval(base?: Val<any, any>): RValFactories {
     }
   }
 
-  // TODO: autowrap with update and warn?
-  function batch<R>(updater: () => R): R {
-    let prevUpdating = context.isUpdating
-    context.isUpdating = true
-    try {
-      return updater()
-    } finally {
-      context.isUpdating = prevUpdating
-      if (!context.isUpdating) {
+  function act<T extends Function>(fn: T): T {
+    return function act(this: any) {
+      if (context.isUpdating)
+        return fn.apply(this, arguments)
+      try {
+        context.isUpdating = true
+        return fn.apply(this, arguments)
+      } finally {
+        context.isUpdating = false
         runPendingObservers()
       }
-    }
-  }
-
-  // TODO: rename to act, and kill batch
-  function batched<T extends Function>(fn: T): T {
-    return (function updater(this: any) {
-      const self = this
-      // TODO: optimize: short-circuit if already in transaction
-      return batch(() => fn.apply(self, arguments))
-    } as any) as T
+    } as any
   }
 
   function runPendingObservers() {
@@ -194,7 +185,7 @@ export function rval(base?: Val<any, any>): RValFactories {
       context.isRunningReactions = true
       while (context.pending.length) {
         // N.B. errors here cause other pending subscriptions to be aborted!
-        context.pending.splice(0).forEach(run)
+        context.pending.splice(0).forEach(runFn)
       }
       context.isRunningReactions = false
     }
@@ -205,18 +196,20 @@ export function rval(base?: Val<any, any>): RValFactories {
   }
 
   // prettier-ignore
-  const api = { val, drv, sub, batch, batched, effect, configure }
+  const api = { val, drv, sub, act, effect, configure, run(fn) {
+    return act(fn)()
+  } }
   return api
 }
 
 const defaultPreProcessor = value => value
-export const defaultContext = rval()
+export const defaultInstance = rval()
 
 class ObservableValue<T> implements ObservableAdministration {
   listeners: Thunk[] = []
   value: T
   preProcessor: PreProcessor
-  constructor(private context: RValContext, public api: RValFactories, state: T, preProcessor) {
+  constructor(private context: RValContext, public api: RValInstance, state: T, preProcessor) {
     this.get = this.get.bind(this)
     this.preProcessor = normalizePreProcessor(preProcessor)
     hiddenProp(this.get, $RVal, this)
@@ -243,9 +236,9 @@ class ObservableValue<T> implements ObservableAdministration {
         if (newValue !== this.value) {
           this.value = newValue!
           if (this.context.config.autoFreeze) deepfreeze(this.value)
-          batch(() => { // optimize: no need to wrap if already in transaction
+          this.api.act(() => { // optimize: no need to wrap if already in transaction
             runAll(this.listeners)
-          })
+          })()
         }
         // TODO: return this.value ?
         break
@@ -263,9 +256,9 @@ class Computed<T = any> implements ObservableAdministration {
   dirtyCount = 0
   value: T = undefined!
   setter?: (value) => void
-  constructor(private context: RValContext, public api: RValFactories, public derivation: () => T, setter?: (value) => void) {
+  constructor(private context: RValContext, public api: RValInstance, public derivation: () => T, setter?: (value) => void) {
     this.get = this.get.bind(this) as any
-    if (setter) this.setter = batched(setter)
+    if (setter) this.setter = api.act(setter)
     hiddenProp(this.get, $RVal, this)
   }
   markDirty = () => {
@@ -386,10 +379,10 @@ function currentValue(dep: ObservableAdministration): any {
 }
 
 function runAll(fns: Thunk[]): void {
-  fns.forEach(run)
+  fns.forEach(runFn)
 }
 
-function run(fn: Thunk): void {
+function runFn(fn: Thunk): void {
   fn()
 }
 
@@ -448,10 +441,10 @@ function hiddenProp(target, key, value) {
   })
 }
 
-export const val = defaultContext.val
-export const drv = defaultContext.drv
-export const sub = defaultContext.sub
-export const batch = defaultContext.batch
-export const batched = defaultContext.batched
-export const effect = defaultContext.effect
-export const configure = defaultContext.configure
+export const val = defaultInstance.val
+export const drv = defaultInstance.drv
+export const sub = defaultInstance.sub
+export const act = defaultInstance.act
+export const run = defaultInstance.run
+export const effect = defaultInstance.effect
+export const configure = defaultInstance.configure
