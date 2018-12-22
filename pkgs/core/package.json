@@ -39,7 +39,9 @@
     "sub",
     "run",
     "act",
-    "effect"
+    "effect",
+    "configure",
+    "autoFreeze"
   ],
   "mangle": {
     "reserved": [
@@ -56,9 +58,11 @@
       "val",
       "drv",
       "sub",
-      "batch",
-      "batched",
-      "effect"
+      "run",
+      "act",
+      "effect",
+      "configure",
+      "autoFreeze"
     ]
   }
 }
