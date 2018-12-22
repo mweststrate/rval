@@ -158,6 +158,12 @@ Todo:
 * [ ] docs
 * [ ] implement `SubscribeOptions`
 * [ ] verify debugging with minification
+* [ ] utils `assignVals`, `toJS
+* [ ] move `invariant` to preprocessors?
+* [ ] add `reference` to models?
+* [ ] host docs
+* [ ] contributing guide. `reserved` section in package.json!
+* [ ] add `toJS` on all model types
 
 Later
 * [ ] `drv(( tick ) => ())`

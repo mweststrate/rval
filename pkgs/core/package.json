@@ -2,7 +2,7 @@
   "name": "@r-val/core",
   "private": false,
   "version": "0.0.1",
-  "description": "",
+  "description": "minimalistic, transparent reactive programming library",
   "main": "dist/core.js",
   "umd:main": "dist/core.umd.js",
   "unpkg": "dist/core.umd.js",
@@ -18,21 +18,47 @@
   "author": "Michel Weststrate",
   "license": "MIT",
   "dependencies": {},
-  "files": ["*.ts", "dist"],
+  "files": [
+    "*.ts",
+    "dist"
+  ],
   "devDependencies": {},
+  "reserved": [
+    "configurable",
+    "enumerable",
+    "writable",
+    "value",
+    "$RVal",
+    "rval",
+    "defaultInstance",
+    "isVal",
+    "isDrv",
+    "deepfreeze",
+    "val",
+    "drv",
+    "sub",
+    "batch",
+    "batched",
+    "effect"
+  ],
   "mangle": {
     "reserved": [
+      "configurable",
+      "enumerable",
+      "writable",
+      "value",
+      "$RVal",
+      "rval",
+      "defaultInstance",
+      "isVal",
+      "isDrv",
+      "deepfreeze",
       "val",
       "drv",
       "sub",
       "batch",
       "batched",
-      "deepfreeze",
-      "isVal",
-      "isDrv",
-      "defaultInstance",
-      "configure",
-      "autoFreeze"
+      "effect"
     ]
   }
 }
