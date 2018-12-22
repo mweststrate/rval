@@ -37,8 +37,8 @@
     "val",
     "drv",
     "sub",
-    "batch",
-    "batched",
+    "run",
+    "act",
     "effect"
   ],
   "mangle": {
