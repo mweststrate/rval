@@ -10,5 +10,6 @@ export default {
             name: "API"
         }
     ],
+    dest: 'docs',
     hashRouter: true
 }
