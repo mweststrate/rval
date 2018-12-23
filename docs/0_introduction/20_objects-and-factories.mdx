@@ -93,13 +93,67 @@ myFirstTodo.toggle()
 // Prints: * [x] ~Get coffee and cookie~
 ```
 
-## Combining factories
+Yeah, our first factory is a fact!
+
+_Tip: When starting with RVal, it will take mere seconds before you will forget parenthesis for the first and write `if (todo.done) ... ` instead of `if (todo.done())`. So be smart. Or, use TypeScript so that you don't have be (Granted, TypeScript won't catch all of those mistakes, but hopefully enough to learn the right habits)._ 
 
 
+## Creating collections
+
+At this point you might be wondering, ok, you tricked me with objects. But how do I organize a collection of todo items, with just using `val`. 
+The answer is: we'll repeat the same trick.
+Let's quickly design a factory for a "todoStore":
+
+```javascript
+function createTodoStore() {
+    const todos = val([])
+
+    function addTodo(title) {
+        todos([
+            ...todos(),
+            createTodo(title)
+        ])
+    }
+
+    return { todos, addTodo }
+}
+
+const store = createTodoStore()
+store.addTodo("Go for a walk")
+console.log(tore.todos().map(todo => todo.title())) // prints: ["Go for a walk"]
+```
+
+See what we did there? We introduced a `val` to maintain our collection of todos, but the value we assign to it/ read from it, we still consider it as immutable!
+So, we always replace the entire collection. But, we recycle all the contents, so it isn't to involved. 
+So, when using RVal, the recommended approach is to always produces those trees that are immutable themselves, but have stateful reactive values inside them, which always store a scalar value, but their contents aren't actively mutated.
+In fact, by default RVal will help you with that; it will automatically deeply freeze any value you store in `val`!
+This makes sure that an error will throw if you accidentally write something that would otherwise mutate the contents, like `store.todos().push(createTodo("Go for a walk))`.
+This way of organizing could be expressed as: using _immutable, but stateful objects_.
+
+_Note: that this approach doesn't suffer too much from writing complex deep updates, because a deep update is just reads until you arrive at the location for the update. You don't have to produce an entire new state tree. For example this is a valid "deep update": `store.todos()[0].done(true)`_
+
+_Tip: The autofreeze behavior can be disabled for performance reasons, by using `configure({ autoFreeze: false })`._
 
 ## Using classes
 
-Freezing
+You might be wondering whether it is possible to use classes instead of factory functions. 
+The answer is, yes that is perfectly possible. 
+The reason for the chose approach in this documentation however, is that it hopefully set's you up for the [Pit of Success](https://medium.com/@ricomariani/the-pit-of-success-cfefc6cb64c8). 
+Once you get used to this approach, there should be less places where you can accidentally error, you can't forget to bind a function,
+and the mental model becomes really trivial: Nothing should or can't be modified. Except `val`s.
+
+That being said, in an existing codebase it might be easier to start with introducing reactive values at certain places and keep the rest as is. 
+If you are using TypeScript, it is highly recommended to use the `readonly` keyword when `val` as classfield: `readonly done = val(false)`.
+This will protect you against accidental reassignments of the field.
+
+## Next steps
+
+TODO: fix links
+
+This page covered the basics of working with objects and collections in RVal. 
+To dive a bit deeper, you might want to check these sections out later:
+- Using updaters to simplify writing the update functions
+- Using models to simplify and reduce the boilerplate of writing factories
 
 [^1]: In MobX, roughly 75% of the code base is dealing with decorators, making plain data structures observable and dealing with the various different ways that people have to work with objects.
-[^2]: For _super_ performance critical applications (measure before optimizing!), one could use `Object.create` and store actions on the `prototype`, leveraging `this` and avoid creating a closure per action per instance.
+[^2]: For _super_ performance critical applications (measure before optimizing!), one could use `Object.create` and store all methods on the `prototype`. Those methods would then rely on using `this`, but it would avoid creating a closure for each method on each instance.

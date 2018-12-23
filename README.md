@@ -164,9 +164,11 @@ Todo:
 * [ ] host docs
 * [ ] contributing guide. `reserved` section in package.json!
 * [ ] add `toJS` on all model types
+* [ ] add (mobx like) performance tests
 
 Later
-* [ ] `drv(( tick ) => ())`
+* [ ] eliminate classes from code base
+* [ ] `drv(( tick ) => ())` to communicate staleness from inside drv (probably also needs onHot / onCold callback in such case)
 * [ ] dynamically switch between hook and non-hook implementations (and explain differences)
 * [ ] support name option
 * [ ] abstraction for creating drv / vals and subscribing in hook based component automatically?
