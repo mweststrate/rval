@@ -124,11 +124,11 @@ describe("using prototype", () => {
   }
 
   function TodoList(initialState: ITodo[]) {
-    let self
+    let self // used by drv, as 'this' is not available
     return self = Object.assign(
       Object.create(TodoListProto), {
       todos: val(initialState.map(Todo)),
-      completedCount: drv(function (this: any) {
+      completedCount: drv(() => {
         return self.todos().filter(todo => todo.done()).length
       })
     })
