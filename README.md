@@ -114,6 +114,7 @@ Patterns
 Comparison with mobx
 - factory + getter / setters -> observable. More convenient, but, pit of success
 - sub(drv(x), noop) === autorun(x)
+- more scheduling control; effect
 
 Comparison with Rx
 - focus on values, not events
@@ -165,6 +166,9 @@ Todo:
 * [ ] contributing guide. `reserved` section in package.json!
 * [ ] add `toJS` on all model types
 * [ ] add (mobx like) performance tests
+* [ ] kill with-immmer?
+* [ ] fast class / object test
+* [ ] `sub`, pass in previous value as second argumetn
 
 Later
 * [ ] eliminate classes from code base
