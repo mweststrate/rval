@@ -235,7 +235,7 @@ class ObservableValue<T> implements ObservableAdministration {
         newValue = this.preProcessor(newValue, this.value, this.api) as T
         if (newValue !== this.value) {
           this.value = newValue!
-          if (this.context.config.autoFreeze) deepfreeze(this.value)
+          if (this.context.config.autoFreeze) deepfreeze(this.value) // TODO: don't freeze if non-proto object?
           this.api.act(() => { // optimize: no need to wrap if already in transaction
             runAll(this.listeners)
           })()
