@@ -146,6 +146,7 @@ Todo:
 * [x] re-enable minification ootb
 * [x] fix sourcemaps for minified builds
 * [x] use prop mangling for smaller builds
+* [x] fast class / object test
 * [ ] config: warn on unbatched writes
 * [ ] config: warn on untracked, stale reads
 * [ ] rval-validation
@@ -167,7 +168,6 @@ Todo:
 * [ ] add `toJS` on all model types
 * [ ] add (mobx like) performance tests
 * [ ] kill with-immmer?
-* [ ] fast class / object test
 * [ ] `sub`, pass in previous value as second argumetn
 
 Later

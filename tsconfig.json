@@ -42,6 +42,7 @@
     "paths": {
       "@r-val/core": ["pkgs/core/core"],
       "@r-val/immer": ["pkgs/immer/immer"],
+      "@r-val/updaters": ["pkgs/updaters/updaters"],
       "@r-val/models": ["pkgs/models/models"],
       "@r-val/react": ["pkgs/react/react"],
       "*": ["node_modules/*"]

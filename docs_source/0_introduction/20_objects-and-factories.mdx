@@ -146,6 +146,8 @@ That being said, in an existing codebase it might be easier to start with introd
 If you are using TypeScript, it is highly recommended to use the `readonly` keyword when `val` as classfield: `readonly done = val(false)`.
 This will protect you against accidental reassignments of the field.
 
+For further inspiration, checkout the [prototype based example](https://github.com/mweststrate/rval/blob/c12d30ce7d43326fd062e59366902e14794eeed3/pkgs/core/tests/object.spec.ts#L100-L135) or [class based example](https://github.com/mweststrate/rval/blob/c12d30ce7d43326fd062e59366902e14794eeed3/pkgs/core/tests/object.spec.ts#L187-L220).
+
 ## Next steps
 
 TODO: fix links
@@ -156,4 +158,4 @@ To dive a bit deeper, you might want to check these sections out later:
 - Using models to simplify and reduce the boilerplate of writing factories
 
 [^1]: In MobX, roughly 75% of the code base is dealing with decorators, making plain data structures observable and dealing with the various different ways that people have to work with objects.
-[^2]: For _super_ performance critical applications (measure before optimizing!), one could use `Object.create` and store all methods on the `prototype`. Those methods would then rely on using `this`, but it would avoid creating a closure for each method on each instance.
+[^2]: For _super_ performance critical applications (measure before optimizing!), one could use `Object.create` and store all methods on the `prototype`. Those methods would then rely on using `this`, but it would avoid creating a closure for each method on each instance. See also the two examples linked in the "Using classes" section.
