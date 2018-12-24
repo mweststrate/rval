@@ -1,19 +1,19 @@
 {
-  "name": "@r-val/immer",
+  "name": "@r-val/updaters",
   "private": false,
   "version": "0.0.1",
   "description": "",
-  "main": "dist/immer.js",
-  "umd:main": "dist/immer.umd.js",
-  "unpkg": "dist/immer.umd.js",
-  "module": "dist/immer.mjs",
-  "jsnext:main": "dist/immer.mjs",
-  "react-native": "dist/immer.mjs",
+  "main": "dist/updaters.js",
+  "umd:main": "dist/updaters.umd.js",
+  "unpkg": "dist/updaters.umd.js",
+  "module": "dist/updaters.mjs",
+  "jsnext:main": "dist/updaters.mjs",
+  "react-native": "dist/updaters.mjs",
   "browser": {
-    "./dist/immer.js": "./dist/immer.js",
-    "./dist/immer.mjs": "./dist/immer.mjs"
+    "./dist/updaters.js": "./dist/updaters.js",
+    "./dist/updaters.mjs": "./dist/updaters.mjs"
   },
-  "source": "immer.ts",
+  "source": "updaters.ts",
   "scripts": {},
   "author": "Michel Weststrate",
   "license": "MIT",
@@ -28,7 +28,21 @@
   },
   "reserved": [
     "toggle",
-    "inc1", "inc", "dec", "dec1", "replace", "set", "remove", "push", "shift", "unshift", "splice", "assign"
+    "inc1",
+    "inc",
+    "dec",
+    "dec1",
+    "replace",
+    "set",
+    "unset",
+    "push",
+    "shift",
+    "unshift",
+    "splice",
+    "assign",
+    "pop",
+    "removeBy",
+    "removeValue"
   ],
   "mangle": {
     "reserved": [
@@ -50,8 +64,22 @@
       "effect",
       "configure",
       "autoFreeze",
-      "updater",
-      "produce"
+      "toggle",
+      "inc1",
+      "inc",
+      "dec",
+      "dec1",
+      "replace",
+      "set",
+      "unset",
+      "push",
+      "shift",
+      "unshift",
+      "splice",
+      "assign",
+      "pop",
+      "removeBy",
+      "removeValue"
     ]
   }
 }

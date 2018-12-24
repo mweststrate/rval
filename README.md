@@ -155,7 +155,7 @@ Todo:
 * [ ] strict mode: only reads from actions or reactions. Only updates from actions. 
 * [ ] verify callign actions in reactions work correctly
 * [ ] contributing and debugging
-* [ ] updaters `inc1`, `inc`, `push`, `set`, `delete`, `assign`, `toggle`
+* [x] updaters `inc1`, `inc`, `push`, `set`, `delete`, `assign`, `toggle`
 * [ ] utils `assignVals`, `toJS`
 * [ ] docs
 * [ ] implement `SubscribeOptions`
@@ -169,6 +169,7 @@ Todo:
 * [ ] add (mobx like) performance tests
 * [ ] kill with-immmer?
 * [ ] `sub`, pass in previous value as second argumetn
+* [ ] improve updaters typings
 
 Later
 * [ ] eliminate classes from code base
