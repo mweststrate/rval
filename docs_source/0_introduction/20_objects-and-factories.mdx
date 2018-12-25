@@ -124,17 +124,99 @@ console.log(tore.todos().map(todo => todo.title())) // prints: ["Go for a walk"]
 ```
 
 See what we did there? We introduced a `val` to maintain our collection of todos, but the value we assign to it/ read from it, we still consider it as immutable!
-So, we always replace the entire collection. But, we recycle all the contents, so it isn't to involved. 
-So, when using RVal, the recommended approach is to always produces those trees that are immutable themselves, but have stateful reactive values inside them, which always store a scalar value, but their contents aren't actively mutated.
+So, we always replace the entire collection. But, we recycle all the contents, so it isn't too involved. 
+
+When using RVal, the recommended approach is to always produces those trees that are immutable themselves, but have stateful reactive values inside them, which always store an completely immutable, but possibly stateful value.
+
 In fact, by default RVal will help you with that; it will automatically deeply freeze any value you store in `val`!
-This makes sure that an error will throw if you accidentally write something that would otherwise mutate the contents, like `store.todos().push(createTodo("Go for a walk))`.
+This makes sure that an error will be thrown if you accidentally write something that would otherwise mutate the contents, like `store.todos().push(createTodo("Go for a walk))`.
 This way of organizing could be expressed as: using _immutable, but stateful objects_.
 
-_Note: that this approach doesn't suffer too much from writing complex deep updates, because a deep update is just reads until you arrive at the location for the update. You don't have to produce an entire new state tree. For example this is a valid "deep update": `store.todos()[0].done(true)`_
+So that is why in the above function `addTodo`, a completely new array is passed to `todos(x)` as new value, a value that is based on the current value of `todos()`.
+
+_Note: that this approach doesn't suffer too much needing to write complicated deep updates, because a deep update is just reads until you arrive at the location for the update. You don't have to produce an entire new state tree. For example this is a valid "deep update": `store.todos()[0].done(true)`_
 
 _Tip: The autofreeze behavior can be disabled for performance reasons, by using `configure({ autoFreeze: false })`._
 
-## Using classes
+## Simplifying updates with updaters
+
+It is quite common that updates depend on a previous value. 
+We saw this for example when we tried to toggle our `todo` status:
+
+```javascript
+import { val } from "@r-val/core"
+
+const done = val(false)
+done(!done()) // toggles to true
+```
+
+To simply these kind of updates, it is also possible to pass a function as new value to a reactive value.
+This function receives as current argument the current value, and should return the new value to be stored.
+This function is called once, and it's output will be the name state.
+With that we can rewrite the above as:
+
+
+```javascript
+import { val } from "@r-val/core"
+
+const done = val(false)
+done(v => !v)
+```
+
+It turns out that many of these update functions are very similar. 
+The most common update functions are gathered in the `@r-val/updaters` package. 
+For example, for toggling a boolean we can use the `toggle` updater, and rewrite the above as:
+
+```javascript
+import { val } from "@r-val/core"
+import { toggle } from "@r-val/updaters"
+
+const done = val(false)
+done(toggle)
+```
+
+More complicated patterns are supported as well. For example, we can rewrite the `addTodo` function shown above from:
+
+```javascript
+function addTodo(title) {
+    todos([
+        ...todos(),
+        createTodo(title)
+    ])
+}
+``` 
+
+To:
+
+```javascript
+import { push } from "@r-val/updaters"
+
+function addTodo(title) {
+    todos(push(createTodo(title)))
+}
+```
+
+Note that the `push` updater takes an argument itself, to describe which item(s) should be pushed to the array.
+This holds for many updaters. For example `inc` (to increment), `set`, `splice` and many of the other updaters 
+to manipulate objects or arrays take arguments as well.
+
+You'll find it is pretty trivial to write your own updater function (feel free to [PR](https://github.com/mweststrate/rval/compare)!).
+But here is the extensive list all [updaters](#/api/updaters).
+
+_Tip: You might be wondering, if any function that is passed as value to a reactive value is called, how do I store function `fn` in reactive value `x`? The answer is simple: just pass a function that produces `fn`. So instead of `x(fn)` use `x(() => fn)`. Or you can use the built-in updater `replace` to achieve the same: `x(replace(fn))`._ 
+
+## Next steps
+
+TODO: fix links
+
+This page covered the basics of working with objects and collections in RVal. 
+To dive a bit deeper, you might want to check these sections out later:
+- Using models to simplify and reduce the boilerplate of writing factories
+- Best practices for structuring state
+
+But first we'll see how we can combine RVal with React, so that we can finally put some fanciness on the screen.
+
+## Background: what about classes?
 
 You might be wondering whether it is possible to use classes instead of factory functions. 
 The answer is, yes that is perfectly possible. 
@@ -147,15 +229,6 @@ If you are using TypeScript, it is highly recommended to use the `readonly` keyw
 This will protect you against accidental reassignments of the field.
 
 For further inspiration, checkout the [prototype based example](https://github.com/mweststrate/rval/blob/c12d30ce7d43326fd062e59366902e14794eeed3/pkgs/core/tests/object.spec.ts#L100-L135) or [class based example](https://github.com/mweststrate/rval/blob/c12d30ce7d43326fd062e59366902e14794eeed3/pkgs/core/tests/object.spec.ts#L187-L220).
-
-## Next steps
-
-TODO: fix links
-
-This page covered the basics of working with objects and collections in RVal. 
-To dive a bit deeper, you might want to check these sections out later:
-- Using updaters to simplify writing the update functions
-- Using models to simplify and reduce the boilerplate of writing factories
 
 [^1]: In MobX, roughly 75% of the code base is dealing with decorators, making plain data structures observable and dealing with the various different ways that people have to work with objects.
 [^2]: For _super_ performance critical applications (measure before optimizing!), one could use `Object.create` and store all methods on the `prototype`. Those methods would then rely on using `this`, but it would avoid creating a closure for each method on each instance. See also the two examples linked in the "Using classes" section.

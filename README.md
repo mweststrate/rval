@@ -8,26 +8,10 @@ TODO: publish docz docs somewhere and link
 [Philosophy](docs/philosophy.mdx)
 [Getting Started](docs/getting-started.mdx)
 
-# concepts
-
-val
-
-drv
-
-sub
-
-objects
-
-factories
-
-structural immutability
-
-mutability granularity
-
-rendering iwth react
 
 STATE DESIGN
 
+mutability granularity
 refs
 
 preprocessor validation
@@ -43,11 +27,6 @@ preprocessors
 
 
 models
-
-ADVANCED
-updaes wit immer
-
-drv with setter
 
 
 async
@@ -130,7 +109,7 @@ Todo:
 * [x] ~`sub({ scheduler, onInvalidate(f (track)))})`~ -> `effect`
 * [x] setup coveralls
 * [x] rval-models
-* [c] rval-react
+* [x] rval-react
 * [x] rval-immer
 * [x] custom schedulers
 * [x] custom preprocessors
@@ -150,11 +129,11 @@ Todo:
 * [x] updaters `inc1`, `inc`, `push`, `set`, `delete`, `assign`, `toggle`
 * [x] utils `assignVals`, `toJS
 * [x] setter for `drv`?
+* [x] host docs
+* [x] check https://reactpixi.org/#/stage / https://docs.setprotocol.com/#/#support-and-community- for setup of edit button, menu nesting, hosting
 * [ ] config: warn on unbatched writes
 * [ ] config: warn on untracked, stale reads
 * [ ] rval-validation
-* [ ] rval-remote
-* [ ] check https://reactpixi.org/#/stage / https://docs.setprotocol.com/#/#support-and-community- for setup of edit button, menu nesting, hosting
 * [ ] strict mode: only reads from actions or reactions. Only updates from actions. 
 * [ ] verify callign actions in reactions work correctly
 * [ ] contributing and debugging
@@ -164,15 +143,17 @@ Todo:
 * [ ] tests and types for utils
 * [ ] move `invariant` to preprocessors?
 * [ ] add `reference` to models?
-* [ ] host docs
 * [ ] contributing guide. `reserved` section in package.json!
 * [ ] add `toJS` on all model types
 * [ ] add (mobx like) performance tests
 * [ ] kill with-immmer?
 * [ ] `sub`, pass in previous value as second argumetn
 * [ ] improve updaters typings
+* [ ] publish all script
+* [ ] rval.js.org CDN
 
 Later
+* [ ] rval-remote
 * [ ] eliminate classes from code base
 * [ ] `drv(( tick ) => ())` to communicate staleness from inside drv (probably also needs onHot / onCold callback in such case)
 * [ ] dynamically switch between hook and non-hook implementations (and explain differences)

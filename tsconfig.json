@@ -45,6 +45,7 @@
       "@r-val/updaters": ["pkgs/updaters/updaters"],
       "@r-val/models": ["pkgs/models/models"],
       "@r-val/react": ["pkgs/react/react"],
+      "@r-val/utils": ["pkgs/utils/utils"],
       "*": ["node_modules/*"]
     } /* A series of entries which re-map imports to lookup locations relative to the 'baseUrl'. */,
     // "rootDirs": [],                        /* List of root folders whose combined content represents the structure of the project at runtime. */
