@@ -26,22 +26,7 @@
   "peerDependencies": {
   },
   "reserved": [
-    "toggle",
-    "inc1",
-    "inc",
-    "dec",
-    "dec1",
-    "replace",
-    "set",
-    "unset",
-    "push",
-    "shift",
-    "unshift",
-    "splice",
-    "assign",
-    "pop",
-    "removeBy",
-    "removeValue"    
+    "toJS", "assignVals"
   ],
   "mangle": {
     "reserved": [

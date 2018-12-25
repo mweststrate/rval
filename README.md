@@ -147,6 +147,9 @@ Todo:
 * [x] fix sourcemaps for minified builds
 * [x] use prop mangling for smaller builds
 * [x] fast class / object test
+* [x] updaters `inc1`, `inc`, `push`, `set`, `delete`, `assign`, `toggle`
+* [x] utils `assignVals`, `toJS
+* [x] setter for `drv`?
 * [ ] config: warn on unbatched writes
 * [ ] config: warn on untracked, stale reads
 * [ ] rval-validation
@@ -155,12 +158,10 @@ Todo:
 * [ ] strict mode: only reads from actions or reactions. Only updates from actions. 
 * [ ] verify callign actions in reactions work correctly
 * [ ] contributing and debugging
-* [x] updaters `inc1`, `inc`, `push`, `set`, `delete`, `assign`, `toggle`
-* [ ] utils `assignVals`, `toJS`
 * [ ] docs
 * [ ] implement `SubscribeOptions`
 * [ ] verify debugging with minification
-* [ ] utils `assignVals`, `toJS
+* [ ] tests and types for utils
 * [ ] move `invariant` to preprocessors?
 * [ ] add `reference` to models?
 * [ ] host docs
@@ -177,5 +178,4 @@ Later
 * [ ] dynamically switch between hook and non-hook implementations (and explain differences)
 * [ ] support name option
 * [ ] abstraction for creating drv / vals and subscribing in hook based component automatically?
-* [x] setter for `drv`?
 * [ ] MobX global state compatibility?
