@@ -151,6 +151,7 @@ Todo:
 * [ ] improve updaters typings
 * [ ] publish all script
 * [ ] rval.js.org CDN
+* [ ] smart lack of act detection. Only have `act`, no `run`?
 
 Later
 * [ ] rval-remote

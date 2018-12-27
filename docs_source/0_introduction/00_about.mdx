@@ -7,33 +7,37 @@ route: /
 
 # About RVal
 
-RVal is a minimalistic, transparent reactive programming library, heavily inspired by [MobX](http://mobx.js.org), 
+RVal is a minimalistic, transparent reactive programming library, heavily inspired by [MobX](http://mobx.js.org)[^1], 
 with the same core principle: _Everything that can be derived from state, should be derived. Automatically_.
 
-However, the goals are slightly different and the library is in terms of API surface and bundle size _much_ smaller. 
-RVal core principles include:
+RVal enables you to organize state into **reactive values**, and provides utilities to **update** this state, **derive** from this state, and organize **side-effects** related to this state.
+
+The core principles of RVal are:
 
 * 🍭 **Minimalistic** A very simple, minimalistic core API
-* 🛅 **Functions + immutable objects**: Functions and (stateful) immutable objects as the primary means to organize state
+* 🛅 **Functions + stateful immutable objects**: Functions and (stateful) immutable objects as the primary means to organize state
 * 🎯 **Convention driven**: An idiomatic way of working, that guides devs into the [Pit of Success](https://medium.com/@ricomariani/the-pit-of-success-cfefc6cb64c8)
-* 📦 **Embeddable**: A low level building block, that is small (~2KB minified gzipped) so that it can easily be embedded in existing libraries and frameworks as state management libraries.
+* 📦 **Embeddable**: A low level building block, that is small (~2KB minified gzipped) so that it can easily be embedded in existing libraries and frameworks as state management library.
 * 🐆 **Fast**: Rock solid performance, leveraging the battle tested algorithms of MobX.
 * ☔ **Versatile**: no dependencies, no modern syntax or language requirements, non-intrusive, applicable in any ES5 JavaScript stack
 * 🎓 **Gradual learning curve**: Opt-in utilities that help with applying best practices
 * 💪 **Strongly typed**: Shouldn't need further explanation in 2019
 
-Ok, that is a pretty vague, generic list of things that sound positive. Hardly saying anything. 
-It boils down to this: RVal, is small, conceptually simple and powerful.
-But mostly: 
+Ok, that is a pretty vague, generic list of things that sound positive.
+It boils down to this: RVal is small, conceptually simple and powerful.
+Or, put differently: 
 
 _The proof of the pudding is in the eating._.
 
-Here is a term that you will encounter when reading the introduction: 
+Here are some terms that you will encounter when reading the introduction: 
 It's all about _reactive values_ and _immutable stateful objects_. 
 Read the introduction to find out what that abomination of seemingly conflicting concepts means.
 But at least: you won't be needing `this`, `let`, `var` or `class`.
+However, if you don't like messing around with functions, you'll better take refuge somewhere else.
 
 ## Quick example
+
+Finally, code!
 
 TODO
 
@@ -42,3 +46,5 @@ Sandbox link
 ## Philosophy
 
 TODO link
+
+[^1]: Compared to Mobx, the goals are slightly different and the library is in terms of API surface and bundle size _much_ smaller. 
