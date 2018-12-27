@@ -167,10 +167,10 @@ test('evaluate on demand', () => {
   let computed = 0
   const b = drv(() => (computed++, a() * 2))
   expect(b()).toBe(4)
-  expect(b()).toBe(4)
+  expect(b()).toBe(4) // this computation is cached until next tick!
   a(3)
   expect(b()).toBe(6)
-  expect(computed).toBe(3)
+  expect(computed).toBe(2)
 })
 
 test('nested propagation', () => {
@@ -408,5 +408,40 @@ test("curried subscription", () => {
     "Got: 2",
     "Got: y",
     "Got: z",
+  ])
+})
+
+test("sub passed previous values", () => {
+  const a = val(1)
+  const events: any[] = []
+  sub(a, (cur, prev) => {
+    events.push([cur, prev])
+  })
+  a(2)
+  run(() => {
+    a(3)
+    a(4)
+  })
+  expect(events).toEqual([
+    [2, 1],
+    [4, 2]
+  ])
+})
+
+test("sub supports fireImmediately", () => {
+  const a = val(1)
+  const events: any[] = []
+  sub(a, (cur, prev) => {
+    events.push([cur, prev])
+  }, { fireImmediately: true })
+  a(2)
+  run(() => {
+    a(3)
+    a(4)
+  })
+  expect(events).toEqual([
+    [1, undefined],
+    [2, 1],
+    [4, 2]
   ])
 })

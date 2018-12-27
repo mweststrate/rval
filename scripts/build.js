@@ -17,7 +17,7 @@ const buildCommand =
   projects.map(pkg => '@r-val/' + pkg + '=rval_' + pkg).join(',') + 
   ' --external ' + projects.map(pkg => '@r-val/' + pkg).join(',') + 
   ' && mv dist/$pkg/*.d.ts dist/ ' +
-  ' && rimraf dist/$pkg .rts2*'
+  ' && rimraf dist/$pkg .rts2* mangle.json'
 
 const corePkgJson = JSON.parse(fs.readFileSync(__dirname + '/../pkgs/core/package.json', 'utf8'))
 

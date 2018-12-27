@@ -5,3 +5,24 @@ menu: Introduction
 route: /introduction/react
 ---
 
+```javascript
+const counter = val(0)
+
+const Counter = () => {
+    const c = useVal(counter)
+    <div>
+        {c}
+        <button onClick={() => counter(0)}>
+            Reset
+        </button>
+    </div>
+}
+
+setInterval(() => {
+    counter(c => c + 1)
+}, 1000);
+
+render(<Counter />, document.body)
+```
+
+// Sandbox

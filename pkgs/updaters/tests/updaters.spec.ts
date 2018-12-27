@@ -1,5 +1,7 @@
-import { val, drv, sub, act, deepfreeze } from "@r-val/core"
+import { val, drv, sub, act, _deepfreeze } from "@r-val/core"
 import { toggle, inc, dec1, inc1, dec, replace, set, push, splice, shift, unshift, pop, assign, unset, removeBy, removeValue } from "@r-val/updaters"
+import { append } from "ramda"
+import produce from "immer";
 
 test('toggle', () => {
   const x = val(false)
@@ -144,8 +146,8 @@ test("unset / removeBy / removeValue", () => {
 
   const ar = [todo1, todo2]
   const obj = { todo1, todo2 }
-  deepfreeze(ar)
-  deepfreeze(obj)
+  _deepfreeze(ar)
+  _deepfreeze(obj)
 
   expect(unset(0)(ar)).toEqual([todo2])
   expect(unset("todo1")(obj)).toEqual({todo2})
@@ -167,4 +169,16 @@ test("unset / removeBy / removeValue", () => {
 
   expect(removeValue(todo1)(ar)).toEqual([todo2])
   expect(removeValue(todo1)(obj)).toEqual({ todo2 })
+})
+
+test("it should append with ramda", () => {
+  const numbers = val([1,2])
+  numbers(append(3))
+  expect(numbers()).toEqual([1,2,3])
+})
+
+test("it should produce with immer", () => {
+  const numbers = val([1,2])
+  numbers(produce(draft => { draft.push(3) }))
+  expect(numbers()).toEqual([1,2,3])
 })

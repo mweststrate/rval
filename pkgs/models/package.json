@@ -1,7 +1,7 @@
 {
   "name": "@r-val/models",
   "private": false,
-  "version": "0.0.1",
+  "version": "0.0.4",
   "description": "",
   "main": "dist/models.js",
   "umd:main": "dist/models.umd.js",
@@ -17,12 +17,10 @@
   "scripts": {},
   "author": "Michel Weststrate",
   "license": "MIT",
-  "dependencies": {},
   "files": [
     "*.ts",
     "dist"
   ],
-  "devDependencies": {},
   "reserved": [
     "model",
     "mapOf",
@@ -40,7 +38,8 @@
       "defaultInstance",
       "isVal",
       "isDrv",
-      "deepfreeze",
+      "_deepfreeze",
+      "_once",
       "val",
       "drv",
       "sub",
@@ -54,5 +53,6 @@
       "arrayOf",
       "invariant"
     ]
-  }
+  },
+  "gitHead": "a824fe9bd83228fb126c8c6188ef7b85fc2ffdd7"
 }

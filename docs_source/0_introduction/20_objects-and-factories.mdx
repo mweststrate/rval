@@ -201,7 +201,33 @@ This holds for many updaters. For example `inc` (to increment), `set`, `splice` 
 to manipulate objects or arrays take arguments as well.
 
 You'll find it is pretty trivial to write your own updater function (feel free to [PR](https://github.com/mweststrate/rval/compare)!).
-But here is the extensive list all [updaters](#/api/updaters).
+But here is the extensive list all [updaters](#/api/updaters) provided by the `@r-val/updaters` package.
+
+Note that the `@r-val/updaters` package is just a set of convenient update functions! 
+However, because the signature of an updater is just a pure function that takes some old state, and produces some new state,
+you can leverage any package you are familiar with to model an update! Such as `ramda` or `immer`. For example:
+
+```javascript
+import { val } from "@r-val/core"
+import { append } from "ramda"
+
+test("it should append with ramda", () => {
+  const numbers = val([1,2])
+  numbers(append(3))
+  expect(numbers()).toEqual([1,2,3])
+})
+```
+
+```javascript
+import { val } from "@r-val/core"
+import produce from "immer"
+
+test("it should produce with immer", () => {
+  const numbers = val([1,2])
+  numbers(produce(draft => { draft.push(3) }))
+  expect(numbers()).toEqual([1,2,3])
+})
+```
 
 _Tip: You might be wondering, if any function that is passed as value to a reactive value is called, how do I store function `fn` in reactive value `x`? The answer is simple: just pass a function that produces `fn`. So instead of `x(fn)` use `x(() => fn)`. Or you can use the built-in updater `replace` to achieve the same: `x(replace(fn))`._ 
 
