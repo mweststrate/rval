@@ -1,7 +1,7 @@
 {
   "name": "@r-val/react",
   "private": false,
-  "version": "0.0.1",
+  "version": "0.0.4",
   "description": "",
   "main": "dist/react.js",
   "umd:main": "dist/react.umd.js",
@@ -17,7 +17,6 @@
   "scripts": {},
   "author": "Michel Weststrate",
   "license": "MIT",
-  "dependencies": {},
   "peerDependencies": {
     "react": "^16.0.0"
   },
@@ -25,5 +24,5 @@
     "*.ts",
     "dist"
   ],
-  "devDependencies": {}
+  "gitHead": "a824fe9bd83228fb126c8c6188ef7b85fc2ffdd7"
 }

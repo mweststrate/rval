@@ -3,11 +3,10 @@
 
 [![npm](https://img.shields.io/npm/v/rval.svg)](https://www.npmjs.com/package/rval) [![size](http://img.badgesize.io/https://unpkg.com/rval/dist/core.mjs?compression=gzip)](http://img.badgesize.io/https://unpkg.com/rval/dist/core.mjs?compression=gzip) [![Build Status](https://travis-ci.org/mweststrate/rval.svg?branch=master)](https://travis-ci.org/mweststrate/rval) [![Coverage Status](https://coveralls.io/repos/github/mweststrate/rval/badge.svg?branch=master)](https://coveralls.io/github/mweststrate/rval?branch=master) [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/michelweststrate) [![Donate](https://img.shields.io/badge/donate-buy%20me%20a%20coffee-orange.svg)](https://www.buymeacoffee.com/mweststrate)
 
-TODO: publish docz docs somewhere and link
 
-[Philosophy](docs/philosophy.mdx)
-[Getting Started](docs/getting-started.mdx)
+Docs in progress:
 
+https://mweststrate.github.io/rval
 
 STATE DESIGN
 
@@ -131,29 +130,31 @@ Todo:
 * [x] setter for `drv`?
 * [x] host docs
 * [x] check https://reactpixi.org/#/stage / https://docs.setprotocol.com/#/#support-and-community- for setup of edit button, menu nesting, hosting
-* [ ] config: warn on unbatched writes
-* [ ] config: warn on untracked, stale reads
+* [x] `sub`, pass in previous value as second argumetn
+* [x] implement `SubscribeOptions`
+* [x] keepAlive drv option, using effect
+* [x] publish all script
 * [ ] rval-validation
-* [ ] strict mode: only reads from actions or reactions. Only updates from actions. 
 * [ ] verify callign actions in reactions work correctly
 * [ ] contributing and debugging
 * [ ] docs
-* [ ] implement `SubscribeOptions`
 * [ ] verify debugging with minification
 * [ ] tests and types for utils
 * [ ] move `invariant` to preprocessors?
 * [ ] add `reference` to models?
-* [ ] contributing guide. `reserved` section in package.json!
+* [ ] contributing & debugging guide. `reserved` section in package.json!
 * [ ] add `toJS` on all model types
 * [ ] add (mobx like) performance tests
 * [ ] kill with-immmer?
-* [ ] `sub`, pass in previous value as second argumetn
 * [ ] improve updaters typings
-* [ ] publish all script
 * [ ] rval.js.org CDN
+* [ ] use yalc? https://www.google.com/url?q=https%3A%2F%2Fgithub.com%2Fwhitecolor%2Fyalc%2F&sa=D&sntz=1&usg=AFQjCNGCTXoCduIMdVHx5xm-uAs_REX3MA
 
 Later
 * [ ] rval-remote
+* [ ] config: warn on unbatched writes
+* [ ] config: warn on untracked, stale reads
+* [ ] strict mode: only reads from actions or reactions. Only updates from actions. 
 * [ ] eliminate classes from code base
 * [ ] `drv(( tick ) => ())` to communicate staleness from inside drv (probably also needs onHot / onCold callback in such case)
 * [ ] dynamically switch between hook and non-hook implementations (and explain differences)

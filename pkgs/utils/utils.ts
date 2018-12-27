@@ -1,4 +1,4 @@
-import { isVal, isDrv } from "@r-val/core";
+import { isVal, isDrv, Drv, Disposer, rval, _once } from "@r-val/core";
 
 // type SnapshotType<T> = {
 //   [K in keyof T]?: T[K] extends Val<infer X, infer S>
@@ -33,4 +33,10 @@ export function assignVals(target, vals, ...moreVals) {
     throw new Error(`[assignVals] value at key "${key}" is not a 'val' or 'drv'`)
   }
   return target
+}
+
+export function keepAlive(target: Drv<any>): Disposer {
+  return rval(target).effect(target, _once((didChange, pull) => {
+    didChange() // we never have to pull, we only detect for changes once, so that the target becomes hot
+  }))
 }

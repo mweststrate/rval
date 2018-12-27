@@ -1,4 +1,4 @@
-import { isVal, deepfreeze, PreProcessor, Val, Drv } from "@r-val/core"
+import { isVal, _deepfreeze, PreProcessor, Val, Drv } from "@r-val/core"
 
 const $factory = Symbol('$factory')
 
@@ -41,7 +41,7 @@ export function model(factory, key?) {
         } else if (prop !== key) throw new Error(`Property '${prop}' cannot be updated`)
       }
       // freeze(base)
-      return deepfreeze(base)
+      return _deepfreeze(base)
     },
     { key }
   )

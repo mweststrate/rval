@@ -6,3 +6,4 @@ dist
 /coverage
 .docz
 mangle.json
+lerna-debug.log

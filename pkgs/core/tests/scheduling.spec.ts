@@ -101,3 +101,36 @@ test("scheduling 1", async () => {
     expect(events.splice(0)).toEqual([    
     ])
 })
+
+test("drv are temporarily kept alive", async () => {
+    let count = 0
+    const x = val(1)
+    const y = drv(() => {
+        count++
+        return x() * 2
+    })
+
+    debugger
+    expect(y()).toBe(2)
+    expect(count).toBe(1)
+
+    // kept alaive
+    expect(y()).toBe(2)
+    expect(count).toBe(1)
+
+    x(2)
+    expect(y()).toBe(4)
+    expect(count).toBe(2)
+
+    await delay(1000)
+    debugger
+    expect(y()).toBe(4)
+    expect(count).toBe(3)
+    expect(y()).toBe(4)
+    expect(count).toBe(3)
+
+    debugger
+    x(3)
+    expect(y()).toBe(6)
+    expect(count).toBe(4)
+})

@@ -2,6 +2,7 @@ import { val, sub, drv, rval } from '@r-val/core'
 
 test('auto freeze', () => {
     {
+        debugger
         const v = val<any>({ x: 1 })
         expect(() => v().y = 1).toThrow(/object is not extensible/)
 

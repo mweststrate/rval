@@ -1,32 +1,29 @@
 {
-  "name": "@r-val/updaters",
+  "name": "@r-val/utils",
   "private": false,
-  "version": "0.0.1",
+  "version": "0.0.4",
   "description": "",
-  "main": "dist/updaters.js",
-  "umd:main": "dist/updaters.umd.js",
-  "unpkg": "dist/updaters.umd.js",
-  "module": "dist/updaters.mjs",
-  "jsnext:main": "dist/updaters.mjs",
-  "react-native": "dist/updaters.mjs",
+  "main": "dist/utils.js",
+  "umd:main": "dist/utils.umd.js",
+  "unpkg": "dist/utils.umd.js",
+  "module": "dist/utils.mjs",
+  "jsnext:main": "dist/utils.mjs",
+  "react-native": "dist/utils.mjs",
   "browser": {
-    "./dist/updaters.js": "./dist/updaters.js",
-    "./dist/updaters.mjs": "./dist/updaters.mjs"
+    "./dist/utils.js": "./dist/utils.js",
+    "./dist/utils.mjs": "./dist/utils.mjs"
   },
-  "source": "updaters.ts",
+  "source": "utils.ts",
   "scripts": {},
   "author": "Michel Weststrate",
   "license": "MIT",
-  "dependencies": {},
   "files": [
     "*.ts",
     "dist"
   ],
-  "devDependencies": {},
-  "peerDependencies": {
-  },
   "reserved": [
-    "toJS", "assignVals"
+    "toJS",
+    "assignVals"
   ],
   "mangle": {
     "reserved": [
@@ -39,7 +36,8 @@
       "defaultInstance",
       "isVal",
       "isDrv",
-      "deepfreeze",
+      "_deepfreeze",
+      "_once",
       "val",
       "drv",
       "sub",
@@ -48,22 +46,9 @@
       "effect",
       "configure",
       "autoFreeze",
-      "toggle",
-      "inc1",
-      "inc",
-      "dec",
-      "dec1",
-      "replace",
-      "set",
-      "unset",
-      "push",
-      "shift",
-      "unshift",
-      "splice",
-      "assign",
-      "pop",
-      "removeBy",
-      "removeValue"
+      "toJS",
+      "assignVals"
     ]
-  }
+  },
+  "gitHead": "a824fe9bd83228fb126c8c6188ef7b85fc2ffdd7"
 }
