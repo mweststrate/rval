@@ -43,7 +43,7 @@ interface ObservableAdministration {
 export type PreProcessor<T = unknown, S = T> = (newValue: T | S, baseValue?: T, api?: RValInstance) => T
 
 export interface RValInstance {
-  val<T, S=T>(initial: S, preProcessor: PreProcessor<T, S> | PreProcessor<T, any>[]): Val<T, S>
+  val<T, S=T>(initial: S, preProcessor?: PreProcessor<T, S> | PreProcessor<T, any>[]): Val<T, S>
   drv<T, S=T>(derivation: () => T, setter?: (value: S) => void): Drv<T>
   sub<T>(
     listener: SubListener<T>,
@@ -93,7 +93,7 @@ export function rval(base?: Val<any, any>): RValInstance {
     context.pending.push(t)
   }
 
-  function val(initial, preProcessor: any = defaultPreProcessor): Val {
+  function val(initial, preProcessor: any = defaultPreProcessor): Val<any, any> {
     return new ObservableValue(context, api, initial, preProcessor).get as any
   }
 

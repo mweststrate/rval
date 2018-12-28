@@ -10,6 +10,7 @@ route: /api/core
 ## `val`
 
 **Signature** 
+
 `val(initialValue, preProcessor?) -> reactive value`
 
 **Description**
@@ -17,20 +18,24 @@ route: /api/core
 ## `drv`
 
 **Signature**
-drv(derivation, setter?) -> reactive value`**
+
+`drv(derivation, setter?) -> reactive value`
 
 **Description**
 
 ## `sub`
 
 **Signature**
+
 * `sub(source, listener, options) -> disposer` &mdash; the default way to create a subscription to an reactive `source`
 * `sub(listener, options) -> (source) -> disposer` &mdash; create a curried subscription, 
 
 **Subscription `options`:**
+
 * `fireImmediately` (default `false`). `true`: the listener should be immediately invoked, or `false`: only when the first _change_ is observed in `source`.
 
 **Listener arguments:**
+
 * `value`
 * `previousValue`
 
@@ -60,9 +65,11 @@ log(someOtherReactiveValue)
 ## `configure`
 
 **Signature**
+
 `configure(options)`
 
 **Configuration options**
+
 * `deepFreeze`: automatically deeply freezes any values arrays or plain objects that are stored in a reactive value. Best enabled in development enviroments. Default: `true`. Should be disabled in production enviroments for optimal performance.
 
 Set's the the options for the current RVal instance (see also `rval` and `defaultInstance`).
@@ -71,10 +78,12 @@ Set's the the options for the current RVal instance (see also `rval` and `defaul
 ## `rval`
 
 Signature: 
+
 * `rval()` &mdash; creates a _new_ RVal instance
 * `rval(reactiveValue)` &mdash; returns the RVal instances that created the given reactive value.
 
 Returns an rval instance, that exposes the APIs:
+
 * `val`
 * `drv`
 * `sub`
