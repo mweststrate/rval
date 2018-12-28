@@ -21,12 +21,6 @@
   },
   "author": "Michel Weststrate",
   "license": "MIT",
-  "files": [
-    "core",
-    "immer",
-    "models",
-    "react"
-  ],
   "devDependencies": {
     "@types/jest": "^23.3.9",
     "@types/node": "^10.12.17",

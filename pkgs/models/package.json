@@ -25,7 +25,8 @@
     "model",
     "mapOf",
     "arrayOf",
-    "invariant"
+    "invariant",
+    "toJS"
   ],
   "mangle": {
     "reserved": [
@@ -48,6 +49,7 @@
       "effect",
       "configure",
       "autoFreeze",
+      "fireImmediately",
       "model",
       "mapOf",
       "arrayOf",

@@ -1,4 +1,5 @@
-import { isVal, _deepfreeze, PreProcessor, Val, Drv } from "@r-val/core"
+import { isVal, _deepfreeze, PreProcessor, Val, Drv, drv } from "@r-val/core"
+import { toJS, keepAlive } from "@r-val/utils";
 
 const $factory = Symbol('$factory')
 
@@ -29,9 +30,20 @@ export function model(factory, key?) {
       }
       if (key && newValue[key] === undefined) throw new Error(`Attribute '${key}' is required`)
       const reconcilable = currentValue && (!key || newValue[key] === currentValue[key])
-      const base = reconcilable ? currentValue : Object.assign(factory(), { [$factory]: factory })
+      let base 
+      if (reconcilable)
+        base = currentValue
+      else {
+        const fromFactory = factory()
+        const snapshot = drv(() => toJS(fromFactory))
+        keepAlive(snapshot)
+        base = Object.assign({ 
+          [$factory]: factory,
+          toJS: snapshot
+        }, fromFactory) // Optimization: swapping args would probalby lot faster
+      }
       // TODO: factory should set debug names
-      // update props
+      // update props from the provided initial snapshot
       for (let prop in newValue) {
         if (isVal(base[prop])) {
           base[prop](newValue[prop])
@@ -40,7 +52,6 @@ export function model(factory, key?) {
           else throw new Error(`Property '${prop}' has not been declared in the model`)
         } else if (prop !== key) throw new Error(`Property '${prop}' cannot be updated`)
       }
-      // freeze(base)
       return _deepfreeze(base)
     },
     { key }

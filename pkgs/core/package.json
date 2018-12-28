@@ -63,7 +63,8 @@
       "act",
       "effect",
       "configure",
-      "autoFreeze"
+      "autoFreeze",
+      "fireImmediately"
     ]
   },
   "gitHead": "a824fe9bd83228fb126c8c6188ef7b85fc2ffdd7"

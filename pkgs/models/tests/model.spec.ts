@@ -275,6 +275,13 @@ describe('todostore - with parent', () => {
     s({todos: [{
       id: 1, title: "world"
     }]})
+    
+    debugger;
+    expect(s().toJS()).toEqual({
+      todos: [
+        { done: true, id: 0, title: "world" }
+      ]
+    })
 
     expect(t1.title()).toBe('world')
     expect(t1.done()).toBe(true)
@@ -282,5 +289,8 @@ describe('todostore - with parent', () => {
 
     t1.remove()
     expect(s().todos().length).toBe(0)
+
   })
 })
+
+// TODO: store with drv, check liveleness of toJS

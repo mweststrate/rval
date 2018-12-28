@@ -37,9 +37,9 @@ test("assignVals", () => {
 
     expect(toJS(x)).toEqual({
         a: 4,
-        b: 5,
-        c: 10
+        b: 5
     })
+    expect(x.c()).toBe(10)
 })
 
 test("keepAlive", async () => {

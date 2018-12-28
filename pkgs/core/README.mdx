@@ -7,6 +7,9 @@ route: /api/core
 
 # @r-val/core
 
+`@r-val/core` package contains all the core functionality of RVal. 
+The most important concepts are explain on the [getting started](#/introduction/the-basics) page.
+
 ## `val`
 
 **Signature** 
@@ -14,6 +17,71 @@ route: /api/core
 `val(initialValue, preProcessor?) -> reactive value`
 
 **Description**
+
+`val` creates a reactive value that can be used to store state.
+The `initialValue` froms the initial state of the reative value.
+
+`val` returns a function that takes zero or one arguments:
+* If the function is invoked without arguments, the current value is returned
+* If the function is invoked with one argument, and that value is not a function, the argument becomes the new state of the reactive value.
+* If the function is invoked with a function as argument, that function is invoked and should produce the new state, based on the current state. Built-in update functions can be found in the [`@r-val/updaters` package](#/api/updaters).
+
+```javascript
+const temperature = val(37)
+console.log(temperature()) // prints 37
+
+temperature(38)
+console.log(temperature()) // prints 38
+
+temperature(v => v + 1)
+console.log(temperature()) // prints 39
+```
+
+For the `preProcessor` argument, see [#preprocessors].
+
+## PreProcessors
+
+By default, any new value state stored in a `val` is automatically deeply frozen, even the value is a plain array or object.
+
+The `preProcessor` argument to apply some preprocessing on the values that are being stored, or perform validations.
+The signature of a pre-processor is: `(newValue, currentValue, rvalInstance) -> newValue`. Where:
+ * `newValue` the value that is about to be stored
+ * `currentValue` the value that is currently stored
+ * `rvalInstance` the current RVal instance (see the `rval()` function)
+ * The return value is the value that will be passed to the next pre-processor, or if there is none, that will be stored.
+
+It is possible to chain multiple pre processors, by simply passing an array of preprocessors to `val`.
+
+For example, the following reactive value `profit` has two pre-processors. 
+The first one automatically converts new values to strings,
+the second one performs some validation, refusing to store numbers that 
+are smaller then the previous value.
+
+```javascript
+function convertToNumber(newValue) {
+    if (typeof newValue === "number")
+        return newValue
+    else
+        return parseFloat(newValue)
+}
+
+const profit = val(0, [
+    // convert input to number
+    convertToNumber,
+    // check if profits increase
+    (newValue, currentValue) => {
+        if (newValue < currentValue)
+            throw new Error("Invariant failed! Profits should increase")
+        return newValue
+    }
+])
+
+profit(-5) // Throws exception: Profits should increase
+
+profit("7") // Parses the number, and sets profit to number 7
+```
+
+
 
 ## `drv`
 

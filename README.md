@@ -135,6 +135,8 @@ Todo:
 * [x] keepAlive drv option, using effect
 * [x] publish all script
 * [x] tests and types for utils
+* [x] kill with-immmer?
+* [x] improve updaters typings
 * [ ] kill `run`
 * [ ] rval-validation
 * [ ] verify callign actions in reactions work correctly
@@ -146,11 +148,10 @@ Todo:
 * [ ] contributing & debugging guide. `reserved` section in package.json!
 * [ ] add `toJS` on all model types
 * [ ] add (mobx like) performance tests
-* [ ] kill with-immmer?
-* [ ] improve updaters typings
 * [ ] rval.js.org CDN
 * [ ] smart lack of act detection. Only have `act`, no `run`?
 * [ ] use yalc? https://www.google.com/url?q=https%3A%2F%2Fgithub.com%2Fwhitecolor%2Fyalc%2F&sa=D&sntz=1&usg=AFQjCNGCTXoCduIMdVHx5xm-uAs_REX3MA
+* [ ] rename MDX files to md
 
 Later
 * [ ] rval-remote

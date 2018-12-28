@@ -445,3 +445,28 @@ test("sub supports fireImmediately", () => {
     [4, 2]
   ])
 })
+
+test("preprocessor", () => {
+  function convertToNumber(newValue) {
+    if (typeof newValue === "number")
+        return newValue
+    else
+        return parseFloat(newValue)
+  }
+
+  const profit = val(0, [
+      convertToNumber,
+      (newValue, currentValue) => {
+          if (newValue < currentValue)
+              throw new Error("Invariant failed! Profits should increase")
+          return newValue
+      }
+  ])
+
+  expect(() => {
+    profit(-5) // Throws exception: Profits should increase
+  }).toThrow("should increase")
+
+  profit("7") // Parses the number, and sets profit to number 7
+  expect(profit()).toBe(7)
+})

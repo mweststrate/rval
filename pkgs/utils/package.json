@@ -23,7 +23,8 @@
   ],
   "reserved": [
     "toJS",
-    "assignVals"
+    "assignVals",
+    "keepAlive"
   ],
   "mangle": {
     "reserved": [
@@ -46,6 +47,7 @@
       "effect",
       "configure",
       "autoFreeze",
+      "fireImmediately",
       "toJS",
       "assignVals"
     ]

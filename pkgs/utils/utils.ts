@@ -8,7 +8,9 @@ export function toJS(thing) {
   if (Array.isArray(thing)) return thing.map(toJS)
   if (_isPlainObject(thing)) {
     const res = {}
-    for (const key in thing) res[key] = toJS(thing[key])
+    for (const key in thing)
+      if (typeof thing[key] !== "function" || isVal(thing[key]))
+        res[key] = toJS(thing[key])
     return res
   }
   return thing
