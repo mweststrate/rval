@@ -93,6 +93,7 @@ export class RView extends Component<{
   }
 }
 
+// Hook based implementation:
 // export function _RView({
 //   children,
 //   rvalInstance = defaultContext,

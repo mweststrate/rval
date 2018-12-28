@@ -37,14 +37,50 @@ However, if you don't like messing around with functions, you'll better take ref
 
 ## Quick example
 
-Finally, code!
+Finally, some code! Here is quick example of RVal incombination with React:
+
+```javascript
+import React from "react"
+import { render } from "react-dom"
+import { val } from "@r-val/core"
+import { rview } from "@r-val/react"
+
+const counter = val(0)
+
+const Counter = () => rview(() => (
+    <>
+        {counter()}
+        <button onClick={() => counter(0)}>Reset</button>
+    </>
+))
+
+setInterval(() => {
+  counter(c => c + 1)
+}, 1000)
+
+render(<Counter />, document.body)
+```
+
+This example can be tried in [code sandbox](https://codesandbox.io/s/m297j6w38). Some quick highlights:
+1. This application has a single _reactive value_, called `counter`, initialized to `0`.
+2. The component is reading the current value, by calling `counter()`, that simply returns the current state.
+3. The `onClick` handler replaces the internal state of the `counter` with the value `0` again.
+4. The `setInterval` updates the `counter` every second, using a function that takes the current state of the `counter`, and produces a new state.
+5. The [`rview`](#/introduction/react) function creates a _reactive view_, which takes a render callback, and re-render's automatically when any of the reactive values inside it's function body changes. That is why we see the counter actually ticking (Note that the `counter` is neither part of the state or props of the component). 
+
+Hopefully this example will strike you as slightly boring. Good, this library wasn't build to write counters. 
+The following example is slightly more elaborate. Or you can just jump ahead to all the [core concepts](#/introduction/the-basics).
+
+## Slightly more elaborate example
 
 TODO
 
-Sandbox link
+## More examples
+
+An overview of more examples can be found in the [examples](#/advanced/examples) section.
 
 ## Philosophy
 
-TODO link
+Interesting in the _why_ of RVal? In that case check out the [philosophy](#/introduction/philosophy) section.
 
 [^1]: Compared to Mobx, the goals are slightly different and the library is in terms of API surface and bundle size _much_ smaller. 

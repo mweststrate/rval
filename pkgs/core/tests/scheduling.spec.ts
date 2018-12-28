@@ -110,7 +110,6 @@ test("drv are temporarily kept alive", async () => {
         return x() * 2
     })
 
-    debugger
     expect(y()).toBe(2)
     expect(count).toBe(1)
 
@@ -123,14 +122,15 @@ test("drv are temporarily kept alive", async () => {
     expect(count).toBe(2)
 
     await delay(1000)
-    debugger
     expect(y()).toBe(4)
     expect(count).toBe(3)
     expect(y()).toBe(4)
     expect(count).toBe(3)
 
-    debugger
     x(3)
     expect(y()).toBe(6)
     expect(count).toBe(4)
+
+    x(4)
+    expect(count).toBe(4) // y() wasn't called
 })

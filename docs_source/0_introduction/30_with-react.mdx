@@ -5,17 +5,38 @@ menu: Introduction
 route: /introduction/react
 ---
 
+# Using RVal with React
+
+RVal is in essence framework agnostic. 
+But, official bindings for React are available through the `@r-val/react` package.
+(This package is a very thin layer around the `effect` function).
+
+## `useVal`: Subscribe with hooks
+
+The simplest way to consume a reactive value in a component is to use the `useVal` hook.
+Note that `useVal` uses React hooks, which aren't officially released yet! 
+We just start with those because they are conceptually the most straight-forward, but RVal will work with any version of React 16.
+
+The `useVal` hook can be passed any reactive value (either an `val` or `drv`), and makes sure the component subscribes to the changes in this value.
+It simply returns the current state of the reactive value passed.
+Note that `useVal` doesn't return a setter function! To update the reactive value, just call the reactive value directly with a new value, as shown below in the `onClick` handler:
+
 ```javascript
+import React from "react"
+import { render } from "react-dom"
+import { val } from "@r-val/core"
+import { useVal } from "@r-val/react"
+
 const counter = val(0)
 
 const Counter = () => {
     const c = useVal(counter)
-    <div>
+    return (<>
         {c}
         <button onClick={() => counter(0)}>
             Reset
         </button>
-    </div>
+    </>)
 }
 
 setInterval(() => {
@@ -25,4 +46,50 @@ setInterval(() => {
 render(<Counter />, document.body)
 ```
 
-// Sandbox
+## `rview`: Reactive views
+
+With `useVal`, we can pick one by one all the reactive values we wan't to subscribe to. 
+This is quite explicit, but it easy to subscribe to to few, or too many reactive values.
+And more important, `useVal` is quite limited; due to the nature of hooks it is not possible to 
+conditionally subscribe to reactive values. 
+While in practice not all values might always be relevant in all states of the component!
+
+So, that is where `rview` comes in! 
+`rview` is conceptually very similar to `drv`, except that it is specialized to produce and update React components. 
+`rview` takes a render callback (without arguments) and returns an `RView` component instance. 
+The neat thing is that `rview` will automatically keep track of all the reactive values that are used in the render callback, and subscribes to them,
+so that you don't have to. 
+(And it will even unsubscribe from reactive values that are (temporarily) unused). 
+So with `rview`, our previous counter simply boils down to the following, and note that `counter()` can be called directly in the render callback:
+
+
+```javascript
+import React from "react"
+import { render } from "react-dom"
+import { val } from "@r-val/core"
+import { useVal } from "@r-val/react"
+
+const counter = val(0)
+
+const Counter = () => rview(() => (
+    <>
+        {counter()}
+        <button onClick={() => counter(0)}>
+            Reset
+        </button>
+    </>
+))
+
+setInterval(() => {
+    counter(c => c + 1)
+}, 1000);
+
+render(<Counter />, document.body)
+```
+as [code sandbox](https://codesandbox.io/s/m297j6w38)
+
+_Tip: `rview` doesn't require hooks, so it works in any React 16.+ version._
+
+## Further details
+
+...can be found in the [API reference for the React bindings](#/api/react). 

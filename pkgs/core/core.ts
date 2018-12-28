@@ -44,7 +44,6 @@ export type PreProcessor<T = unknown, S = T> = (newValue: T | S, baseValue?: T, 
 
 export interface RValInstance {
   val<T, S=T>(initial: S, preProcessor: PreProcessor<T, S> | PreProcessor<T, any>[]): Val<T, S>
-  val<T>(initial: T): Val<T, T>
   drv<T, S=T>(derivation: () => T, setter?: (value: S) => void): Drv<T>
   sub<T>(
     listener: SubListener<T>,

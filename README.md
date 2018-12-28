@@ -134,6 +134,7 @@ Todo:
 * [x] implement `SubscribeOptions`
 * [x] keepAlive drv option, using effect
 * [x] publish all script
+* [ ] kill `run`
 * [ ] rval-validation
 * [ ] verify callign actions in reactions work correctly
 * [ ] contributing and debugging

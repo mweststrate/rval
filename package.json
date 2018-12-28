@@ -17,7 +17,7 @@
     "coverage": "jest --runInBand --coverage --config jest.config.json && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "docz:dev": "docz dev",
     "docz:build": "docz build",
-    "release": "yarn build && lerna publish && yarn docz:build && git add docs && git commit -m 'regenned docs'"
+    "release": "yarn build && lerna publish && yarn docz:build && git add docs && git commit -m 'regenned docs' && git push"
   },
   "author": "Michel Weststrate",
   "license": "MIT",

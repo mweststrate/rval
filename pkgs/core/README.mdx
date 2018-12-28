@@ -5,9 +5,86 @@ menu: API
 route: /api/core
 ---
 
-# @r-val/core api
+# @r-val/core
 
-## val
+## `val`
 
-How to set a function? `fnHolder(() => fn)` or `fnHolder(replace(fn))`
+**Signature** 
+`val(initialValue, preProcessor?) -> reactive value`
 
+**Description**
+
+## `drv`
+
+**Signature**
+drv(derivation, setter?) -> reactive value`**
+
+**Description**
+
+## `sub`
+
+**Signature**
+* `sub(source, listener, options) -> disposer` &mdash; the default way to create a subscription to an reactive `source`
+* `sub(listener, options) -> (source) -> disposer` &mdash; create a curried subscription, 
+
+**Subscription `options`:**
+* `fireImmediately` (default `false`). `true`: the listener should be immediately invoked, or `false`: only when the first _change_ is observed in `source`.
+
+**Listener arguments:**
+* `value`
+* `previousValue`
+
+**Description**
+
+TODO
+
+The curried version of the api can be useful to create utilities, for example a `logger` that prints the values of any state transition:
+
+```javascript
+const log = sub((current, previous) => {
+    console.log(`${previous} -> ${current}`)
+})
+
+log(someReactiveValue)
+log(someOtherReactiveValue)
+```
+
+## `act`
+
+## `effect`
+
+## `isVal`
+
+## `isDrv`
+
+## `configure`
+
+**Signature**
+`configure(options)`
+
+**Configuration options**
+* `deepFreeze`: automatically deeply freezes any values arrays or plain objects that are stored in a reactive value. Best enabled in development enviroments. Default: `true`. Should be disabled in production enviroments for optimal performance.
+
+Set's the the options for the current RVal instance (see also `rval` and `defaultInstance`).
+
+
+## `rval`
+
+Signature: 
+* `rval()` &mdash; creates a _new_ RVal instance
+* `rval(reactiveValue)` &mdash; returns the RVal instances that created the given reactive value.
+
+Returns an rval instance, that exposes the APIs:
+* `val`
+* `drv`
+* `sub`
+* `act`
+* `effect`
+* `configure`
+
+## `defaultInstance`
+
+The default RVal instance used by all the top-level api's exposed by the module. 
+For more info about what an RVal instance is, see `rval`.
+
+## `$RVal`
