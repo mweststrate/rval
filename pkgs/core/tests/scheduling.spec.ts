@@ -1,4 +1,4 @@
-import { val, sub, drv, batch, effect, $RVal } from '@r-val/core'
+import { val, sub, drv, effect, $RVal } from '@r-val/core'
 
 function getDeps(thing) {
     return Array.from(thing[$RVal].listeners)

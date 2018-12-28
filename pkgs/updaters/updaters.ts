@@ -84,20 +84,18 @@ export function pop<T>(val: T[]): T[] {
   return res
 }
 
-export const assign = <T>(v:T) => (o: T) => {
+export const assign = <A, B>(v:A) => (o: B) => {
   if (!v) return o
   let change = false
-  for (const key in v) if (o[key] !== v[key]) {
+  for (const key in v) if ((o as any) [key] !== v[key]) {
     change = true
     break
   }
-  return (change ? Object.assign({}, o, v) : o) as T
+  return (change ? Object.assign({}, o, v) : o) as (A & B)
 }
 
-export function removeBy<T>(predicate: (val: T) => boolean): (o: T[]) => T[]
-export function removeBy<V, T extends KVMap<V>>(predicate: (val: V) => boolean): (o: T) => T
-export function removeBy<T, K extends keyof T>(key: K, value: T[K]): (o: T[]) => T[]
-export function removeBy<V, T extends KVMap<V>, K extends keyof V>(key: K, value: V[K]): (o: T) => T
+export function removeBy(key: string, value: any): <B>(o: B) => B
+export function removeBy(predicate: (val: any) => boolean): <B>(o: B) => B
 export function removeBy(arg1, arg2?) {
   if (typeof arg1 !== "function")
     return removeBy(v => v[arg1] === arg2)
@@ -118,6 +116,7 @@ export function removeBy(arg1, arg2?) {
   }
 }
 
+export function removeValue(value: any): <B>(o: B) => B
 export function removeValue(value) {
   return removeBy(v => v === value)
 }

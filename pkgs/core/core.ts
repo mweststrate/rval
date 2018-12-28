@@ -244,7 +244,7 @@ class ObservableValue<T> implements ObservableAdministration {
     }
   }
   freeze(v) {
-    if (this.context.config.autoFreeze && (Array.isArray(v) || isPlainObject(v))) _deepfreeze(v)
+    if (this.context.config.autoFreeze && (Array.isArray(v) || _isPlainObject(v))) _deepfreeze(v)
     return v
   }
 }
@@ -443,8 +443,8 @@ function hiddenProp(target, key, value) {
   })
 }
 
-function isPlainObject(o) {
-  const p = Object.getPrototypeOf(o)
+export function _isPlainObject(o) {
+  const p = o && typeof o === "object" && Object.getPrototypeOf(o)
   return p === Object.prototype || p === null
 }
 

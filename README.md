@@ -134,13 +134,13 @@ Todo:
 * [x] implement `SubscribeOptions`
 * [x] keepAlive drv option, using effect
 * [x] publish all script
+* [x] tests and types for utils
 * [ ] kill `run`
 * [ ] rval-validation
 * [ ] verify callign actions in reactions work correctly
 * [ ] contributing and debugging
 * [ ] docs
 * [ ] verify debugging with minification
-* [ ] tests and types for utils
 * [ ] move `invariant` to preprocessors?
 * [ ] add `reference` to models?
 * [ ] contributing & debugging guide. `reserved` section in package.json!

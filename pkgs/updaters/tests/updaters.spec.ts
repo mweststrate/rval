@@ -124,7 +124,7 @@ test("assign", () => {
   }
 
   expect(assign({})(base)).toBe(base)
-  expect(assign(null)(base)).toBe(base)
+  expect(assign(null as any)(base)).toBe(base)
   expect(assign({x: 1, y: 2})(base)).toBe(base)
   expect(assign({x: 2, y: 2})(base)).not.toBe(base)
   expect(assign({x: 2, y: 2})(base)).toEqual({ x: 2, y: 2 })
