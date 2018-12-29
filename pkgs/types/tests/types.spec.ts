@@ -126,7 +126,45 @@ test('isMap', () => {
   v({})
 })
 
-// TODO: isShape
+describe('isShape', () => {
+  const todoShape = t.isShape({
+    done: t.isBoolean,
+    title: t.isString
+  })
 
-// TODO: invariant
+  const todoStoreShape = t.isShape({
+    todos: t.isArray(todoShape)
+  })
 
+  test('simple', () => {
+    const t1 = val({ done: false, title: "get coffee"}, todoShape)
+    expect(() => t1({} as any)).toThrowErrorMatchingSnapshot()
+    expect(() => t1({ done: true, title: 3 } as any)).toThrowErrorMatchingSnapshot()
+    t1({
+      extra: 7,
+      done: false,
+      title: "stuff"
+    } as any)
+  })
+
+  test('complex', () => {
+    const store = val({
+      todos: [{ done: false, title: "get coffee"}]
+    }, todoStoreShape)
+
+    expect(() => store({} as any)).toThrowErrorMatchingSnapshot()
+    store({
+      todos: []
+    })
+    expect(() => store({
+      todos: [{ done: false, title: "get coffee"}, 3]
+    } as any)).toThrowErrorMatchingSnapshot()
+  })
+})
+
+test('invariant', () => {
+  const x = val(3, t.invariant(p => p > 0))
+
+  x(2)
+  expect(() => x(-1)).toThrow("Typecheck failed, expected 'invariant 'p => p > 0'', got: (number) '-1'")
+})

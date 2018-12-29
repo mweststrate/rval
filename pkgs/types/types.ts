@@ -78,7 +78,7 @@ export function isMap<T>(subTypeChecker: TypeChecker<T>): TypeChecker<{[key: str
 export function isShape<T extends {[key: string]: TypeChecker<any> }>(shape: T): TypeChecker<T> {
   const typeString = "Object<{\n\t"
     + Object.keys(shape).map(key => `${key}: ${getTypeName(shape[key])}`).join(",\n\t")
-    + "\t}>";
+    + "\n}>";
   return createTypeChecker(
     v => Object.keys(shape).every(key => isA(shape[key], v[key])),
     typeString

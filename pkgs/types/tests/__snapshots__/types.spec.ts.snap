@@ -1,0 +1,33 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`isShape complex 1`] = `
+"Typecheck failed, expected 'Object<{
+	todos: Array<Object<{
+	done: boolean,
+	title: string
+}>>
+}>', got: (object) '{}'"
+`;
+
+exports[`isShape complex 2`] = `
+"Typecheck failed, expected 'Object<{
+	todos: Array<Object<{
+	done: boolean,
+	title: string
+}>>
+}>', got: (object) '{\\"todos\\":[{\\"done\\":false,\\"title\\":\\"get coffee\\"},3]}'"
+`;
+
+exports[`isShape simple 1`] = `
+"Typecheck failed, expected 'Object<{
+	done: boolean,
+	title: string
+}>', got: (object) '{}'"
+`;
+
+exports[`isShape simple 2`] = `
+"Typecheck failed, expected 'Object<{
+	done: boolean,
+	title: string
+}>', got: (object) '{\\"done\\":true,\\"title\\":3}'"
+`;
