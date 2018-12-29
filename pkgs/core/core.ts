@@ -40,7 +40,7 @@ interface ObservableAdministration {
   get(): any
 }
 
-export type PreProcessor<T = unknown, S = T> = (newValue: T | S, baseValue: T, api: RValInstance) => T
+export type PreProcessor<T = unknown, S = T> = (newValue: T | S, baseValue?: T, api?: RValInstance) => T
 
 export interface RValInstance {
   val<T>(initial: T): Val<T, T>

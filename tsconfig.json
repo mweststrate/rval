@@ -42,7 +42,7 @@
     "paths": {
       "@r-val/core": ["pkgs/core/core"],
       "@r-val/updaters": ["pkgs/updaters/updaters"],
-      "@r-val/types": ["pkgs/models/models"],
+      "@r-val/types": ["pkgs/types/types"],
       "@r-val/utils": ["pkgs/utils/utils"],
       "@r-val/react": ["pkgs/react/react"],
       "@r-val/models": ["pkgs/models/models"],

@@ -276,7 +276,6 @@ describe('todostore - with parent', () => {
       id: 1, title: "world"
     }]})
     
-    debugger;
     expect(s().toJS()).toEqual({
       todos: [
         { done: true, id: 0, title: "world" }

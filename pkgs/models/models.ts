@@ -18,7 +18,7 @@ type SnapshotType<T> = {
 // TODO: pass bae value as first arg to factory? or call res.afterCreate() ? and what about other hooks? parents?
 // TODO: pass RvalFactories in as second arg to factory?
 // TODO: make sure the return value is made readonly, typewise!
-export function model<T>(factory: () => T, key?: keyof T): PreProcessor<T, SnapshotType<T>>
+export function model<T>(factory: () => T, key?: keyof T): PreProcessor<T & {toJS(): any}, SnapshotType<T>>
 export function model(factory, key?) {
   return Object.assign(
     function modelPreProcessor(newValue, currentValue?) {

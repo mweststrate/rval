@@ -457,7 +457,7 @@ test("preprocessor", () => {
   const profit = val(0, [
       convertToNumber,
       (newValue, currentValue) => {
-          if (newValue < currentValue)
+          if (newValue < currentValue!)
               throw new Error("Invariant failed! Profits should increase")
           return newValue
       }
