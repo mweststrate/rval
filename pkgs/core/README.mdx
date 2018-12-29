@@ -52,6 +52,8 @@ The signature of a pre-processor is: `(newValue, currentValue, rvalInstance) -> 
 
 It is possible to chain multiple pre processors, by simply passing an array of preprocessors to `val`.
 
+`val` uses pointer equality to detect and propagate updates. So if your previous detects that the current update can or needs to be aborted, just `return currentValue`.
+
 For example, the following reactive value `profit` has two pre-processors. 
 The first one automatically converts new values to strings,
 the second one performs some validation, refusing to store numbers that 

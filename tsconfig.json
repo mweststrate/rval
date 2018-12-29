@@ -42,9 +42,10 @@
     "paths": {
       "@r-val/core": ["pkgs/core/core"],
       "@r-val/updaters": ["pkgs/updaters/updaters"],
-      "@r-val/models": ["pkgs/models/models"],
-      "@r-val/react": ["pkgs/react/react"],
+      "@r-val/types": ["pkgs/models/models"],
       "@r-val/utils": ["pkgs/utils/utils"],
+      "@r-val/react": ["pkgs/react/react"],
+      "@r-val/models": ["pkgs/models/models"],
       "*": ["node_modules/*"]
     } /* A series of entries which re-map imports to lookup locations relative to the 'baseUrl'. */,
     // "rootDirs": [],                        /* List of root folders whose combined content represents the structure of the project at runtime. */
