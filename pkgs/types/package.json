@@ -20,41 +20,5 @@
   "files": [
     "*.ts",
     "dist"
-  ],
-  "reserved": [
-    "model",
-    "mapOf",
-    "arrayOf",
-    "invariant",
-    "toJS"
-  ],
-  "mangle": {
-    "reserved": [
-      "configurable",
-      "enumerable",
-      "writable",
-      "value",
-      "$RVal",
-      "rval",
-      "defaultInstance",
-      "isVal",
-      "isDrv",
-      "_deepfreeze",
-      "_once",
-      "val",
-      "drv",
-      "sub",
-      "run",
-      "act",
-      "effect",
-      "configure",
-      "autoFreeze",
-      "fireImmediately",
-      "model",
-      "mapOf",
-      "arrayOf",
-      "invariant"
-    ]
-  },
-  "gitHead": "a824fe9bd83228fb126c8c6188ef7b85fc2ffdd7"
+  ]
 }

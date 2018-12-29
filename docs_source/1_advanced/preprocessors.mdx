@@ -5,3 +5,56 @@ menu: Advanced
 route: /advanced/preprocessors
 ---
 
+
+# Pre-processors
+
+By default, any new value state stored in a `val` is automatically deeply frozen, even the value is a plain array or object.
+
+The `preProcessor` argument to apply some preprocessing on the values that are being stored, or perform validations.
+The signature of a pre-processor is: `(newValue, currentValue, rvalInstance) -> newValue`. Where:
+ * `newValue` the value that is about to be stored
+ * `currentValue` the value that is currently stored
+ * `rvalInstance` the current RVal instance (see the `rval()` function)
+ * The return value is the value that will be passed to the next pre-processor, or if there is none, that will be stored.
+
+It is possible to chain multiple pre processors, by simply passing an array of preprocessors to `val`.
+
+`val` uses pointer equality to detect and propagate updates. So if your previous detects that the current update can or needs to be aborted, just `return currentValue`.
+
+For example, the following reactive value `profit` has two pre-processors. 
+The first one automatically converts new values to strings,
+the second one performs some validation, refusing to store numbers that 
+are smaller then the previous value.
+
+```javascript
+function convertToNumber(newValue) {
+    if (typeof newValue === "number")
+        return newValue
+    else
+        return parseFloat(newValue)
+}
+
+const profit = val(0, [
+    // convert input to number
+    convertToNumber,
+    // check if profits increase
+    (newValue, currentValue) => {
+        if (newValue < currentValue)
+            throw new Error("Invariant failed! Profits should increase")
+        return newValue
+    }
+])
+
+profit(-5) // Throws exception: Profits should increase
+
+profit("7") // Parses the number, and sets profit to number 7
+```
+
+
+## Type checking
+
+## Factories
+
+## Debugging / logging
+
+## Side effects

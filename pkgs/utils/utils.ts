@@ -58,3 +58,10 @@ export async function when(goal: Observable<any>, timeout = 0): Promise<void> {
     })
   })
 }
+
+export function debug(condition? : any, startDebuggerOrMessage?: any) {
+  // if functioon
+  // if nothing
+  // if value
+  (new Function("debugger"))
+}
