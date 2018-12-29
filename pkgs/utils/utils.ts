@@ -1,4 +1,4 @@
-import { isVal, run, isDrv, Drv, Disposer, rval, _once, _isPlainObject, Val } from '@r-val/core'
+import { isVal, run, isDrv, Drv, Disposer, rval, _once, _isPlainObject, Val, Observable, drv } from '@r-val/core'
 
 // TODO: add typings!
 export function toJS(thing) {
@@ -39,4 +39,22 @@ export function keepAlive(target: Drv<any>): Disposer {
       didChange() // we never have to pull, we only detect for changes once, so that the target becomes hot
     })
   )
+}
+
+export async function when(goal: Observable<any>, timeout = 0): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (goal()) return void resolve() // short-circuit 
+    const timeoutHandle = timeout &&
+      setTimeout(() => { 
+        disposer()
+        reject(new Error("TIMEOUT")) 
+      }, timeout)
+    const disposer = rval(goal).sub(goal, v => {
+      if (v) {
+        clearTimeout(timeoutHandle as any)
+        resolve()
+        disposer()
+      }
+    })
+  })
 }

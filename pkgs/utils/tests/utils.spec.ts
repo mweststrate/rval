@@ -1,5 +1,5 @@
 import { val, drv, sub, act } from "@r-val/core"
-import {toJS, assignVals, keepAlive} from "@r-val/utils"
+import {toJS, assignVals, keepAlive, when } from "@r-val/utils"
 import { delay } from "q";
 
 test("toJS", () => {
@@ -74,4 +74,56 @@ test("keepAlive", async () => {
     await delay(10)
     expect(y()).toBe(3)
     expect(calc).toBe(4)
+})
+
+
+test("when - val", async () => {
+    const x = val(0)
+
+    setTimeout(() => {
+        x(1)
+    }, 10)
+
+    await when(x)
+})
+
+
+test("when - drv", async () => {
+    let calcs = 0
+    const x = val(0)
+    const y = drv(() => {
+        calcs++
+        return x()
+    })
+
+    setTimeout(() => {
+        x(1)
+    }, 100)
+
+    const p = when(y)
+    expect(calcs).toBe(1)
+
+    await p
+    expect(calcs).toBe(2)
+})
+
+test("when - short circuit", async () => {
+    let calcs = 0
+    const x = val(1)
+    const y = drv(() => {
+        calcs++
+        return x()
+    })
+
+    const p = when(y, 100)
+    expect(calcs).toBe(1)
+
+    await p
+    expect(calcs).toBe(1)
+})
+
+test("when - timeout", async () => {
+    const x = val(0)
+
+    await expect(when(x, 100)).rejects.toMatchObject({ message: "TIMEOUT" })
 })

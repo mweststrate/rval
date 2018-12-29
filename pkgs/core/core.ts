@@ -151,7 +151,7 @@ export function rval(base?: Val<any, any>): RValInstance {
 
     let lastSeen: any = undefined
     let firstRun = true
-    const effectDisposer = effect(src, (didChange, pull) => {
+    return effect(src, (didChange, pull) => {
       if (didChange()) {
         const v = pull()
         if (!firstRun && v !== lastSeen) listener(v, lastSeen)
@@ -160,9 +160,6 @@ export function rval(base?: Val<any, any>): RValInstance {
         firstRun = false
       }
     })
-    return () => {
-      effectDisposer()
-    }
   }
 
   function act<T extends Function>(fn: T): T {
@@ -228,7 +225,7 @@ class ObservableValue<T> implements ObservableAdministration {
         return this.value
       case 1:
         // prettier-ignore
-        if (this.context.currentlyComputing) throw new Error('derivations cannot have side effects and update values')
+        // TODO: re-enable? if (this.context.currentlyComputing) throw new Error('derivations cannot have side effects and update values')
         if(typeof newValue === "function") newValue = newValue(this.value)
         newValue = this.preProcessor(newValue, this.value, this.api) as T
         if (newValue !== this.value) {
@@ -391,7 +388,8 @@ function runFn(fn: Thunk): void {
 }
 
 function removeCallback(fns: Thunk[], fn: Thunk) {
-  fns.splice(fns.indexOf(fn), 1)
+  const idx = fns.indexOf(fn)
+  if (idx >= 0) fns.splice(idx, 1)
 }
 
 function normalizePreProcessor(preProcessor: undefined | PreProcessor | PreProcessor[]): PreProcessor {
