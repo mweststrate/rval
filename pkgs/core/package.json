@@ -33,6 +33,7 @@
     "isDrv",
     "_deepfreeze",
     "_once",
+    "_isPlainObject",
     "val",
     "drv",
     "sub",
