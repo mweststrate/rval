@@ -1,4 +1,4 @@
-import { isVal, run, isDrv, Drv, Disposer, rval, _once, _isPlainObject, Val, Observable, drv } from '@r-val/core'
+import { isVal, isDrv, Drv, Disposer, rval, _once, _isPlainObject, Val, Observable, drv, act } from '@r-val/core'
 
 // TODO: add typings!
 export function toJS(thing) {
@@ -23,12 +23,12 @@ type AssignVals<T> = {
 export function assignVals<T>(target: T, vals: AssignVals<T>, ...moreVals: AssignVals<T>[])
 export function assignVals(target, vals, ...moreVals) {
   if (moreVals.length) vals = Object.assign(vals, ...moreVals)
-  run(() => {
+  act(() => {
     for (const key in vals) {
       if (isVal(target[key]) || isDrv(target[key])) target[key](vals[key])
       else throw new Error(`[assignVals] value at key "${key}" is not a 'val' or 'drv'`)
     }
-  })
+  })()
   return target
 }
 

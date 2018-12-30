@@ -137,16 +137,16 @@ Todo:
 * [x] tests and types for utils
 * [x] kill with-immmer?
 * [x] improve updaters typings
-* [ ] kill `run`
-* [ ] rval-validation
-* [ ] verify callign actions in reactions work correctly
+* [x] verify callign actions in reactions work correctly
+* [x] move `invariant` to preprocessors?
+* [x] add `toJS` on all model types
+* [x] rval-validation
+* [x] kill `run`
 * [ ] contributing and debugging
 * [ ] docs
 * [ ] verify debugging with minification
-* [ ] move `invariant` to preprocessors?
 * [ ] add `reference` to models?
 * [ ] contributing & debugging guide. `reserved` section in package.json!
-* [ ] add `toJS` on all model types
 * [ ] add (mobx like) performance tests
 * [ ] rval.js.org CDN
 * [ ] smart lack of act detection. Only have `act`, no `run`?

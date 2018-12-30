@@ -57,7 +57,6 @@ export interface RValInstance {
   ): Disposer
   effect<T>(fn: () => T, onInvalidate: (onChanged: () => boolean, pull: () => T) => void): Thunk
   act<T extends Function>(fn: T): T
-  run<R>(fn: () => R): R
   configure(config: Partial<RValConfig>): void
 }
 
@@ -192,9 +191,7 @@ export function rval(base?: Val<any, any>): RValInstance {
   }
 
   // prettier-ignore
-  const api = { val, drv, sub, act, effect, configure, run(fn) {
-    return act(fn)()
-  } }
+  const api = { val, drv, sub, act, effect, configure }
   return api
 }
 
@@ -230,16 +227,17 @@ class ObservableValue<T> implements ObservableAdministration {
         newValue = this.preProcessor(newValue, this.value, this.api) as T
         if (newValue !== this.value) {
           this.value = this.freeze(newValue!)
-          if (this.context.isUpdating) runAll(this.listeners)
-          else this.api.run(() => {
-            runAll(this.listeners)
-          })
+          this.notifyObservers()
         }
         break
       default:
         throw new Error('val expects 0 or 1 arguments')
     }
   }
+  // optimization: could factor out this closure
+  notifyObservers = this.api.act(() => {
+      runAll(this.listeners)
+  })
   freeze(v) {
     if (this.context.config.autoFreeze && (Array.isArray(v) || _isPlainObject(v))) _deepfreeze(v)
     return v
@@ -450,6 +448,5 @@ export const val = defaultInstance.val
 export const drv = defaultInstance.drv
 export const sub = defaultInstance.sub
 export const act = defaultInstance.act
-export const run = defaultInstance.run
 export const effect = defaultInstance.effect
 export const configure = defaultInstance.configure

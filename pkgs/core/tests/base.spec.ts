@@ -1,4 +1,8 @@
-import { val, sub, drv, run, defaultInstance } from '@r-val/core'
+import { val, sub, drv, act, defaultInstance } from '@r-val/core'
+
+function run(fn) {
+  return act(fn)()
+}
 
 test('very basic', () => {
   const x = val(3)
