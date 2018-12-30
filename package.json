@@ -44,6 +44,7 @@
     "rollup-plugin-filesize": "^5.0.1",
     "rollup-plugin-terser": "^3.0.0",
     "rollup-plugin-typescript2": "^0.18.0",
+    "tape": "^4.9.2",
     "ts-jest": "^23.10.5",
     "tslib": "^1.9.3",
     "typescript": "^3.2.1"

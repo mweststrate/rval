@@ -1,0 +1,28 @@
+
+One observers many observes one - Started/Updated in 68/85 ms.
+500 props observing sibling -  Started/Updated in 5/8 ms.
+Late dependency change - Updated in 137ms.
+Unused computables -   Updated in 2 ms.
+Unused observables -  Updated in 48 ms.
+Array reduce -  Started/Updated in 36/44 ms.
+Array loop -  Started/Updated in 250/502 ms.
+Order system batched: false tracked: true  Started/Updated in 656/90 ms.
+Order system batched: true tracked: true  Started/Updated in 205/72 ms.
+Order system batched: false tracked: false  Started/Updated in 210/63 ms.
+Order system batched: true tracked: false  Started/Updated in 227/64 ms.
+
+Create array -  Created in 188ms.
+
+Create array (non-recursive)  Created in 126ms.
+Observable with many observers  + dispose: 784ms
+expensive sort: created 4504
+expensive sort: updated 12783
+expensive sort: disposed298
+native plain sort: updated 3648
+computed memoization 1ms
+Initilizing 100000 maps: 249 ms.
+Looking up 100 map properties 1000 times: 30 ms.
+Setting and deleting 100 map properties 1000 times: 258 ms.
+
+
+Completed performance suite in 26.343 sec.
