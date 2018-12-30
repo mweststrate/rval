@@ -1,28 +1,28 @@
 
-One observers many observes one - Started/Updated in 68/85 ms.
-500 props observing sibling -  Started/Updated in 5/8 ms.
-Late dependency change - Updated in 137ms.
-Unused computables -   Updated in 2 ms.
-Unused observables -  Updated in 48 ms.
-Array reduce -  Started/Updated in 36/44 ms.
-Array loop -  Started/Updated in 250/502 ms.
-Order system batched: false tracked: true  Started/Updated in 656/90 ms.
-Order system batched: true tracked: true  Started/Updated in 205/72 ms.
-Order system batched: false tracked: false  Started/Updated in 210/63 ms.
-Order system batched: true tracked: false  Started/Updated in 227/64 ms.
+One observers many observes one - Started/Updated in 46/54 ms.
+500 props observing sibling -  Started/Updated in 2/3 ms.
+Late dependency change - Updated in 829ms.
+Unused computables -   Updated in 0 ms.
+Unused observables -  Updated in 59 ms.
+Array reduce -  Started/Updated in 314/603 ms.
+Array loop -  Started/Updated in 361/670 ms.
+Order system batched: false tracked: true  Started/Updated in 136/78 ms.
+Order system batched: true tracked: true  Started/Updated in 120/65 ms.
+Order system batched: false tracked: false  Started/Updated in 119/36 ms.
+Order system batched: true tracked: false  Started/Updated in 109/45 ms.
 
-Create array -  Created in 188ms.
+Create array -  Created in 239ms.
 
-Create array (non-recursive)  Created in 126ms.
-Observable with many observers  + dispose: 784ms
-expensive sort: created 4504
-expensive sort: updated 12783
-expensive sort: disposed298
-native plain sort: updated 3648
+Create array (non-recursive)  Created in 239ms.
+Observable with many observers  + dispose: 4937ms
+expensive sort: created 2963
+expensive sort: updated 25460
+expensive sort: disposed210
+native plain sort: updated 1083
 computed memoization 1ms
-Initilizing 100000 maps: 249 ms.
-Looking up 100 map properties 1000 times: 30 ms.
-Setting and deleting 100 map properties 1000 times: 258 ms.
+Initilizing 100000 maps: 84 ms.
+Looking up 100 map properties 1000 times: 20 ms.
+Setting and deleting 100 map properties 1000 times: 5136 ms.
 
 
-Completed performance suite in 26.343 sec.
+Completed performance suite in 44.588 sec.

@@ -311,11 +311,15 @@ function order_system_helper(t, usebatch, keepObserving) {
     var start = now()
 
     function setup() {
+        const tmp = []
         for (var i = 0; i < 100; i++) {
             var c = new Order(i % 2 == 0)
-            orders(updaters.push(c))
-            for (var j = 0; j < 100; j++) c.lines(updaters.unshift(new OrderLine(c, 5, 5)))
+            tmp.push(c)
+            const lines = []
+            for (var j = 0; j < 100; j++) lines.unshift(new OrderLine(c, 5, 5))
+            c.lines(lines)
         }
+        orders(tmp)
     }
 
     if (usebatch) rval.act(setup)()
@@ -410,7 +414,7 @@ test("observe and dispose", t => {
     t.end()
 })
 
-test.skip("sort", t => {
+test("sort", t => {
     gc()
 
     function Item(a, b, c) {
@@ -418,7 +422,7 @@ test.skip("sort", t => {
         this.b = val(b)
         this.c = val(c)
         this.d = drv(() => {
-            return this.a + this.b + this.c
+            return this.a() + this.b() + this.c()
         })
     }
     var items = val([])
@@ -436,26 +440,41 @@ test.skip("sort", t => {
         return 0
     }
 
+    function sortFnPlain(l, r) {
+        items.length // screw all optimizations!
+        l.d()
+        r.d()
+        if (l.a > r.a) return 1
+        if (l.a < r.a) return -1
+        if (l.b > r.b) return 1
+        if (l.b < r.b) return -1
+        if (l.c > r.c) return 1
+        if (l.c < r.c) return -1
+        return 0
+    }
+
     var sorted = drv(() => {
-        items.sort(sortFn)
+        items().slice().sort(sortFn)
     })
 
     var start = now()
     var MAX = 100000
 
-    var ar = rval.sub(drv(() => sorted()))
+    var ar = rval.sub(drv(() => sorted()), voidObserver)
 
     rval.act(() => {
-        for (var i = 0; i < MAX; i++) items(updaters.push(new Item(i % 10, i % 3, i % 7)))
+        const tmp = items().slice()
+        for (var i = 0; i < MAX; i++) tmp.push(new Item(i % 10, i % 3, i % 7))
+        items(tmp)
     })()
 
     log("expensive sort: created " + (now() - start))
     var start = now()
 
     for (var i = 0; i < 5; i++) {
-        items[i * 1000].a = 7
-        items[i * 1100].b = 5
-        items[i * 1200].c = 9
+        items()[i * 1000].a(7)
+        items()[i * 1100].b(5)
+        items()[i * 1200].c(9)
     }
 
     log("expensive sort: updated " + (now() - start))
@@ -465,19 +484,22 @@ test.skip("sort", t => {
 
     log("expensive sort: disposed" + (now() - start))
 
-    var plain = items.map(item => ({
-        a: item.a, b: item.b, c: item.c
+    var plain = items().map(item => ({
+        a: item.a(), b: item.b(), c: item.c(),
+        d() {
+            return this.a + this.b + this.c
+        }
     }))
     t.equal(plain.length, MAX)
 
     var start = now()
     for (var i = 0; i < 5; i++) {
         plain[i * 1000].a = 7
-        plain.sort(sortFn)
+        plain.slice().sort(sortFnPlain)
         plain[i * 1100].b = 5
-        plain.sort(sortFn)
+        plain.slice().sort(sortFnPlain)
         plain[i * 1200].c = 9
-        plain.sort(sortFn)
+        plain.slice().sort(sortFnPlain)
     }
     log("native plain sort: updated " + (now() - start))
 
