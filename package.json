@@ -14,6 +14,7 @@
     "build": "node scripts/build.js",
     "watch": "jest --config jest.config.json --watch",
     "test": "jest --config jest.config.test.json",
+    "test:perf": "PERSIST=true time node --expose-gc pkgs/core/tests/perf/index.js",
     "coverage": "jest --runInBand --coverage --config jest.config.json && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "docz:dev": "docz dev",
     "docz:build": "docz build",

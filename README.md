@@ -142,6 +142,7 @@ Todo:
 * [x] add `toJS` on all model types
 * [x] rval-validation
 * [x] kill `run`
+* [ ] add missing mobx optimizations
 * [ ] contributing and debugging
 * [ ] docs
 * [ ] verify debugging with minification
