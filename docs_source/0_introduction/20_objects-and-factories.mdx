@@ -31,16 +31,16 @@ const myFirstTodo = {
   done,
 }
 
-title.done(true)
-console.log(title.done())
+myFirstTodo.done(true)
+console.log(myFirstTodo.done())
 ```
 
-Pretty straight forward eh? Note that we used only `const` values, and that `myFirstTodo` itself should be treated as an immutable objects to keep the conceptuel model simple.
+Pretty straight forward eh? Note that we used only `const` values, and that `myFirstTodo` itself should be treated as an immutable object to keep the conceptuel model simple.
 (In fact, it would be recommended to use `Object.freeze(myFirstTodo)`, but it turns out that RVal will take care of that as well in most cases, as we will discover later).
 
 ## A first object factory
 
-Probably you don't want to create multiple todo's in your application, intead of one.
+Probably you want to create multiple todo's in your application, instead of one.
 To ease that process we can make a _factory_ funtion:
 
 ```javascript
@@ -58,14 +58,14 @@ myFirstTodo.done(true)
 ```
 
 Ok, that was easy! But our factory function can do more than just instating some reactive values and combining them into an object.
-We can add define derived data using `drv`, and actions using `act`, and make them part of the object as well:
+We can define derived data using `drv`, and actions using `act`, and make them part of the object as well:
 
 ```javascript
 function createTodo(initialTitle) {
     const title = val(initialTitle)
     const done = val(false)
-    const asMarkdown(() => done() ? " * [x] ~" + title() + "~" : " * [ ] " +title())
-    const toggle = act(() {
+    const asMarkdown = drv(() => done() ? " * [x] ~" + title() + "~" : " * [ ] " + title())
+    const toggle = act(() => {
         done(!done())
     })
 
@@ -76,7 +76,7 @@ function createTodo(initialTitle) {
 ```
 
 So, we now have a factory that creates an immutable object, containing some reactive values, derivations and actions. 
-Note that we are only creating `const`s in these listing, and we neatly avoided using `this`, which might save some headaches down the road![^2]
+Note that we are only creating `const`s in these listings, and we neatly avoided using `this`, which might save some headaches down the road![^2]
 
 Let's put our code to the test and create a `sub` to observe the effects of our state updates:
 
@@ -84,7 +84,7 @@ Let's put our code to the test and create a `sub` to observe the effects of our 
 const myFirstTodo = createTodo("Get coffee")
 sub(myFirstTodo.asMarkdown, md => {
     console.log(md)
-}
+})
 
 myFirstTodo.title("Get coffee and cookie")
 // Prints: * [ ] Get coffee and cookie
@@ -106,7 +106,7 @@ Let's quickly design a factory for a "todoStore":
 
 ```javascript
 function createTodoStore() {
-    const todos = val([])
+    const todos = val<any[]>([])
 
     function addTodo(title) {
         todos([
@@ -120,7 +120,7 @@ function createTodoStore() {
 
 const store = createTodoStore()
 store.addTodo("Go for a walk")
-console.log(tore.todos().map(todo => todo.title())) // prints: ["Go for a walk"]
+console.log(store.todos().map(todo => todo.title())) // prints: ["Go for a walk"]
 ```
 
 See what we did there? We introduced a `val` to maintain our collection of todos, but the value we assign to it/ read from it, we still consider it as immutable!
@@ -152,7 +152,7 @@ done(!done()) // toggles to true
 
 To simply these kind of updates, it is also possible to pass a function as new value to a reactive value.
 This function receives as current argument the current value, and should return the new value to be stored.
-This function is called once, and it's output will be the name state.
+This function is called once, and it's output will be the new state.
 With that we can rewrite the above as:
 
 
@@ -246,7 +246,7 @@ But first we'll see how we can combine RVal with React, so that we can finally p
 
 You might be wondering whether it is possible to use classes instead of factory functions. 
 The answer is, yes that is perfectly possible. 
-The reason for the chose approach in this documentation however, is that it hopefully set's you up for the [Pit of Success](https://medium.com/@ricomariani/the-pit-of-success-cfefc6cb64c8). 
+The reason for the chosen approach in this documentation however, is that it hopefully set's you up for the [Pit of Success](https://medium.com/@ricomariani/the-pit-of-success-cfefc6cb64c8). 
 Once you get used to this approach, there should be less places where you can accidentally error, you can't forget to bind a function,
 and the mental model becomes really trivial: Nothing should or can't be modified. Except `val`s.
 

@@ -83,7 +83,7 @@ console.log(isGoodLuckyNumber()) // false
 
 The critical reader might think at this point: &ldquo;That's nice and dandy, but you couldn't we just have used `const isGoodLuckyNumber = () => myLuckyNumber() % 2 === 1`?&rdquo;. 
 And that is true, glad you ask. That would indeed have yielded the same output. 
-But! Using `drv` brings in a few new possiblities:
+But! Using `drv` brings in a few new possibilities:
 
 First, `drv` will memoize[^(usually)] it's results. That is: as long as `myLuckyNumber` doesn't change, invoking `isGoodLuckyNumber()` multiple times won't actually re-evaluate the original expression, but just return a memoized result.
 
@@ -137,9 +137,9 @@ TODO: run or act?
 
 You might have noticed that in the previous listening or side effects where immediately fired when emitting an update to `myLuckyNumber`. 
 This is just the default behavior and there are several ways to influence it. 
-First of all, we can use techniques like debounce to roun our subscriptions less frequently. 
+First of all, we can use techniques like debounce to run our subscriptions less frequently. 
 But more importantly, we can hold of the reactive system to wait a bit until we've done all our updates,
-so that changes will be broadcased as one atomic update. 
+so that changes will be broadcasted as one atomic update. 
 To express that, there is `act` to group multiple changes into a single **activity**: 
 
 ```javascript
