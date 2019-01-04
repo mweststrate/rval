@@ -101,11 +101,11 @@ export function rval(base?: Val<any, any>): RValInstance {
     return new Computed<T>(context, api, derivation, setter).get as any
   }
 
-  function effect<T>(fn: () => T, onInvalidate: (onChanged: () => boolean, pull: () => T) => void): Thunk {
+  function effect<T>(fn: () => T, onInvalidate: (didChange: () => boolean, pull: () => T) => void): Thunk {
     const computed = isDrv(fn) ? fn[$RVal] : new Computed(context, api, fn)
     let scheduled = true
     let disposed = false
-    let lastSeen = undefined
+    let lastSeen: any = {} // definitely not pointer equal to something else
     
     function didChange() {
       if (disposed) return false
@@ -153,8 +153,8 @@ export function rval(base?: Val<any, any>): RValInstance {
     return effect(src, (didChange, pull) => {
       if (didChange()) {
         const v = pull()
-        if (!firstRun && v !== lastSeen) listener(v, lastSeen)
-        if (firstRun && options && options.fireImmediately) listener(v, lastSeen)
+        if (firstRun ? (options && options.fireImmediately) : v !== lastSeen) 
+          listener(v, lastSeen)
         lastSeen = v
         firstRun = false
       }

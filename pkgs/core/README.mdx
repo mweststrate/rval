@@ -23,7 +23,7 @@ The `initialValue` froms the initial state of the reative value.
 
 `val` returns a function that takes zero or one arguments:
 * If the function is invoked without arguments, the current value is returned
-* If the function is invoked with one argument, and that value is not a function, the argument becomes the new state of the reactive value.
+* If the function is invoked with one argument, and that value is not a function, the argument becomes the new state of the reactive value. (If you want to store a function itself as value, use `val(() => fn)` instead of `val(fn)`)
 * If the function is invoked with a function as argument, that function is invoked and should produce the new state, based on the current state. Built-in update functions can be found in the [`@r-val/updaters` package](#/api/updaters).
 
 ```javascript
@@ -47,6 +47,40 @@ For the `preProcessor` argument, see [#/advanced/preprocessors]. `preProcessor` 
 
 **Description**
 
+`drv` creates a derived, reactive value. It accepts a single function (which should not have side effects),
+and it will automatically subscribe to all reactive values that were accessed when running that function.
+The output of the function is cached until one observed reactive values changes.
+
+Generally, it is recommended to use `drv` abunduntaly; every `drv` is a potential caching point, making change propagation trough your system easier.
+It will also help you reduce the amount of _state_ you have in your application, and under almost all circumstances it is better
+to have a piece of derived information, over some redundant information that is kept up to date through other means (such as `sub`).
+
+The optional `setter` argument can be used to make the derived value writable. 
+This is just syntactic convenience, as the `drv` itself does not hold state, but it can be used as 'write-through' mechanism.
+Setters are automatically wrapped in an `act`.
+
+```javascript
+const priceDollar = val(10)
+const euroDollarRate = val(1.1487)
+
+const priceEuro = drv(
+    // derive the price in euro
+    () => priceDollar() / euroDollarRate(),
+    // setter: makes priceEuro writeable
+    (newPriceEur) => {
+        priceDollar(newPriceEur * euroDollarRate()) 
+    }
+)
+
+console.log(priceEuro()) // 8.71
+priceEuro(10)
+console.log(priceDollar()) // 11.49
+```
+
+By default, RVal assumes that a `drv` that is not observed itself by anyone (by a `drv`, `sub` or `effect) is not relevant anymore,
+and it will automatically suspend the computation, meaning that it will stop observing it's inputs on the next JavaScript tick.
+This is done to make sure no memory leaks are introduced. If you want to forcefully cache the `drv` output under all circumstances, use `keepAlive` from `@r-val/utils`.
+
 ## `sub`
 
 **Signature**
@@ -65,9 +99,51 @@ For the `preProcessor` argument, see [#/advanced/preprocessors]. `preProcessor` 
 
 **Description**
 
-TODO
+`sub` subscribe to a reative value. 
+It will trigger for each change in the reactive value, but only once per batch (see `act`).
+`sub` is the primary means to create side effects that are triggered by reactive values,
+such as logging, updating a rendering, or makign network requests.
+(In the end, any system needs side effects, to be able to perform output).
 
-The curried version of the api can be useful to create utilities, for example a `logger` that prints the values of any state transition:
+`sub` returns a disposer function, that stops future executions of the `listener` once called.
+
+```javascript
+import { val, sub, drv } from "@r-val/core"
+
+function createTodo(id, initialTitle) {
+    const title = val(initialTitle)
+    const done = val(false)
+    const toJS = drv(() => ({
+        id,
+        title: title(),
+        done: done()
+    }))
+
+    // set up a subscription to automatically save the 
+    // todo when either title or done changes
+    const stop = sub(toJS, data => {
+        window.fetch("http://host/todos/" + id, { 
+            method: "POST",
+            body: JSON.stringify(data)
+        }).catch(e => {
+            console.error(e)
+        }) 
+    })
+
+    return {
+        title, done, toJS, stop
+    }
+}
+
+const myTodo = createTodo(1, "get cofee")
+myTodo.title("get coffee") // will be saved automatically
+myTodo.stop() // stop future executions of the subscription
+```
+
+In cases, it might be tempting to update other reactive values in a subscription,
+but in most cases this is an anti pattern and the value-to-be-updated could be expressed as derived value using `drv` instead.
+
+The curried version of the `sub` can be useful to create utilities, for example a `logger` that prints the values of any state transition:
 
 ```javascript
 const log = sub((current, previous) => {
@@ -78,13 +154,88 @@ log(someReactiveValue)
 log(someOtherReactiveValue)
 ```
 
+N.B. this utility is actually built-in as `logChanges` in the `@r-val/utils` package.
+
 ## `act`
 
+**signature**
+
+`act(function) -> function` 
+
+**discription**
+
+`act` takes accepts a function, and returns a function with the same signature, that, when invoked, will batch the updates.
+This is also called an _action_. 
+This means, that if multiple mutations in that same function would normally affect multiple invocations of the same side-effect,
+an function wrapped in `act` will trigger the side effects at most once. 
+
+Although it is very well possible to create and invoke an action in one go (like: `act(() => { /* someStuff */ })()`),
+it is recommended to not do this. Updates that are grouped together are a nice opportunity to extract a single function with limited functionality.
+
+If functions that are wrapped by `act` invoke other functions wrapped by `act`, side effects will only trigger once the outer `act` completes.
+
+That's all! Note that `act` only batches _synchronosly_ run updates. Passing an `async` function to `act` is in that regard mostly useless (only the code until the first `await` will be batched in that case).
+Calling individual actions from `async` functions is no problem. 
+
 ## `effect`
+
+**signature**
+
+`effect(functionToTrack: () -> T, onInvalidate: (didChange() -> boolean, pull() -> T)): disposerFunction` 
+
+**description**
+
+`effect` is a core building block to organize side effects. 
+For example `sub` and `@r-val/react`'s `rview` use `effect` under the hood.
+`effect` tracks a function (that might produce a value), and notifies the `onInvalidate` callback when 
+some of the dependencies of the tracked function _might_ have changed.
+
+`effect` basically produces a state machine with the following states / contract (it initializes at step 7!):
+
+1. The `functionToTrack` is executed, and the effect records which reactive values where used during the executions
+2. If one or more of those dependencies might have changed, `onInvalidate` is called, with two parameters; `didChange()` and `pull()`
+3. At any point in time, `didChange()` should be called. This will make sure that the dependencies are actually _evaluated_ (the effect might be depending on derived values that have not been evauated so far).
+4. If `didChange()` returns `false`, nothing did actually changed, and `onInvalidate` might be invoked again if dependencies change in the future. (Go back to 2.)
+5. If `didChange()` returns `true`, `pull()` should be called at any point in time in the future. `pull()` will perform step 1 again (tracking the function), register the dependencies, and returns any value it yields.
+6. If the `disposer` returned from `effect` is called at any moment in time, the effect is immediately disposed, cleaning up the dependency tree.
+7. Initially, the state machine is kicked of by calling `onInvalidate` once, starting basically at step 3. (Note that `didChange` will always yield `true` the first time)
+
+
+Note that `onInvalidate` won't be called again, until `didChange()` is called and returned `false`, 
+or `pull()` is called.
+
+You probably won't use `effect` much in practice (using `sub` is more straightforward), 
+but `effect` is a good building block to create utility functions that have very specific caching or timing behavior.
+
+For example, an alternative to `sub(source, listener)` that debounces the listener and at max triggers its listener
+every x milliseconds could be defined as:
+
+```javascript
+function sub(src, listener, delay) {
+    let lastSeen = undefined
+
+    return effect(
+        () => src(),
+        (didChange, pull) => {
+            if (didChange()) {
+                setTimeout(() => {
+                    const v = pull()
+                    if (v !== lastSeen)
+                        listener(v, lastSeen)
+                    lastSeen = v
+                }, delay);
+            }
+        }
+    )
+}
+```
 
 ## `isVal`
 
 ## `isDrv`
+
+
+---
 
 ## `configure`
 

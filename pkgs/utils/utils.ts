@@ -63,5 +63,16 @@ export function debug(condition? : any, startDebuggerOrMessage?: any) {
   // if functioon
   // if nothing
   // if value
+  // TODO:
   (new Function("debugger"))
 }
+
+export function logChanges(source: Observable<any>, prefix = "rval: changed") {
+  return rval(source).sub(source, (current, previous) => {
+    console.log(`[${prefix}] ${previous} -> ${current}`)
+  })
+}
+
+// export function actNow<R>(fn: () => R): R {
+//   return act(fn)()
+// }

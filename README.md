@@ -153,6 +153,8 @@ Todo:
 * [ ] smart lack of act detection. Only have `act`, no `run`?
 * [ ] use yalc? https://www.google.com/url?q=https%3A%2F%2Fgithub.com%2Fwhitecolor%2Fyalc%2F&sa=D&sntz=1&usg=AFQjCNGCTXoCduIMdVHx5xm-uAs_REX3MA
 * [ ] rename MDX files to md
+* [ ] rview as wrapper
+* [ ] deep merge model tree?
 
 Later
 * [ ] rval-remote

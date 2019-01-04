@@ -11826,6 +11826,11 @@ sane@^2.0.0:
   optionalDependencies:
     fsevents "^1.2.3"
 
+sarcastic@^1.5.0:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/sarcastic/-/sarcastic-1.5.0.tgz#1e87e75bb64e856d3f34d1f5a391c3abecf8c7c1"
+  integrity sha512-j7zmeNbABvOGXzt11WIm7nITPJ0exX/IL0sV9GZHNSsrFEjadfK5Z3GfBEelc6/VoEp17i/JEw3UuzyJNvgZNw==
+
 sax@^1.2.4, sax@~1.2.1, sax@~1.2.4:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"

@@ -133,26 +133,27 @@ Such as updating the UI, logging, making network effects etc.
 
 _&ldquo;No act of kindness, no matter how small, is ever wasted...&rdquo; &mdash; Aesop_
 
-TODO: run or act?
-
 You might have noticed that in the previous listening or side effects where immediately fired when emitting an update to `myLuckyNumber`. 
 This is just the default behavior and there are several ways to influence it. 
 First of all, we can use techniques like debounce to roun our subscriptions less frequently. 
 But more importantly, we can hold of the reactive system to wait a bit until we've done all our updates,
 so that changes will be broadcased as one atomic update. 
-To express that, there is `act` to group multiple changes into a single **activity**: 
+To express that, there is `act` to group multiple changes into a single **activity**.
+`act` takes accepts a function, and returns a function with the same signature, that, when invoked, will batch the updates. 
 
 ```javascript
 const cancelPrint = sub(isGoodLuckyNumber, isGood => {
     console.log(isGood)
 })
 
-act(() => {
+const assignNumbers = act(() => {
     myLuckyNumber(42) 
     myLuckyNumber(33)
     myLuckyNumber(55)
     myLuckyNumber(2) 
-}) // prints only once, at the end of the activity: 'false'
+})
+
+assignNumbers()// prints only once, at the end of the activity: 'false'
 ```
 
 That's all! Note that `act` only batches _synchronosly_ run updates. Passing an `async` function to `act` is in that regard mostly useless.
