@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`isShape complex 1`] = `"[object Object].todos must be an array"`;
+
+exports[`isShape complex 2`] = `"[object Object].todos[1] must be an object"`;
+
+exports[`isShape simple 1`] = `"[object Object].done must be a boolean"`;
+
+exports[`isShape simple 2`] = `"[object Object].title must be a string"`;
