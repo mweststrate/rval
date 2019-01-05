@@ -99,11 +99,14 @@ The `rvalInstance` argument can be used to use a different `RValInstance` for tr
 
 **Signature**
 
-`useLocalVal(initialValue, rvalInstance?) -> [currentValue, reactiveValue]`
+`useLocalVal(initialValue, rvalInstance?) -> reactiveValue`
 
 **Description**
 
 _This function is a React hook, currently, it can only be used with React 16.7.0-alpha. use `rview` in all other cases_
+
+`useLocalVal` creates a `val` that is used to store state in a reactive value that is owned by the current function component.
+The component will always re-render if a new value is pushed into the reactive value. 
 
 
 ## useLocalDrv
@@ -115,3 +118,24 @@ _This function is a React hook, currently, it can only be used with React 16.7.0
 **Description**
 
 _This function is a React hook, currently, it can only be used with React 16.7.0-alpha. use `rview` in all other cases_
+
+Creates a `drv` which is local to the current component, subscribes to it, and returns it current value.
+Normally, the `drv` instance will be the same for the entire life-cycle of the component. 
+So, if the output of the `drv` depends on non-rval state or props, normally the derivation wouldn't re-evaluate.
+The `inputs` argument can be used to make sure changes in the inputs are reflected as well. 
+Example:
+
+```javascript
+function CounterMultiplier(({ multiplier })) => {
+    const counter = useLocalVal(0)
+    // The derivation will automatically react to counter(), as it is a reactive value,
+    // however, multiplier is a plain input, so we have to pass it as 'input' to make sure
+    // the derivation updates as well if that one changes
+    const total = useLocalDrv(() => {
+        return counter() * multiplier
+    }, [multiplier])
+
+    return <div>{total}</div>
+}
+
+ReactDOM.render(<CounterMultiplier multiplier=2 />, document.body)

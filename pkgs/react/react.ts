@@ -11,10 +11,10 @@ export function useVal<T>(observable: Observable<T>): T {
   return observable()
 }
 
-export function useLocalVal<T>(initial: T, rvalInstance = defaultInstance): [T, Val<T>] {
+export function useLocalVal<T>(initial: T, rvalInstance = defaultInstance): Val<T> {
   const val = useMemo(() => rvalInstance.val(initial), [])
-  const current = useVal(val)
-  return [current, val]
+  useVal(val)
+  return val
 }
 
 export function useLocalDrv<T>(derivation: () => T, inputs: any[] = [], rvalInstance = defaultInstance): T {
