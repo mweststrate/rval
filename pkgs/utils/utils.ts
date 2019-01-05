@@ -1,6 +1,7 @@
 import { isVal, isDrv, Drv, Disposer, rval, _once, _isPlainObject, Val, Observable, drv, act } from '@r-val/core'
 
 // TODO: add typings!
+// TODO: support custom serializer function as second argument?
 export function toJS(thing) {
   if (!thing) return thing
   if (typeof thing.toJS === 'function') return thing.toJS()

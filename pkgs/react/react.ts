@@ -30,7 +30,7 @@ export function rview(render: () => ReactNode, memo?: any[] | boolean, rvalInsta
   })
 }
 
-export class RView extends Component<{
+class RView extends Component<{ 
   children?: () => ReactNode
   memo?: any[] | boolean,
   rvalInstance?: RValInstance

@@ -7,18 +7,111 @@ route: /api/react
 
 # @r-val/react
 
-useVal
+## useVal
+
+**Signature**
+
+`useVal(reactiveValue) -> currentValue`
+
+**Description**
+
+_This function is a React hook, currently, it can only be used with React 16.7.0-alpha. use `rview` in all other cases_
+
+Given a reactive value, subscribes the current React function component to the value. 
+It returns the current state, and make sure the component is re-rendered on the next change of the value.
+
+Example ([try online](https://codesandbox.io/s/m297j6w38)):
+
+```javascript
+import React from "react"
+import { render } from "react-dom"
+import { val } from "@r-val/core"
+import { useVal } from "@r-val/react"
+
+const counter = val(0)
+
+const Counter = () => {
+    const c = useVal(counter)
+    return (<>
+        {c}
+        <button onClick={() => counter(0)}>
+            Reset
+        </button>
+    </>)
+}
+
+setInterval(() => {
+    counter(c => c + 1)
+}, 1000);
+
+render(<Counter />, document.body)
+```
+
+## rview
+
+**Signature**
+
+`rview(render: () => ReactNode, memo?, rvalInstance?) -> ReactElement`
+
+**Description**
+
+`rview` can be used inside the render part of any React component, to render the given `render`  function
+and track which reactive values it is using.
+`rview` will make sure that every time that reactive values involved in the rendering change, the function is called again.
+
+Example ([try online](https://codesandbox.io/s/m297j6w38)):
+
+```javascript
+import React from "react"
+import { render } from "react-dom"
+import { val } from "@r-val/core"
+import { useVal } from "@r-val/react"
+
+const counter = val(0)
+
+const Counter = () => rview(() => (
+    <>
+        {counter()}
+        <button onClick={() => counter(0)}>
+            Reset
+        </button>
+    </>
+))
+
+setInterval(() => {
+    counter(c => c + 1)
+}, 1000);
+
+render(<Counter />, document.body)
+```
+
+The `memo` argument can be used to further optimize the rendering, and takes three possible values:
+* `false` (the default). If `memo` is `false`, the `rview` will _also_ re-render if the owning component re-renders. The reason for that is that a new render function is passed in to the `rview`, which might be referring variables in it's closure. (For example state or calbacks defined in the owining component).
+* `true`. Use `true` if the render function is pure and doesn't rely on anything from it's closure, but only on reactive values (which are tracked). 
+* `[inputs]`. Use an array of inputs (similarly to for example the `inputs` arguments of React's `useEffect` hook. This will cache the rendering of the `rview`, until either some reactive value used changes, or some of the inputs are not pointer equal.
+
+For more details: see the [unit tests](https://github.com/mweststrate/rval/blob/2a861ebfbfcc359b130269d286b00183abae2ef1/pkgs/react/tests/rview.spec.tsx#L141-L319)
+
+The `rvalInstance` argument can be used to use a different `RValInstance` for tracking. See also the [`@r-val/core`](#/api/core) documentation.
+
+## useLocalVal
 - context
 
-useLocalVal
-- context
+**Signature**
 
-useLocalDrv
+`useLocalVal(initialValue, rvalInstance?) -> [currentValue, reactiveValue]`
 
-- inputs
-- context
+**Description**
 
-rview
-- chidren
-- memo (true, false, array)
-- context
+_This function is a React hook, currently, it can only be used with React 16.7.0-alpha. use `rview` in all other cases_
+
+
+## useLocalDrv
+
+**Signature**
+
+`useLocalDrv(derivation: () -> value, inputs?, rvalInstance?) -> currentValue`
+
+**Description**
+
+_This function is a React hook, currently, it can only be used with React 16.7.0-alpha. use `rview` in all other cases_

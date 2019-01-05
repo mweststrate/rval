@@ -155,6 +155,7 @@ Todo:
 * [ ] rename MDX files to md
 * [ ] rview as wrapper
 * [ ] deep merge model tree?
+* [ ] RVAL return this in setter for chaining?
 
 Later
 * [ ] rval-remote

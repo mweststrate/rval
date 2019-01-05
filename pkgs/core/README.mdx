@@ -158,7 +158,7 @@ N.B. this utility is actually built-in as `logChanges` in the `@r-val/utils` pac
 
 ## `act`
 
-**signature**
+**Signature**
 
 `act(function) -> function` 
 
@@ -179,11 +179,11 @@ Calling individual actions from `async` functions is no problem.
 
 ## `effect`
 
-**signature**
+**Signature**
 
 `effect(functionToTrack: () -> T, onInvalidate: (didChange() -> boolean, pull() -> T)): disposerFunction` 
 
-**description**
+**Description**
 
 `effect` is a core building block to organize side effects. 
 For example `sub` and `@r-val/react`'s `rview` use `effect` under the hood.
@@ -207,8 +207,8 @@ or `pull()` is called.
 You probably won't use `effect` much in practice (using `sub` is more straightforward), 
 but `effect` is a good building block to create utility functions that have very specific caching or timing behavior.
 
-For example, an alternative to `sub(source, listener)` that debounces the listener and at max triggers its listener
-every x milliseconds could be defined as:
+For example, an alternative (naive) implementation to `sub(source, listener)` that debounces the listener and at max triggers its listener
+every x milliseconds could look like:
 
 ```javascript
 function sub(src, listener, delay) {
@@ -232,10 +232,27 @@ function sub(src, listener, delay) {
 
 ## `isVal`
 
+**Signature**
+
+`isVal(thing) -> boolean`
+
+**Description**
+
+Returns `true` if `thing` was constructed `val`
+
 ## `isDrv`
 
+**Signature**
+
+`isDrv(thing) -> boolean`
+
+**Description**
+
+Returns `true` if `thing` was constructed `drv`
 
 ---
+
+API's below won't be called frequently when using RVal, but may be called once per project or library to configure the environment. You might not use them at all.
 
 ## `configure`
 
@@ -252,12 +269,16 @@ Set's the the options for the current RVal instance (see also `rval` and `defaul
 
 ## `rval`
 
-Signature: 
+**Signature**
 
 * `rval()` &mdash; creates a _new_ RVal instance
 * `rval(reactiveValue)` &mdash; returns the RVal instances that created the given reactive value.
 
-Returns an rval instance, that exposes the APIs:
+**Description**
+
+This functions is mostly for library authors.
+
+`rval()` / `rval(reactiveValue)` Returns an rval instance, that exposes the core APIs:
 
 * `val`
 * `drv`
@@ -266,9 +287,33 @@ Returns an rval instance, that exposes the APIs:
 * `effect`
 * `configure`
 
+By default, there should be only one `@r-val/core` dependency per application to manage all the state in an application.
+The reason for that is, that all top-level api calls will then use the same `defaultInstance` (see below).
+`sub`, `drv` and `effect`, `etc` etc only track each other dependencies if they are created by the same `RValInstance`.
+
+This fact can be leveraged to isolate `RVal` behavior as well. 
+For example when building a library that uses `RVal` to manage it's own internal state,
+but that shouldn't interfere with any RVal that is used in the hosting application. 
+(For example because the configuration is different).
+
 ## `defaultInstance`
+
+**Signature**
+
+`defaultInstance: RValInstance`
+
+**Description**
 
 The default RVal instance used by all the top-level api's exposed by the module. 
 For more info about what an RVal instance is, see `rval`.
 
 ## `$RVal`
+
+**Signature**
+
+`$RVAL: Symbol`
+
+**Description**
+
+`$RVAL` is a symbol, that exists on reactive values that are created by `val` and `drv`, and could be used to access their internal administration.
+This could potentially be used for development tools.
