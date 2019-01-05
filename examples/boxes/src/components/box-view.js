@@ -1,6 +1,6 @@
 import React, { PureComponent } from "react"
 import { DraggableCore } from "react-draggable"
-import { batch } from "rval";
+import { act } from "@r-val/core";
 import { RValRender } from "../utils"
 
 class BoxView extends PureComponent {
@@ -31,13 +31,11 @@ class BoxView extends PureComponent {
         e.stopPropagation()
     }
 
-    handleDrag = (e, dragInfo) => {
+    handleDrag = act((e, dragInfo) => {
         const { box } = this.props
-        batch(() => {
-            box.x(box.x() + dragInfo.deltaX)
-            box.y(box.y() + dragInfo.deltaY)
-        })
-    }
+        box.x(box.x() + dragInfo.deltaX)
+        box.y(box.y() + dragInfo.deltaY)
+    })
 }
 
 export default BoxView

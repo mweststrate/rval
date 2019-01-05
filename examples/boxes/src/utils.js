@@ -1,5 +1,5 @@
 import React from 'react';
-import { effect } from 'rval';
+import { effect } from '@r-val/core';
 
 import {v4} from 'node-uuid';
 

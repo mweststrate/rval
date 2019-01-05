@@ -1,6 +1,6 @@
 import React, {Component} from "react"
 import { RValRender } from "../utils"
-import { batch } from "rval"
+import { act } from "@r-val/core"
 
 import BoxView from "./box-view"
 import ArrowView from "./arrow-view"
@@ -30,16 +30,14 @@ class Canvas extends Component {
         )
     }
 
-    onCanvasClick = e => {
+    onCanvasClick = act(e => {
         const {store} = this.props
         if (e.ctrlKey === true && store.selection()) {
-            batch(() => {
-                const id = store.addBox("Hi.",  e.clientX - 50, e.clientY - 20)
-                store.addArrow(store.selection(), id)
-                store.selection(id)
-            })
+            const id = store.addBox("Hi.",  e.clientX - 50, e.clientY - 20)
+            store.addArrow(store.selection(), id)
+            store.selection(id)
         }
-    }
+    })
 }
 
 export default Canvas

@@ -6,10 +6,7 @@
   "module": "dist/$pkg.mjs",
   "jsnext:main": "dist/$pkg.mjs",
   "react-native": "dist/$pkg.mjs",
-  "browser": {
-    "./dist/$pkg.js": "./dist/$pkg.js",
-    "./dist/$pkg.mjs": "./dist/$pkg.mjs"
-  },
+  
   "source": "$pkg.ts",
   "author": "Michel Weststrate",
   "license": "MIT",

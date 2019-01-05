@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "devDependencies": {
-    "react-scripts": "2.1.1"
+    "react-scripts": "2.1.3"
   },
   "dependencies": {
     "@r-val/core": "^0.0.4",

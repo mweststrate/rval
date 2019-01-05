@@ -1,4 +1,4 @@
-import { val, drv, batch } from "rval"
+import { val, drv, act } from "@r-val/core"
 
 import {randomUuid} from '../utils';
 
@@ -64,17 +64,16 @@ export function createBoxesStore(initialState = {
 // /**
 //     Generate 'amount' new random arrows and boxes
 // */
-export function generateStuff(store, amount) {
+export const generateStuff = act(function(store, amount) {
     const ids = Object.keys(store.boxes())
-    batch(() => {
-        for(var i = 0; i < amount; i++) {
-            const id = store.addBox(
-                '#' + i,
-                Math.random() * window.innerWidth * 0.5,
-                Math.random() * window.innerHeight
-            )
-            store.addArrow(ids[Math.floor(Math.random() * ids.length)], id)
-            ids.push(id)
-        }
-    })
-}
+    for(var i = 0; i < amount; i++) {
+        const id = store.addBox(
+            '#' + i,
+            Math.random() * window.innerWidth * 0.5,
+            Math.random() * window.innerHeight
+        )
+        store.addArrow(ids[Math.floor(Math.random() * ids.length)], id)
+        ids.push(id)
+    }
+})
+
