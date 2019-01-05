@@ -6,13 +6,15 @@
     "react-scripts": "2.1.1"
   },
   "dependencies": {
+    "@r-val/core": "^0.0.4",
+    "@r-val/react": "^0.0.4",
     "node-uuid": "^1.4.8",
     "react": "^16.7.0-alpha.2",
     "react-dom": "^16.7.0-alpha.2",
     "react-draggable": "^3.0.5"
   },
   "scripts": {
-    "start": "yarn link rval && react-scripts start",
+    "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

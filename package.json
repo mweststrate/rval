@@ -12,6 +12,7 @@
   "types": "core/index.d.ts",
   "scripts": {
     "build": "node scripts/build.js",
+    "link-examples": "node scripts/link.js",
     "watch": "jest --config jest.config.json --watch",
     "test": "jest --config jest.config.test.json",
     "test:perf": "PERSIST=true time node --expose-gc pkgs/core/tests/perf/index.js",
