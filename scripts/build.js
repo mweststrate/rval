@@ -9,11 +9,13 @@ const binFolder = child_process
 const microbundle = binFolder + '/microbundle'
 
 const projects = fs.readdirSync('pkgs/')
-const packageJson = fs.readFileSync('scripts/package-template.json', 'utf8')
+const templatePackageJsonSource = fs.readFileSync('scripts/package-template.json', 'utf8')
 
 const buildCommand =
   microbundle +
-  ' --compress --source-map --entry $pkg.ts --name rval_$pkg --strict --format es,cjs,umd --globals ' +
+  ' --compress ' + 
+  // ' --no-compress ' +
+  ' --source-map --entry $pkg.ts --name rval_$pkg --strict --format es,cjs,umd --globals ' +
   projects.map(pkg => '@r-val/' + pkg + '=rval_' + pkg).join(',') + 
   ' --external ' + projects.map(pkg => '@r-val/' + pkg).join(',') + 
   ' && mv dist/$pkg/*.d.ts dist/ ' +
@@ -23,23 +25,20 @@ const corePkgJson = JSON.parse(fs.readFileSync(__dirname + '/../pkgs/core/packag
 
 projects.forEach(pkg => {
   const pkgJson = JSON.parse(fs.readFileSync(__dirname + '/../pkgs/' + pkg + '/package.json', 'utf8'))
-  const newProps = packageJson.replace(/\$pkg/g, pkg)
+  const templateJson = JSON.parse(templatePackageJsonSource.replace(/\$pkg/g, pkg))
 
-  const newPkgJson = Object.assign(
-    pkgJson,
-    JSON.parse(newProps),
-    // If reserved is set, mangle all the property names!
-    Array.isArray(pkgJson.reserved)
-      ? // property names as defined in core shouldn't be mangled either
-        {
-          mangle: {
-            reserved: Array.from(new Set([...corePkgJson.reserved, ...pkgJson.reserved])),
-          },
-        }
-      : {}
-  )
+  // If reserved is set, mangle all the property names!
+  // property names as defined in core shouldn't be mangled either
+  if (Array.isArray(pkgJson.reserved)) {
+    pkgJson.mangle = {
+      reserved: Array.from(new Set([...corePkgJson.reserved, ...pkgJson.reserved])),
+    }
+  }
 
-  fs.writeFileSync(__dirname + '/../pkgs/' + pkg + '/package.json', JSON.stringify(newPkgJson, null, '  '), 'utf8')
+  for (const key in templateJson) if (!(key in pkgJson))
+    pkgJson[key] = templateJson[key]
+
+  fs.writeFileSync(__dirname + '/../pkgs/' + pkg + '/package.json', JSON.stringify(pkgJson, null, '  '), 'utf8')
   const command = buildCommand.replace(/\$pkg/g, pkg)
   console.log('Running ' + command)
   child_process.execSync(command, {

@@ -6,9 +6,11 @@
   "module": "dist/$pkg.mjs",
   "jsnext:main": "dist/$pkg.mjs",
   "react-native": "dist/$pkg.mjs",
-  
   "source": "$pkg.ts",
   "author": "Michel Weststrate",
   "license": "MIT",
-  "files": ["*.ts", "dist"]
+  "files": ["*.ts", "dist"],
+  "peerDependencies": {
+    "@r-val/core": "*"
+  }
 }

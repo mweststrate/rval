@@ -195,8 +195,16 @@ export function rval(base?: Val<any, any>): RValInstance {
   return api
 }
 
+const globalProp = "defaultRValInstance" 
 const defaultPreProcessor = value => value
-export const defaultInstance = rval()
+export const defaultInstance = global[globalProp] = (() => {
+  const globalInstance = global[globalProp]
+  if (globalInstance) {
+    console.warn("Note: RVal is included in this project twice") // TODO: which is fine, unless this one is used..
+    return globalInstance
+  }
+  return rval()
+})()
 
 class ObservableValue<T> implements ObservableAdministration {
   listeners: Thunk[] = []
@@ -318,7 +326,7 @@ class Computed<T = any> implements ObservableAdministration {
           // untracked, if no other listener arrived
           // TODO: optimize: have one handler for this!
           // TODO: should there be an option to disable this optimization to prevent mem leaking?
-          setImmediate(() => this.removeListener(null))
+          setTimeout(() => this.removeListener(null), 0)
         }
         // maybe scheduled, definitely tracking, value is needed, track now!
         this.track()

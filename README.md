@@ -142,20 +142,23 @@ Todo:
 * [x] add `toJS` on all model types
 * [x] rval-validation
 * [x] kill `run`
+* [x] fix debugging with minification
+* [x] use yalc? https://www.google.com/url?q=https%3A%2F%2Fgithub.com%2Fwhitecolor%2Fyalc%2F&sa=D&sntz=1&usg=AFQjCNGCTXoCduIMdVHx5xm-uAs_REX3MA
 * [ ] add missing mobx optimizations
 * [ ] contributing and debugging
 * [ ] docs
-* [ ] verify debugging with minification
 * [ ] add `reference` to models?
 * [ ] contributing & debugging guide. `reserved` section in package.json!
 * [ ] add (mobx like) performance tests
 * [ ] rval.js.org CDN
 * [ ] smart lack of act detection. Only have `act`, no `run`?
-* [ ] use yalc? https://www.google.com/url?q=https%3A%2F%2Fgithub.com%2Fwhitecolor%2Fyalc%2F&sa=D&sntz=1&usg=AFQjCNGCTXoCduIMdVHx5xm-uAs_REX3MA
 * [ ] rename MDX files to md
 * [ ] rview as wrapper
 * [ ] deep merge model tree?
 * [ ] RVAL return this in setter for chaining?
+* [ ] cheat sheet
+* [ ] efficient map structure
+* [ ] find neat solution to globally shared instance
 
 Later
 * [ ] rval-remote

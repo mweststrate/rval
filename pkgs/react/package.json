@@ -18,7 +18,8 @@
   "author": "Michel Weststrate",
   "license": "MIT",
   "peerDependencies": {
-    "react": "^16.0.0"
+    "react": "^16.0.0",
+    "@r-val/core": "*"
   },
   "files": [
     "*.ts",
