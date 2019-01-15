@@ -1,5 +1,5 @@
 import React, {Component} from "react"
-import { RValRender } from "../utils"
+import { rview } from "@r-val/react"
 import { act } from "@r-val/core"
 
 import BoxView from "./box-view"
@@ -12,7 +12,7 @@ class Canvas extends Component {
         const {store} = this.props
         return (
             <div className="app">
-                <RValRender>{() => 
+                {rview(() => 
                     <div className="canvas" onClick={this.onCanvasClick}>
                         <svg>
                             {Object.entries(store.arrows()).map(([id, arrow]) => 
@@ -23,7 +23,7 @@ class Canvas extends Component {
                             <BoxView key={id} box={box} store={store} />
                         )}
                     </div>
-                }</RValRender>
+                )}
                 {/* <Sidebar selection={selection} />
                 <FunStuff store={store} /> */}
             </div>

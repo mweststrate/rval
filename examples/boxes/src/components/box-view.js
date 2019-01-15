@@ -1,13 +1,12 @@
 import React, { PureComponent } from "react"
 import { DraggableCore } from "react-draggable"
 import { act } from "@r-val/core";
-import { RValRender } from "../utils"
+import { rview } from "@r-val/react"
 
 class BoxView extends PureComponent {
     render() {
         const { box } = this.props
-        return <RValRender>
-            {() => {
+        return rview(() => {
                 console.log("rendering box " + box.id)
                 return <DraggableCore onDrag={this.handleDrag}>
                     <div
@@ -22,8 +21,7 @@ class BoxView extends PureComponent {
                         {box.name()}
                     </div>
                 </DraggableCore>
-            }}
-        </RValRender>
+            })
     }
 
     handleClick = e => {
