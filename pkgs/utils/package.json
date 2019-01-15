@@ -20,5 +20,8 @@
   "files": [
     "*.ts",
     "dist"
-  ]
+  ],
+  "peerDependencies": {
+    "@r-val/core": "*"
+  }
 }

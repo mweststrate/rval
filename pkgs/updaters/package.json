@@ -41,6 +41,9 @@
   ],
   "mangle": {
     "reserved": [
+      "global",
+      "log",
+      "warn",
       "configurable",
       "enumerable",
       "writable",
@@ -48,6 +51,7 @@
       "$RVal",
       "rval",
       "defaultInstance",
+      "defaultRValInstance",
       "isVal",
       "isDrv",
       "_deepfreeze",
@@ -80,5 +84,8 @@
       "removeValue"
     ]
   },
-  "gitHead": "a824fe9bd83228fb126c8c6188ef7b85fc2ffdd7"
+  "gitHead": "a824fe9bd83228fb126c8c6188ef7b85fc2ffdd7",
+  "peerDependencies": {
+    "@r-val/core": "*"
+  }
 }
