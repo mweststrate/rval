@@ -9,6 +9,7 @@
   "dependencies": {
     "@r-val/core": "^0.0.4",
     "@r-val/react": "^0.0.4",
+    "@r-val/utils": "^0.0.4",
     "node-uuid": "^1.4.8",
     "react": "^16.7.0-alpha.2",
     "react-dom": "^16.7.0-alpha.2",

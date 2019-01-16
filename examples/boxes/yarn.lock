@@ -698,6 +698,11 @@
   resolved "https://registry.yarnpkg.com/@r-val/react/-/react-0.0.4.tgz#167091c7daa53162b5f057870609ca8816c3e97e"
   integrity sha512-1XhYURpNjTkRUWSfYB6klZ0p9p2Jou9x4o+unxXxIyXOQ4TXaWsqesVNho8B9+XB6hR4QRZKgH6FvKJRPMhEbA==
 
+"@r-val/utils@^0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@r-val/utils/-/utils-0.0.4.tgz#50a48fee177c22cc5fda2f27f4361911f3e56783"
+  integrity sha512-2bmzvX/820Z+lFE4jws+SlLOXrLeDtHfaPvDviDFtUacsmhqTIQCsctUpO3pGMasXY4ZnvAsVCV3tooZXlahNg==
+
 "@types/node@^10.11.7":
   version "10.12.18"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-10.12.18.tgz#1d3ca764718915584fcd9f6344621b7672665c67"

@@ -1,28 +1,24 @@
-import React, {PureComponent} from "react"
+import React, { PureComponent } from 'react'
+import { rview } from '@r-val/react'
+import { act } from '@r-val/core'
 
 class Sidebar extends PureComponent {
-    render() {
-        const {selection} = this.props
-        // return selection.do(
-        //     render(
-        //         box =>
-        //             box ? (
-        //                 <div className="sidebar sidebar-open">
-        //                     <input onChange={this.onChange} value={box.name} />
-        //                 </div>
-        //             ) : (
-        //                 <div className="sidebar" />
-        //             )
-        //     )
-        // )
-        return null
-    }
+  render() {
+    const { selection } = this.props
+    return rview(() =>
+      selection() ? (
+        <div className="sidebar sidebar-open">
+          <input onChange={this.onChange} value={selection().name()} />
+        </div>
+      ) : (
+        <div className="sidebar" />
+      )
+    )
+  }
 
-    onChange = e => {
-        this.props.selection.update(draft => {
-            draft.name = e.target.value
-        })
-    }
+  onChange = e => {
+    this.props.selection().name(e.target.value)
+  }
 }
 
 export default Sidebar
