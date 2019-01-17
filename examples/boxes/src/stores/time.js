@@ -8,7 +8,7 @@ let undoing = false
 export function trackChanges(store) {
     const snapshot = drv(() => toJS(store))
     sub(snapshot, state => {
-        console.dir(state)
+        // console.dir(state)
         if (!undoing) {
             states.splice(++currentFrame)
             states.push(toJS(state))
@@ -17,7 +17,7 @@ export function trackChanges(store) {
 }
 
 export function previousState(store) {
-    if (currentFrame > 1) {
+    if (currentFrame > 0) {
         currentFrame--;
         undoing = true
         store.load(states[currentFrame])

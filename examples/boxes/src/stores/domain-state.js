@@ -1,6 +1,5 @@
 import { v4 } from 'node-uuid'
 import { val, drv, act } from '@r-val/core'
-import { assignVals } from '../../../../pkgs/utils/dist/utils';
 
 function createBox(data, selectionId) {
   const name = val(data.name)

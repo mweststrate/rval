@@ -35,7 +35,7 @@ class Canvas extends Component {
     if (e.ctrlKey === true && store.selection()) {
       const id = store.addBox('Hi.', e.clientX - 50, e.clientY - 20)
       store.addArrow(store.selection().id, id)
-      store.selection(id)
+      store.selectionId(id)
     }
   })
 }
