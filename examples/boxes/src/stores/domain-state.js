@@ -80,6 +80,7 @@ export const generateStuff = act(function(store, amount) {
   const ids = Object.keys(store.boxes())
   for (var i = 0; i < amount; i++) {
     const id = store.addBox('#' + i, Math.random() * window.innerWidth * 0.5, Math.random() * window.innerHeight)
+    // TODO: addArrow / addBox is slow and should use one single update instead
     store.addArrow(ids[Math.floor(Math.random() * ids.length)], id)
     ids.push(id)
   }
