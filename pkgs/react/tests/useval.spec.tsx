@@ -100,9 +100,9 @@ test('useVal - custom rval ', async () => {
 test('useLocalVal - 1 ', async () => {
   let updater
   const Comp = () => {
-    const [counter, u] = useLocalVal(0)
-    updater = u
-    return <h1>{counter}</h1>
+    const counter = useLocalVal(0)
+    updater = counter
+    return <h1>{counter()}</h1>
   }
 
   const re = render(<Comp />)

@@ -1,5 +1,5 @@
 import { val, drv, rval } from '@r-val/core'
-import { rview, RView } from '@r-val/react'
+import { rview } from '@r-val/react'
 import * as React from 'react'
 import { render, waitForElement } from 'react-testing-library'
 import { useState } from 'react';
@@ -55,7 +55,7 @@ test('rview - mimimum computations - 1', async () => {
     return counter() * 2
   })
 
-  const Comp = () => <RView>{() =><h1>{doubler()}</h1>}</RView>
+  const Comp = () => rview(() =><h1>{doubler()}</h1>)
   
 
   const re = render(<Comp />)
