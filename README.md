@@ -130,7 +130,7 @@ Todo:
 * [x] setter for `drv`?
 * [x] host docs
 * [x] check https://reactpixi.org/#/stage / https://docs.setprotocol.com/#/#support-and-community- for setup of edit button, menu nesting, hosting
-* [x] `sub`, pass in previous value as second argumetn
+* [x] `sub`, pass in previous value as second argument
 * [x] implement `SubscribeOptions`
 * [x] keepAlive drv option, using effect
 * [x] publish all script
