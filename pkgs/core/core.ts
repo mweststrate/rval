@@ -197,7 +197,7 @@ export function rval(base?: Val<any, any>): RValInstance {
 
 const globalProp = "defaultRValInstance" 
 const defaultPreProcessor = value => value
-export const defaultInstance = global[globalProp] = (() => {
+export const defaultInstance: RValInstance = global[globalProp] = (() => {
   const globalInstance = global[globalProp]
   if (globalInstance) {
     console.warn("Note: RVal is included in this project twice") // TODO: which is fine, unless this one is used..
