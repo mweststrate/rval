@@ -64,7 +64,7 @@ We can add define derived data using `drv`, and actions using `act`, and make th
 function createTodo(initialTitle) {
     const title = val(initialTitle)
     const done = val(false)
-    const asMarkdown(() => done() ? " * [x] ~" + title() + "~" : " * [ ] " +title())
+    const asMarkdown = drv(() => done() ? " * [x] ~" + title() + "~" : " * [ ] " +title())
     const toggle = act(() {
         done(!done())
     })
